@@ -18,10 +18,10 @@ async function initializeContent() {
   error.value = null
 
   const payload: InitializeContentPayload = {
-    orgId: 'your-org-id', // Replace with actual org ID or make it dynamic
-    createdBy: 'user-id', // Replace with actual user ID or make it dynamic
+    orgId: '7c9e6679-7425-40de-944b-e07fc1f90ae7', // Replace with actual org ID or make it dynamic
+    createdBy: '7c9e6679-7425-40de-954b-e07fc1f90ae7', // Replace with actual user ID or make it dynamic
     contentTypeId: 1, // Replace with actual content type ID
-    contentSubtypeId: 'subtype-id' // Replace with actual subtype ID
+    contentSubtypeId: '7c9e6679-7435-40de-954b-e07fc1f90ae7' // Replace with actual subtype ID
   }
 
   try {

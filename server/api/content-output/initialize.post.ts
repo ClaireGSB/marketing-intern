@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { contentOutputs } from '../../db/contentOutputs'
 
 export default defineEventHandler(async (event) => {
+  console.log('API received a new initialization request:', event)
   try {
     const body = await readBody(event)
 
@@ -15,14 +16,22 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    // Generate a new UUID for the content output
+    const id = uuidv4()
+
     const newContentOutput = await contentOutputs.create({
+      id,
       org_id: body.orgId,
       created_by: body.createdBy,
       content_type_id: body.contentTypeId,
       content_subtype_id: body.contentSubtypeId,
       content: '',  // Initialize with empty content
       status: 'draft',  // Initial status
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
+
+    console.log('New content output initialized:', newContentOutput)
 
     return {
       statusCode: 201,
