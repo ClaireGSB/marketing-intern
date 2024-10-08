@@ -15,16 +15,17 @@
 
           <v-tabs-window v-model="tab" class="pb-6">
             <v-tabs-window-item value="setup">
-              <ContentProjectSetup @generate="generateContent" />
+              <p> blabla </p>
+              <!-- <ContentProjectSetup @generate="generateContent" /> -->
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="validations" value="validation">
-              <ContentValidation :validations="validations" @confirm="handleConfirmation"
-                @regenerate="handleRegeneration" />
+              <!-- <ContentValidation :validations="validations" @confirm="handleConfirmation"
+                @regenerate="handleRegeneration" /> -->
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="finalContent" value="final">
-              <FinalContent :content="finalContent" />
+              <!-- <FinalContent :content="finalContent" /> -->
             </v-tabs-window-item>
           </v-tabs-window>
 
@@ -45,90 +46,90 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue';
-import { useUserDataStore } from '../stores/userdata';
-import { Validations, GeneratedContentResponse } from '../types/frontendTypes';
-import { FinalContentItem } from '../types/frontendTypes';
+// import { ref, computed } from 'vue';
+// import { useUserDataStore } from '../stores/userdata';
+// import { Validations, GeneratedContentResponse } from '../types/frontendTypes';
+// import { FinalContentItem } from '../types/frontendTypes';
 
-export default {
-  setup() {
-    const userStore = useUserDataStore();
-    const tab = ref('setup');
-    const isLoading = ref(false);
-    const validations = ref(null as Validations[] | null);
-    const contentOutputID = ref(-1);
-    const finalContent = ref(null as FinalContentItem[] | null);
+// export default {
+//   setup() {
+//     const userStore = useUserDataStore();
+//     const tab = ref('setup');
+//     const isLoading = ref(false);
+//     const validations = ref(null as Validations[] | null);
+//     const contentOutputID = ref(-1);
+//     const finalContent = ref(null as FinalContentItem[] | null);
 
-    const contentOutput = computed(() => {
-      // Check if contentOutputID is -1, return null if true
-      if (contentOutputID.value === -1) {
-        return null;
-      }
-      // Otherwise, fetch the content output by ID
-      return userStore.getContentOutputById(contentOutputID.value);
-    });
+//     const contentOutput = computed(() => {
+//       // Check if contentOutputID is -1, return null if true
+//       if (contentOutputID.value === -1) {
+//         return null;
+//       }
+//       // Otherwise, fetch the content output by ID
+//       return userStore.getContentOutputById(contentOutputID.value);
+//     });
 
-    const hasValidations = computed(() => !!validations.value);
-    const hasFinalContent = computed(() => !!finalContent.value);
+//     const hasValidations = computed(() => !!validations.value);
+//     const hasFinalContent = computed(() => !!finalContent.value);
 
-    const generateContent = async (config: any) => {
-      isLoading.value = true;
-      try {
-        const data: GeneratedContentResponse = await userStore.requestContentGenerationFromAPI(config);
-        contentOutputID.value = data.contentOutput.id;
-        if (data.requiresValidation) {
-          validations.value = data.validationData || [];
-          tab.value = 'validation';
-        } else {
-          if (contentOutput.value && contentOutput.value.status === 'completed') {
-            finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
-            tab.value = 'final';
-          }
-        }
-      } catch (error) {
-        console.error('Error generating content:', error);
-        // Handle error (e.g., show an error message to the user)
-      } finally {
-        isLoading.value = false;
-      }
-    };
+//     const generateContent = async (config: any) => {
+//       isLoading.value = true;
+//       try {
+//         const data: GeneratedContentResponse = await userStore.requestContentGenerationFromAPI(config);
+//         contentOutputID.value = data.contentOutput.id;
+//         if (data.requiresValidation) {
+//           validations.value = data.validationData || [];
+//           tab.value = 'validation';
+//         } else {
+//           if (contentOutput.value && contentOutput.value.status === 'completed') {
+//             finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
+//             tab.value = 'final';
+//           }
+//         }
+//       } catch (error) {
+//         console.error('Error generating content:', error);
+//         // Handle error (e.g., show an error message to the user)
+//       } finally {
+//         isLoading.value = false;
+//       }
+//     };
 
-    const handleConfirmation = async (results: Validations[]) => {
-      // TODO: save validations results to the server and get the final content from the server
-      for (const result of results) {
-        await userStore.updateValidationItem(result);
-      }
-      await userStore.confirmValidations(contentOutputID.value);
-      // final content is the content of ContentOutput as well as the values of blogMetadata if content
+//     const handleConfirmation = async (results: Validations[]) => {
+//       // TODO: save validations results to the server and get the final content from the server
+//       for (const result of results) {
+//         await userStore.updateValidationItem(result);
+//       }
+//       await userStore.confirmValidations(contentOutputID.value);
+//       // final content is the content of ContentOutput as well as the values of blogMetadata if content
 
 
 
-      // in the meantime using this "dummy function"
-      // Process the confirmed selections for all items
-      finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
-      tab.value = 'final';
-    };
+//       // in the meantime using this "dummy function"
+//       // Process the confirmed selections for all items
+//       finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
+//       tab.value = 'final';
+//     };
 
-    const handleRegeneration = (itemsToRegenerate: Validations[]) => {
-      // Send itemsToRegenerate to the server to regenerate versions for specific items
-      generateContent({
-        items: itemsToRegenerate
-      });
-    };
+//     const handleRegeneration = (itemsToRegenerate: Validations[]) => {
+//       // Send itemsToRegenerate to the server to regenerate versions for specific items
+//       generateContent({
+//         items: itemsToRegenerate
+//       });
+//     };
 
-    return {
-      tab,
-      isLoading,
-      validations,
-      finalContent,
-      hasValidations,
-      hasFinalContent,
-      generateContent,
-      handleConfirmation,
-      handleRegeneration,
-    };
-  },
-};
+//     return {
+//       tab,
+//       isLoading,
+//       validations,
+//       finalContent,
+//       hasValidations,
+//       hasFinalContent,
+//       generateContent,
+//       handleConfirmation,
+//       handleRegeneration,
+//     };
+//   },
+// };
 </script>
 
 <style scoped>

@@ -44,6 +44,7 @@ const myCustomLightTheme = {
 
 export default defineNuxtPlugin((app) => {
   const vuetify = createVuetify({
+    ssr: true,
     theme: {
       defaultTheme: 'myCustomLightTheme',
       themes: {
