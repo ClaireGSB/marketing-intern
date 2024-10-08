@@ -21,8 +21,8 @@ export interface Organizations {
 }
 
 export interface ContentSubType {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   content_type_id: number;
   name: string;
   context: string | null;
@@ -30,7 +30,7 @@ export interface ContentSubType {
   target_audience: string | null;
   created_at: string;
   deleted_at: string | null;
-  created_by: number | null;
+  created_by: string | null;
   updated_at: string;
 }
 
@@ -49,16 +49,18 @@ export interface Example {
 }
 
 export interface ContentOutput {
-  id: number;
-  created_by: number;
+  id: string;
+  org_id: string;
+  created_by: string;
   content_type_id: number;
-  content_subtype_id: number | null;
-  original_content_id: number | null;
-  version_number: number;
+  content_subtype_id: string | null;
+  // original_content_id: number | null;
+  // version_number: number;
   content: string;
   created_at: string;
+  updated_at: string;
   status: 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed';
-  is_current_version: boolean;
+  // is_current_version: boolean;
 }
 
 export interface BlogMetadata {

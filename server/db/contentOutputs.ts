@@ -1,18 +1,8 @@
-// server/db/contentOutputRepository.ts
+// server/db/contentOutputs.ts
+
+import { ContentOutput } from '../../types/backendTypes'
 
 import dbclient from '../database';
-
-export interface ContentOutput {
-  id: string;
-  org_id: string;
-  created_by: string;
-  content_type_id: number;
-  content_subtype_id: string;
-  content: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
 
 export const contentOutputs = {
   
@@ -52,5 +42,16 @@ export const contentOutputs = {
     const values = [id, ...Object.values(updates)];
     const result = await dbclient.query(query, values);
     return result.rows[0] || null;
-  }
+  },
+
+  async getContentOutputsByOrgId(orgId: string): Promise<ContentOutput[]> {
+    const query = `
+      SELECT * FROM content_outputs
+      WHERE org_id = $1
+      ORDER BY created_at DESC
+    `;
+    const result = await dbclient.query(query, [orgId]);
+    return result.rows;
+  },
+
 };

@@ -15,9 +15,14 @@ interface UpdateContentPayload {
 }
 
 const contentOutput = ref(null)
+const contentOutputs = ref([])
+const contentSubtypes = ref([])
 const error = ref(null)
 const isLoading = ref(false)
 const isUpdating = ref(false)
+
+const orgId = ref('7c9e6679-7425-40de-944b-e07fc1f90ae7') // Replace with actual org ID or make it dynamic
+
 
 async function initializeContent() {
   isLoading.value = true
@@ -81,6 +86,41 @@ async function updateContent() {
     isUpdating.value = false
   }
 }
+
+async function fetchContentOutputs() {
+  // try {
+    console.log('Fetching content outputs... for org:', orgId.value)
+    const data = await $fetch(`/api/content-output/by-org/${orgId.value}`)
+
+    console.log('Fetched content outputs')
+    // console.log('error:', fetchError)
+    
+    // if (fetchError?.value) {
+    //   throw new Error(fetchError.value.message)
+    // }
+    console.log('Fetched content outputs:', data)
+    console.log('Fetched content outputs:', data.value)
+
+    contentOutputs.value = data.value
+  // } catch (e) {
+  //   error.value = e instanceof Error ? e.message : 'Error fetching content outputs'
+  // }
+}
+
+async function fetchContentSubtypes() {
+  try {
+    const { data, error: fetchError } = await useFetch(`/api/content-subtype/${orgId.value}`)
+    
+    if (fetchError.value) {
+      throw new Error(fetchError.value.message)
+    }
+
+    contentSubtypes.value = data.value
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Error fetching content subtypes'
+  }
+}
+
 </script>
 
 <template>
@@ -93,9 +133,24 @@ async function updateContent() {
       {{ isUpdating ? 'Updating...' : 'Update Content' }}
     </button>
 
+    <div style="margin-top: 20px;">
+      <button @click="fetchContentOutputs">Fetch Content Outputs</button>
+      <button @click="fetchContentSubtypes" style="margin-left: 10px;">Fetch Content Subtypes</button>
+    </div>
+
     <div v-if="contentOutput">
-      <h3>Initialized Content:</h3>
+      <h3>Current Content Output:</h3>
       <pre>{{ JSON.stringify(contentOutput, null, 2) }}</pre>
+    </div>
+<!-- 
+    <div v-if="contentOutputs.length">
+      <h3>All Content Outputs:</h3>
+      <pre>{{ JSON.stringify(contentOutputs, null, 2) }}</pre>
+    </div> -->
+
+    <div v-if="contentSubtypes.length">
+      <h3>Content Subtypes:</h3>
+      <pre>{{ JSON.stringify(contentSubtypes, null, 2) }}</pre>
     </div>
 
     <div v-if="error" class="error">
