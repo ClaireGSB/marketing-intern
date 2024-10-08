@@ -9,9 +9,15 @@ interface InitializeContentPayload {
   contentSubtypeId: string
 }
 
+interface UpdateContentPayload {
+  content: string
+  status?: string
+}
+
 const contentOutput = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
+const isUpdating = ref(false)
 
 async function initializeContent() {
   isLoading.value = true
@@ -41,12 +47,50 @@ async function initializeContent() {
     isLoading.value = false
   }
 }
+
+async function updateContent() {
+  if (!contentOutput.value) {
+    error.value = 'No content output to update. Please initialize first.'
+    return
+  }
+
+  isUpdating.value = true
+  error.value = null
+
+  console.log('Updating content... with:', contentOutput.value)
+
+  const payload: UpdateContentPayload = {
+    content: 'This is the updated content string.',
+    status: 'updated'
+  }
+
+  try {
+    const { data, error: fetchError } = await useFetch(`/api/content-output/${contentOutput.value.body.id}`, {
+      method: 'PATCH',
+      body: payload
+    })
+
+    if (fetchError.value) {
+      throw new Error(fetchError.value.message)
+    }
+
+    contentOutput.value = data.value
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'An error occurred while updating'
+  } finally {
+    isUpdating.value = false
+  }
+}
 </script>
 
 <template>
   <div>
     <button @click="initializeContent" :disabled="isLoading">
       {{ isLoading ? 'Initializing...' : 'Initialize Content' }}
+    </button>
+
+    <button @click="updateContent" :disabled="isUpdating || !contentOutput" style="margin-left: 10px;">
+      {{ isUpdating ? 'Updating...' : 'Update Content' }}
     </button>
 
     <div v-if="contentOutput">
