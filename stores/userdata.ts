@@ -1,6 +1,6 @@
 // Utilities
 import { defineStore } from 'pinia';
-// import { mockApiClient as apiClient } from '../../services/mockApiClient';
+import { mockApiClient as apiClient } from '../services/mockApiClient';
 import * as FrontendTypes from '../types/frontendTypes';
 import { type ContentType, contentTypesFrontEnd } from '../types/contentTypes';
 import { actions, type ActionConfig } from '../types/actionTypes';
@@ -33,12 +33,10 @@ export const useUserDataStore = defineStore('userData', {
   actions: {
     async fetchUserData() {
       // Dummy data
-      // this.user = await apiClient.getUserBytId(1);
-      // this.contentSubTypes = await apiClient.getContentSubtypesByUserID(1);
-      /* The above code is using TypeScript to asynchronously fetch examples from an API client by user
-      ID 1 and storing the result in the `examples` variable. */
-      // this.examples = await apiClient.getExamplesByUserID(1);
-      // this.contentOutputs = await apiClient.getContentOutputsByUserID(1);
+      this.user = await apiClient.getUserBytId(1);
+      this.contentSubTypes = await apiClient.getContentSubtypesByUserID(1);
+      this.examples = await apiClient.getExamplesByUserID(1);
+      this.contentOutputs = await apiClient.getContentOutputsByUserID(1);
       // to do: fetch validations & blogMetadata
       this.validationsItems = [];
       this.blogMetadata = [];
@@ -46,125 +44,125 @@ export const useUserDataStore = defineStore('userData', {
     getContentOutputById(contentOutputID: number) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
     },
-    // async addExample(data: FrontendTypes.Example, contentTypeID: number, contentSubtypeID: number | null) {
-    //   // remove id from data (it was a temp local ID)
-    //   const { id, ...dataWithoutId } = data;
-    //   const newExample = await apiClient.addExample(dataWithoutId, this.userID, contentTypeID, contentSubtypeID);
-    //   console.log(newExample);
-    //   this.examples.push(newExample);
-    //   return newExample;
-    // },
-    // async updateExample(exampleID: number, data: Partial<FrontendTypes.Example>) {
-    //   // remove id from data (we have it separately anyway)
-    //   const { id, ...dataWithoutId } = data;
-    //   const updatedExample = await apiClient.updateExample(exampleID, dataWithoutId);
-    //   const index = this.examples.findIndex((example) => example.id === updatedExample.id);
-    //   this.examples[index] = updatedExample;
-    // },
-    // async deleteExample(exampleID: number) {
-    //   await apiClient.deleteExample(exampleID);
-    //   this.examples = this.examples.filter((example) => example.id !== exampleID);
-    // },
-    // async updateContentSubType(contentSubTypeID: number, field: "target_audience" | "context" | "guidelines", content: string) {
-    //   const updatedContentSubType = await apiClient.updateContentSubType(contentSubTypeID, field, content);
-    //   // update the local store
-    //   const index = this.contentSubTypes.findIndex((contentSubType) => contentSubType.id === updatedContentSubType.id);
-    //   console.log(updatedContentSubType);
-    //   this.contentSubTypes[index] = updatedContentSubType;
-    // },
-    // async createContentSubType(contentTypeId: number, name: string) {
-    //   const newContentSubType = await apiClient.createContentSubType(contentTypeId, this.userID, name);
-    //   this.contentSubTypes.push(newContentSubType);
-    //   console.log(newContentSubType);
-    //   return newContentSubType;
-    // },
-    // getExamplesByContentSubTypeID(contentSubTypeID: number): FrontendTypes.Example[] {
-    //   return this.examples
-    //     .filter((example) => example.content_subtype_id === contentSubTypeID)
-    //     .map((example) => ({
-    //       id: example.id,
-    //       content_subtype_id: example.content_subtype_id,
-    //       name: example.name,
-    //       example_type: example.example_type,
-    //       explanation: example.explanation,
-    //       content: example.content,
-    //     }));
-    // },
-    // getTargetAudienceByContentSubTypeID(contentSubtypeID: number) {
-    //   return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubtypeID)?.target_audience ?? '';
-    // },
-    // getContentTypeNameById(contentTypeID: number) {
-    //   return this.contentTypes.find((contentType) => contentType.id === contentTypeID)?.name ?? '';
-    // },
-    // getContentTypeDisplayNameById(contentTypeID: number) {
-    //   return this.contentTypes.find((contentType) => contentType.id === contentTypeID)?.display_name ?? '';
-    // },
-    // getContentSubTypeNameById(contentSubTypeID: number) {
-    //   return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.name ?? '';
-    // },
-    // getSubtypesForContentType(contentTypeID: number) {
-    //   return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID);
-    // },
-    // getSubtypesIDsForContentType(contentTypeID: number) {
-    //   return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID).map((contentSubType) => contentSubType.id);
-    // },
-    // getSubtypesIDsAndNamesForContentType(contentTypeID: number) {
-    //   return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID).map((contentSubType) => ({ id: contentSubType.id, name: contentSubType.name }));
-    // },
-    // getFieldsForContentSubType(contentSubTypeID: number) {
-    //   const context = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.context ?? '';
-    //   const guidelines = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.guidelines ?? '';
-    //   const examples = this.getExamplesByContentSubTypeID(contentSubTypeID);
-    //   const target_audience = this.getTargetAudienceByContentSubTypeID(contentSubTypeID);
-    //   return {
-    //     context: context,
-    //     guidelines: guidelines,
-    //     examples: examples,
-    //     target_audience: target_audience,
-    //   };
-    // },
-    // async updateValidationItem(validationItem: FrontendTypes.Validations) {
-    //   // TO DO: uncomment this when the API is ready
+    async addExample(data: FrontendTypes.Example, contentTypeID: number, contentSubtypeID: number | null) {
+      // remove id from data (it was a temp local ID)
+      const { id, ...dataWithoutId } = data;
+      const newExample = await apiClient.addExample(dataWithoutId, this.userID, contentTypeID, contentSubtypeID);
+      console.log(newExample);
+      this.examples.push(newExample);
+      return newExample;
+    },
+    async updateExample(exampleID: number, data: Partial<FrontendTypes.Example>) {
+      // remove id from data (we have it separately anyway)
+      const { id, ...dataWithoutId } = data;
+      const updatedExample = await apiClient.updateExample(exampleID, dataWithoutId);
+      const index = this.examples.findIndex((example) => example.id === updatedExample.id);
+      this.examples[index] = updatedExample;
+    },
+    async deleteExample(exampleID: number) {
+      await apiClient.deleteExample(exampleID);
+      this.examples = this.examples.filter((example) => example.id !== exampleID);
+    },
+    async updateContentSubType(contentSubTypeID: number, field: "target_audience" | "context" | "guidelines", content: string) {
+      const updatedContentSubType = await apiClient.updateContentSubType(contentSubTypeID, field, content);
+      // update the local store
+      const index = this.contentSubTypes.findIndex((contentSubType) => contentSubType.id === updatedContentSubType.id);
+      console.log(updatedContentSubType);
+      this.contentSubTypes[index] = updatedContentSubType;
+    },
+    async createContentSubType(contentTypeId: number, name: string) {
+      const newContentSubType = await apiClient.createContentSubType(contentTypeId, this.userID, name);
+      this.contentSubTypes.push(newContentSubType);
+      console.log(newContentSubType);
+      return newContentSubType;
+    },
+    getExamplesByContentSubTypeID(contentSubTypeID: number): FrontendTypes.Example[] {
+      return this.examples
+        .filter((example) => example.content_subtype_id === contentSubTypeID)
+        .map((example) => ({
+          id: example.id,
+          content_subtype_id: example.content_subtype_id,
+          name: example.name,
+          example_type: example.example_type,
+          explanation: example.explanation,
+          content: example.content,
+        }));
+    },
+    getTargetAudienceByContentSubTypeID(contentSubtypeID: number) {
+      return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubtypeID)?.target_audience ?? '';
+    },
+    getContentTypeNameById(contentTypeID: number) {
+      return this.contentTypes.find((contentType) => contentType.id === contentTypeID)?.name ?? '';
+    },
+    getContentTypeDisplayNameById(contentTypeID: number) {
+      return this.contentTypes.find((contentType) => contentType.id === contentTypeID)?.display_name ?? '';
+    },
+    getContentSubTypeNameById(contentSubTypeID: number) {
+      return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.name ?? '';
+    },
+    getSubtypesForContentType(contentTypeID: number) {
+      return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID);
+    },
+    getSubtypesIDsForContentType(contentTypeID: number) {
+      return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID).map((contentSubType) => contentSubType.id);
+    },
+    getSubtypesIDsAndNamesForContentType(contentTypeID: number) {
+      return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID).map((contentSubType) => ({ id: contentSubType.id, name: contentSubType.name }));
+    },
+    getFieldsForContentSubType(contentSubTypeID: number) {
+      const context = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.context ?? '';
+      const guidelines = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.guidelines ?? '';
+      const examples = this.getExamplesByContentSubTypeID(contentSubTypeID);
+      const target_audience = this.getTargetAudienceByContentSubTypeID(contentSubTypeID);
+      return {
+        context: context,
+        guidelines: guidelines,
+        examples: examples,
+        target_audience: target_audience,
+      };
+    },
+    async updateValidationItem(validationItem: FrontendTypes.Validations) {
+      // TO DO: uncomment this when the API is ready
 
-    //   // --- to remove---
-    //   // in the meantime, console log the updated item
-    //   console.log('userStore updating validationItem:', validationItem);
-    //   // dummy update in the local store
-    //   this.validationsItems = this.validationsItems.map((item) => item.id === validationItem.id ? validationItem : item);
-    //   // --- end of to remove---
+      // --- to remove---
+      // in the meantime, console log the updated item
+      console.log('userStore updating validationItem:', validationItem);
+      // dummy update in the local store
+      this.validationsItems = this.validationsItems.map((item) => item.id === validationItem.id ? validationItem : item);
+      // --- end of to remove---
 
-    //   // const updatedValidationItem = await apiClient.updateValidationItem(validationItem);
-    //   // const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
-    //   // this.validationsItems[index] = updatedValidationItem;
-    // },
-    // async confirmValidations(contentOutputID: number) {
-    //   // TO DO: uncomment this when the API is ready
+      // const updatedValidationItem = await apiClient.updateValidationItem(validationItem);
+      // const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
+      // this.validationsItems[index] = updatedValidationItem;
+    },
+    async confirmValidations(contentOutputID: number) {
+      // TO DO: uncomment this when the API is ready
 
-    //   // --- to remove---
-    //   // in the meantime, console log the updated item
-    //   // dummy update in the local store
-    //   this.validationsItems = this.validationsItems.map((item) => item.content_output_id === contentOutputID ? { ...item, validation_status: 'completed', content: item.options[item.selected_option] } : item);
-    //   // update the content in the contentOutputs if output_step_type is final_content
-    //   const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
-    //   const finalContentValidationItem = this.validationsItems.find((item) => item.content_output_id === contentOutputID && item.step_output_type === 'final_content') ?? null;
-    //   const finalContent = finalContentValidationItem ? finalContentValidationItem.options[finalContentValidationItem.selected_option] : '';
-    //   if (contentOutput) {
-    //     this.contentOutputs = this.contentOutputs.map((contentOutput) => contentOutput.id === contentOutputID ? { ...contentOutput, status: 'completed', content: finalContent } : contentOutput);
-    //   }
-    //   console.log('userStore updated validations:', this.validationsItems);
-    //   console.log('userStore updated contentOutput:', this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID));
-    //   // --- end of to remove---
+      // --- to remove---
+      // in the meantime, console log the updated item
+      // dummy update in the local store
+      this.validationsItems = this.validationsItems.map((item) => item.content_output_id === contentOutputID ? { ...item, validation_status: 'completed', content: item.options[item.selected_option] } : item);
+      // update the content in the contentOutputs if output_step_type is final_content
+      const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
+      const finalContentValidationItem = this.validationsItems.find((item) => item.content_output_id === contentOutputID && item.step_output_type === 'final_content') ?? null;
+      const finalContent = finalContentValidationItem ? finalContentValidationItem.options[finalContentValidationItem.selected_option] : '';
+      if (contentOutput) {
+        this.contentOutputs = this.contentOutputs.map((contentOutput) => contentOutput.id === contentOutputID ? { ...contentOutput, status: 'completed', content: finalContent } : contentOutput);
+      }
+      console.log('userStore updated validations:', this.validationsItems);
+      console.log('userStore updated contentOutput:', this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID));
+      // --- end of to remove---
 
-    //   // const updatedContentOutput = await apiClient.confirmValidations(contentOutputID);
-    //   // const index = this.contentOutputs.findIndex((contentOutput) => contentOutput.id === contentOutputID);
-    //   // this.contentOutputs[index] = updatedContentOutput;
+      // const updatedContentOutput = await apiClient.confirmValidations(contentOutputID);
+      // const index = this.contentOutputs.findIndex((contentOutput) => contentOutput.id === contentOutputID);
+      // this.contentOutputs[index] = updatedContentOutput;
 
-    //   // ------ if contentType is blog_post_copy, then update the blogMetadata
-    //   // if (updatedContentOutput.content_type_id === 8) {
-    //   //   const blogMetadata = await apiClient.getBlogMetadataByContentOutputID(contentOutputID);
-    //   //   const index = this.blogMetadata.findIndex((metadata) => metadata.content_output_id === contentOutputID);
-    //   //   this.blogMetadata[index] = blogMetadata;
-    // },
+      // ------ if contentType is blog_post_copy, then update the blogMetadata
+      // if (updatedContentOutput.content_type_id === 8) {
+      //   const blogMetadata = await apiClient.getBlogMetadataByContentOutputID(contentOutputID);
+      //   const index = this.blogMetadata.findIndex((metadata) => metadata.content_output_id === contentOutputID);
+      //   this.blogMetadata[index] = blogMetadata;
+    },
     async requestContentGenerationFromAPI(userInput: FrontendTypes.UserInput): Promise<FrontendTypes.GeneratedContentResponse> {
       // create settingsInput object from contentSubtypeID
       // it should be have the datapoints: - context - guidelines - examples - target_audience
@@ -172,12 +170,11 @@ export const useUserDataStore = defineStore('userData', {
         // get the context and guidelines field from the ContentSubType
         context: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.context ?? '',
         guidelines: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.guidelines ?? '',
-        // examples: this.getExamplesByContentSubTypeID(userInput.subTypeID),
+        examples: this.getExamplesByContentSubTypeID(userInput.subTypeID),
         // if user input contains target audience, then do not fecht it from the settings as we want to use the user input
-        // target_audience: userInput.target_audience ? '' : this.getTargetAudienceByContentSubTypeID(userInput.subTypeID),
+        target_audience: userInput.target_audience ? '' : this.getTargetAudienceByContentSubTypeID(userInput.subTypeID),
       };
-      // await apiClient.requestContentGenerationFromAPI(userInput.subTypeID, userInput, settingsInput);
-
+      await apiClient.requestContentGenerationFromAPI(userInput.subTypeID, userInput, settingsInput);
       // wait 3 secs to simulate server response
       await new Promise((resolve) => setTimeout(resolve, 1000));
       // simulated response
