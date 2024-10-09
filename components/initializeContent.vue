@@ -65,12 +65,13 @@ async function updateContent() {
   console.log('Updating content... with:', contentOutput.value)
 
   const payload: UpdateContentPayload = {
+    id: contentOutput.value.body.id,
     content: 'This is the updated content string.',
     status: 'updated'
   }
 
   try {
-    const { data, error: fetchError } = await useFetch(`/api/content-output/${contentOutput.value.body.id}`, {
+    const { data, error: fetchError } = await useFetch(`/api/content-output/update`, {
       method: 'PATCH',
       body: payload
     })
@@ -90,7 +91,7 @@ async function updateContent() {
 async function fetchContentOutputs() {
   // try {
     console.log('Fetching content outputs... for org:', orgId.value)
-    const data = await $fetch(`/api/content-output/by-org/${orgId.value}`)
+    const data = await $fetch(`/api/content-output/get-by-org`)
 
     console.log('Fetched content outputs')
     // console.log('error:', fetchError)
@@ -101,7 +102,7 @@ async function fetchContentOutputs() {
     console.log('Fetched content outputs:', data)
     console.log('Fetched content outputs:', data.value)
 
-    contentOutputs.value = data.value
+    contentOutputs.value = data.body
   // } catch (e) {
   //   error.value = e instanceof Error ? e.message : 'Error fetching content outputs'
   // }
@@ -109,7 +110,7 @@ async function fetchContentOutputs() {
 
 async function fetchContentSubtypes() {
   try {
-    const { data, error: fetchError } = await useFetch(`/api/content-subtype/${orgId.value}`)
+    const { data, error: fetchError } = await useFetch(`/api/content-subtype/get-by-org`)
     
     if (fetchError.value) {
       throw new Error(fetchError.value.message)
@@ -142,11 +143,11 @@ async function fetchContentSubtypes() {
       <h3>Current Content Output:</h3>
       <pre>{{ JSON.stringify(contentOutput, null, 2) }}</pre>
     </div>
-<!-- 
+
     <div v-if="contentOutputs.length">
       <h3>All Content Outputs:</h3>
       <pre>{{ JSON.stringify(contentOutputs, null, 2) }}</pre>
-    </div> -->
+    </div>
 
     <div v-if="contentSubtypes.length">
       <h3>Content Subtypes:</h3>

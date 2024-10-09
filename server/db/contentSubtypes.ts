@@ -1,31 +1,25 @@
 // server/db/contentSubtypes.ts
-import { ContentSubType } from '../../types/backendTypes'
+import { ContentSubType as ContentSubTypeFrontend } from '../../types/frontendTypes'
 
 import dbclient from '../database';
 
-// export interface ContentSubtype {
-//   id: string;
-//   org_id: string | null;
-//   content_type_id: number;
-//   name: string;
-//   context: string;
-//   guidelines: string;
-//   target_audience: string;
-//   created_at: string;
-//   updated_at: string;
-//   created_by: string;
-//   updated_by: string;
-// }
-
 export const contentSubtypes = {
 
-  async getContentSubtypesByOrgId(orgId: string): Promise<ContentSubType[]> {
+  async getContentSubtypesByOrgId(orgId: string): Promise<ContentSubTypeFrontend[]> {
     const query = `
       SELECT * FROM content_subtypes
       WHERE org_id = $1 OR org_id IS NULL
       ORDER BY content_type_id, name
     `;
     const result = await dbclient.query(query, [orgId]);
-    return result.rows;
+    return result.rows.map(row => ({
+      id: row.id,
+      org_id: row.org_id,
+      content_type_id: row.content_type_id,
+      name: row.name,
+      context: row.context,
+      guidelines: row.guidelines,
+      target_audience: row.target_audience,
+    }));
   }
 };

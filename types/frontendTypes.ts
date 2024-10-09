@@ -38,8 +38,8 @@ export interface Users {
 }
 
 export interface ContentSubType {
-  id: number;
-  user_id: number;
+  id: string;
+  org_id: string;
   content_type_id: number;
   name: string;
   context: string | null;
@@ -60,13 +60,10 @@ export interface ContentOutput {
   id: number;
   created_by: number;
   content_type_id: number;
-  content_subtype_id: number | null;
-  original_content_id: number | null;
-  version_number: number;
+  content_subtype_id: string | null;
   content: string;
   created_at: string;
   status: 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed';
-  is_current_version: boolean;
 }
 
 export interface BlogMetadata {

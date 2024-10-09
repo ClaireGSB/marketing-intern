@@ -22,7 +22,7 @@ export interface Organizations {
 
 export interface ContentSubType {
   id: string;
-  user_id: string;
+  org_id: string;
   content_type_id: number;
   name: string;
   context: string | null;

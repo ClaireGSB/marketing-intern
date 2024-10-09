@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
       content_type_id: body.contentTypeId,
       content_subtype_id: body.contentSubtypeId,
       content: '',  // Initialize with empty content
-      status: 'draft',  // Initial status
+      status: 'generating',  // Initial status
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })

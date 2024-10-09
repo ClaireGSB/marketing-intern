@@ -17,6 +17,60 @@ type State = {
   userID: number;
 };
 
+const fetchContentOutputs = async (): Promise<FrontendTypes.ContentOutput[]> => {
+  try {
+    console.log('Fetching content outputs');
+    const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput[] }>('/api/content-output/get-by-org', {
+      method: 'GET'
+    });
+
+    if (error.value) {
+      throw createError({
+        statusCode: error.value.statusCode,
+        statusMessage: error.value.statusMessage
+      });
+    }
+
+    if (!data.value) {
+      throw new Error('No data received from the server');
+    }
+
+    console.log('data:', data.value.body);
+    return data.value.body;
+  }
+  catch (error) {
+    console.error('Error fetching content outputs:', error);
+    throw new Error('Error fetching content outputs');
+  }
+}
+
+const fetchContentSubtypes = async (): Promise<FrontendTypes.ContentSubType[]> => {
+  try {
+    console.log('Fetching content outputs');
+    const { data, error } = await useFetch<{ body: FrontendTypes.ContentSubType[] }>('/api/content-subtype/get-by-org', {
+      method: 'GET'
+    });
+
+    if (error.value) {
+      throw createError({
+        statusCode: error.value.statusCode,
+        statusMessage: error.value.statusMessage
+      });
+    }
+
+    if (!data.value) {
+      throw new Error('No data received from the server');
+    }
+
+    console.log('data:', data.value.body);
+    return data.value.body;
+  }
+  catch (error) {
+    console.error('Error fetching content outputs:', error);
+    throw new Error('Error fetching content outputs');
+  }
+}
+
 
 export const useUserDataStore = defineStore('userData', {
   state: (): State => ({
@@ -34,9 +88,9 @@ export const useUserDataStore = defineStore('userData', {
     async fetchUserData() {
       // Dummy data
       this.user = await apiClient.getUserBytId(1);
-      this.contentSubTypes = await apiClient.getContentSubtypesByUserID(1);
+      this.contentSubTypes = await fetchContentSubtypes();
       this.examples = await apiClient.getExamplesByUserID(1);
-      this.contentOutputs = await apiClient.getContentOutputsByUserID(1);
+      this.contentOutputs = await fetchContentOutputs();
       // to do: fetch validations & blogMetadata
       this.validationsItems = [];
       this.blogMetadata = [];

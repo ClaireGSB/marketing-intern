@@ -1,6 +1,7 @@
 // server/db/contentOutputs.ts
 
 import { ContentOutput } from '../../types/backendTypes'
+import { ContentOutput as ContentOutputFrontend } from '../../types/frontendTypes'
 
 import dbclient from '../database';
 
@@ -44,14 +45,22 @@ export const contentOutputs = {
     return result.rows[0] || null;
   },
 
-  async getContentOutputsByOrgId(orgId: string): Promise<ContentOutput[]> {
+  async getContentOutputsByOrgId(orgId: string): Promise<ContentOutputFrontend[]> {
     const query = `
       SELECT * FROM content_outputs
       WHERE org_id = $1
       ORDER BY created_at DESC
     `;
     const result = await dbclient.query(query, [orgId]);
-    return result.rows;
+    return result.rows.map(row => ({
+      id: row.id,
+      created_by: row.created_by,
+      content_type_id: row.content_type_id,
+      content_subtype_id: row.content_subtype_id,
+      content: row.content,
+      created_at: row.created_at.toISOString(),
+      status: row.status as ContentOutputFrontend['status'],
+    }));
   },
 
 };

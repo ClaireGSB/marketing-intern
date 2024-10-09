@@ -3,15 +3,18 @@ import { contentOutputs } from '../../db/contentOutputs';
 
 export default defineEventHandler(async (event: H3Event) => {
   try {
-    const id = getRouterParam(event, 'id')
+
+    const body = await readBody(event)
+
+    console.log('body:', body)
+
+    const id = body.id
     if (!id) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Missing content output ID',
       })
     }
-
-    const body = await readBody(event)
 
     if (!body.content && !body.status) {
       throw createError({
