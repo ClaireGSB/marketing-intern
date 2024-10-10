@@ -6,9 +6,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { examples } from '../../db/examples'
 
 export default defineEventHandler(async (event) => {
-  console.log('API received a new example creation request:', event)
+  
   try {
     const body = await readBody(event)
+    console.log('API received a new example creation request:', body)
 
     if (!body.example_type || !body.name) {
       throw createError({

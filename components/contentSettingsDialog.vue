@@ -93,7 +93,7 @@ export default defineComponent({
       required: true,
     },
     contentSubtypeId: {
-      type: Number,
+      type: String,
       default: null,
     },
   },
@@ -125,7 +125,7 @@ export default defineComponent({
     const guidelines = ref('');
     const context = ref('');
     const targetAudience = ref('');
-    const localContentSubtypeID = ref(-1 as number);
+    const localContentSubtypeID = ref('');
     const localContentSubtypeName = ref('');
     const contentTypeDisplayName = ref('');
 
@@ -140,7 +140,7 @@ export default defineComponent({
     const resetDialogState = () => {
       isNewSubtype.value = !props.contentSubtypeId;
       contentTypeDisplayName.value = userStore.getContentTypeDisplayNameById(props.contentTypeId);
-      localContentSubtypeID.value = props.contentSubtypeId || -1;
+      localContentSubtypeID.value = props.contentSubtypeId || '';
       localContentSubtypeName.value = userStore.getContentSubTypeNameById(localContentSubtypeID.value);
       guidelines.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).guidelines
       context.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).context
@@ -178,7 +178,7 @@ export default defineComponent({
       guidelines.value = '';
       context.value = '';
       examples.value = [];
-      localContentSubtypeID.value = -1;
+      localContentSubtypeID.value = '';
       localContentSubtypeName.value = '';
     };
 
@@ -210,17 +210,17 @@ export default defineComponent({
         example_type: type,
         explanation: '',
         name: '',
-        id: -1,
+        id: '',
         content_subtype_id: localContentSubtypeID.value,
       };
       examples.value.push(newExample);
     };
 
     const saveExample = async (example: Example) => {
-      if (example.id === -1) {
+      if (example.id === '') {
         // New example
         console.log('Saving new example:', example);
-        const newEx = await userStore.addExample(example, props.contentTypeId, localContentSubtypeID.value);
+        const newEx = await userStore.addExample(example, localContentSubtypeID.value);
         console.log('New example in dialog:', newEx);
       } else {
         // Existing example
@@ -232,7 +232,7 @@ export default defineComponent({
 
     };
 
-    const removeExample = async (exampleID: number) => {
+    const removeExample = async (exampleID: string) => {
       await userStore.deleteExample(exampleID);
       examples.value = examples.value.filter(e => e.id !== exampleID);
       // Update the local examples array

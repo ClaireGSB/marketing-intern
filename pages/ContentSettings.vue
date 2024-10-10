@@ -52,8 +52,6 @@ import { storeToRefs } from 'pinia';
 const userStore = useUserDataStore();
 
 
-
-
 export default {
   setup() {
     const generalSettings = ref({
@@ -71,11 +69,11 @@ export default {
 
     const showSettingsPanel = ref(false);
     const selectedContentTypeID = ref<number | null>(null);
-    const selectedSubtypeId = ref<number | null>(null);
+    const selectedSubtypeId = ref<string | null>(null);
     const maxChars = 500;  // Maximum characters for guidelines
     const isDataFetched = ref(false);
 
-    const openSubtypePanel = (contentTypeID: number, subtypeId: number) => {
+    const openSubtypePanel = (contentTypeID: number, subtypeId: string) => {
       selectedContentTypeID.value = contentTypeID;
       selectedSubtypeId.value = subtypeId;
       showSettingsPanel.value = true;
