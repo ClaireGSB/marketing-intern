@@ -48,8 +48,8 @@ export interface ContentSubType {
 }
 
 export interface Example {
-  id: number;
-  content_subtype_id: number | null;
+  id: string;
+  content_subtype_id: string | null;
   example_type: string;
   name: string;
   content: string | null;
@@ -84,7 +84,7 @@ export interface ContentGenerationUserInput {
 }
 
 export interface UserInput {
-  subTypeID: number;
+  subTypeID: string;
   action: string;
   topic?: string;
   target_audience?: string;

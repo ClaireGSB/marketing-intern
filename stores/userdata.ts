@@ -1,6 +1,7 @@
 // Utilities
 import { defineStore } from 'pinia';
 import { mockApiClient as apiClient } from '../services/mockApiClient';
+import { api } from '../services/apiClient';
 import * as FrontendTypes from '../types/frontendTypes';
 import { type ContentType, contentTypesFrontEnd } from '../types/contentTypes';
 import { actions, type ActionConfig } from '../types/actionTypes';
@@ -16,61 +17,6 @@ type State = {
   blogMetadata: FrontendTypes.BlogMetadata[];
   userID: number;
 };
-
-const fetchContentOutputs = async (): Promise<FrontendTypes.ContentOutput[]> => {
-  try {
-    console.log('Fetching content outputs');
-    const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput[] }>('/api/content-output/get-by-org', {
-      method: 'GET'
-    });
-
-    if (error.value) {
-      throw createError({
-        statusCode: error.value.statusCode,
-        statusMessage: error.value.statusMessage
-      });
-    }
-
-    if (!data.value) {
-      throw new Error('No data received from the server');
-    }
-
-    console.log('data:', data.value.body);
-    return data.value.body;
-  }
-  catch (error) {
-    console.error('Error fetching content outputs:', error);
-    throw new Error('Error fetching content outputs');
-  }
-}
-
-const fetchContentSubtypes = async (): Promise<FrontendTypes.ContentSubType[]> => {
-  try {
-    console.log('Fetching content outputs');
-    const { data, error } = await useFetch<{ body: FrontendTypes.ContentSubType[] }>('/api/content-subtype/get-by-org', {
-      method: 'GET'
-    });
-
-    if (error.value) {
-      throw createError({
-        statusCode: error.value.statusCode,
-        statusMessage: error.value.statusMessage
-      });
-    }
-
-    if (!data.value) {
-      throw new Error('No data received from the server');
-    }
-
-    console.log('data:', data.value.body);
-    return data.value.body;
-  }
-  catch (error) {
-    console.error('Error fetching content outputs:', error);
-    throw new Error('Error fetching content outputs');
-  }
-}
-
 
 export const useUserDataStore = defineStore('userData', {
   state: (): State => ({
@@ -88,9 +34,9 @@ export const useUserDataStore = defineStore('userData', {
     async fetchUserData() {
       // Dummy data
       this.user = await apiClient.getUserBytId(1);
-      this.contentSubTypes = await fetchContentSubtypes();
-      this.examples = await apiClient.getExamplesByUserID(1);
-      this.contentOutputs = await fetchContentOutputs();
+      this.contentSubTypes = await api.fetchContentSubtypes();
+      this.examples = await api.fetchExamples();
+      this.contentOutputs = await api.fetchContentOutputs();
       // to do: fetch validations & blogMetadata
       this.validationsItems = [];
       this.blogMetadata = [];
@@ -98,39 +44,42 @@ export const useUserDataStore = defineStore('userData', {
     getContentOutputById(contentOutputID: number) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
     },
-    async addExample(data: FrontendTypes.Example, contentTypeID: number, contentSubtypeID: number | null) {
+    async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
       // remove id from data (it was a temp local ID)
       const { id, ...dataWithoutId } = data;
-      const newExample = await apiClient.addExample(dataWithoutId, this.userID, contentTypeID, contentSubtypeID);
+      // add contentSubtypeID to data
+      dataWithoutId.content_subtype_id = contentSubtypeID;
+      const newExample = await api.createExample(dataWithoutId);
       console.log(newExample);
       this.examples.push(newExample);
       return newExample;
     },
-    async updateExample(exampleID: number, data: Partial<FrontendTypes.Example>) {
+    async updateExample(exampleID: string, data: Partial<FrontendTypes.Example>) {
       // remove id from data (we have it separately anyway)
       const { id, ...dataWithoutId } = data;
-      const updatedExample = await apiClient.updateExample(exampleID, dataWithoutId);
+      const updatedExample = await api.updateExample(exampleID, dataWithoutId);
       const index = this.examples.findIndex((example) => example.id === updatedExample.id);
       this.examples[index] = updatedExample;
     },
-    async deleteExample(exampleID: number) {
-      await apiClient.deleteExample(exampleID);
+    async deleteExample(exampleID: string) {
+      await api.deleteExample(exampleID);
       this.examples = this.examples.filter((example) => example.id !== exampleID);
     },
-    async updateContentSubType(contentSubTypeID: number, field: "target_audience" | "context" | "guidelines", content: string) {
-      const updatedContentSubType = await apiClient.updateContentSubType(contentSubTypeID, field, content);
+    async updateContentSubType(contentSubTypeID: string, field: "target_audience" | "context" | "guidelines", content: string) {
+      const update = { [field]: content };
+      const updatedContentSubType = await api.updateContentSubtype(contentSubTypeID, update);
       // update the local store
       const index = this.contentSubTypes.findIndex((contentSubType) => contentSubType.id === updatedContentSubType.id);
       console.log(updatedContentSubType);
       this.contentSubTypes[index] = updatedContentSubType;
     },
     async createContentSubType(contentTypeId: number, name: string) {
-      const newContentSubType = await apiClient.createContentSubType(contentTypeId, this.userID, name);
+      const newContentSubType = await api.createContentSubtype(name, contentTypeId);
       this.contentSubTypes.push(newContentSubType);
       console.log(newContentSubType);
       return newContentSubType;
     },
-    getExamplesByContentSubTypeID(contentSubTypeID: number): FrontendTypes.Example[] {
+    getExamplesByContentSubTypeID(contentSubTypeID: string): FrontendTypes.Example[] {
       return this.examples
         .filter((example) => example.content_subtype_id === contentSubTypeID)
         .map((example) => ({
@@ -142,7 +91,7 @@ export const useUserDataStore = defineStore('userData', {
           content: example.content,
         }));
     },
-    getTargetAudienceByContentSubTypeID(contentSubtypeID: number) {
+    getTargetAudienceByContentSubTypeID(contentSubtypeID: string) {
       return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubtypeID)?.target_audience ?? '';
     },
     getContentTypeNameById(contentTypeID: number) {
@@ -151,7 +100,7 @@ export const useUserDataStore = defineStore('userData', {
     getContentTypeDisplayNameById(contentTypeID: number) {
       return this.contentTypes.find((contentType) => contentType.id === contentTypeID)?.display_name ?? '';
     },
-    getContentSubTypeNameById(contentSubTypeID: number) {
+    getContentSubTypeNameById(contentSubTypeID: string) {
       return this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.name ?? '';
     },
     getSubtypesForContentType(contentTypeID: number) {
@@ -163,7 +112,7 @@ export const useUserDataStore = defineStore('userData', {
     getSubtypesIDsAndNamesForContentType(contentTypeID: number) {
       return this.contentSubTypes.filter((contentSubType) => contentSubType.content_type_id === contentTypeID).map((contentSubType) => ({ id: contentSubType.id, name: contentSubType.name }));
     },
-    getFieldsForContentSubType(contentSubTypeID: number) {
+    getFieldsForContentSubType(contentSubTypeID: string) {
       const context = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.context ?? '';
       const guidelines = this.contentSubTypes.find((contentSubType) => contentSubType.id === contentSubTypeID)?.guidelines ?? '';
       const examples = this.getExamplesByContentSubTypeID(contentSubTypeID);
@@ -217,73 +166,73 @@ export const useUserDataStore = defineStore('userData', {
       //   const index = this.blogMetadata.findIndex((metadata) => metadata.content_output_id === contentOutputID);
       //   this.blogMetadata[index] = blogMetadata;
     },
-    async requestContentGenerationFromAPI(userInput: FrontendTypes.UserInput): Promise<FrontendTypes.GeneratedContentResponse> {
-      // create settingsInput object from contentSubtypeID
-      // it should be have the datapoints: - context - guidelines - examples - target_audience
-      const settingsInput = {
-        // get the context and guidelines field from the ContentSubType
-        context: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.context ?? '',
-        guidelines: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.guidelines ?? '',
-        examples: this.getExamplesByContentSubTypeID(userInput.subTypeID),
-        // if user input contains target audience, then do not fecht it from the settings as we want to use the user input
-        target_audience: userInput.target_audience ? '' : this.getTargetAudienceByContentSubTypeID(userInput.subTypeID),
-      };
-      await apiClient.requestContentGenerationFromAPI(userInput.subTypeID, userInput, settingsInput);
-      // wait 3 secs to simulate server response
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // simulated response
-      const generatedResponse = {
-        requiresValidation: true,
-        contentOutput: {
-          id: 3,
-          created_by: 1,
-          content_type_id: 1,
-          content_subtype_id: 1,
-          original_content_id: 1,
-          version_number: 1,
-          content: "",
-          created_at: "2024-09-20T10:00:00Z",
-          status: 'pending validation' as 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed',
-          is_current_version: true,
-        },
-        validationData: [
-          {
-            id: 1,
-            content_output_id: 1,
-            step_output_type: "final_content",
-            validation_status: "pending" as "pending" | "completed",
-            options: {
-              "1": "10 Ways to Boost Your Productivity",
-              "2": "Unleash Your Productivity: 10 Game-Changing Strategies",
-              "3": "Mastering Productivity: 10 Expert Tips for Success"
-            },
-            feedback: {},
-            selected_option: '',
-          },
-          {
-            id: 2,
-            content_output_id: 1,
-            step_output_type: "BM_title",
-            validation_status: "pending" as "pending" | "completed",
-            options: {
-              "1": "9 Ways to Boost Your Efficiency",
-              "2": "Unleash Your Efficiency: 9 Game-Changing Strategies",
-              "3": "Mastering Efficiency: 9 Expert Tips for Success"
-            },
-            feedback: {},
-            selected_option: '',
-          }
-        ],
-      };
-      // add contentOutput to contentOutputs in the local store
-      this.contentOutputs.push(generatedResponse.contentOutput);
-      // add each object in ValidationData to validationsItems in the local store
-      generatedResponse.validationData.forEach((validationItem) => {
-        this.validationsItems.push(validationItem);
-      });
-      console.log('validation items:', this.validationsItems);
-      return generatedResponse;
-    },
+    // async requestContentGenerationFromAPI(userInput: FrontendTypes.UserInput): Promise<FrontendTypes.GeneratedContentResponse> {
+    //   // create settingsInput object from contentSubtypeID
+    //   // it should be have the datapoints: - context - guidelines - examples - target_audience
+    //   const settingsInput = {
+    //     // get the context and guidelines field from the ContentSubType
+    //     context: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.context ?? '',
+    //     guidelines: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.guidelines ?? '',
+    //     examples: this.getExamplesByContentSubTypeID(userInput.subTypeID),
+    //     // if user input contains target audience, then do not fecht it from the settings as we want to use the user input
+    //     target_audience: userInput.target_audience ? '' : this.getTargetAudienceByContentSubTypeID(userInput.subTypeID),
+    //   };
+    //   await apiClient.requestContentGenerationFromAPI(userInput.subTypeID, userInput, settingsInput);
+    //   // wait 3 secs to simulate server response
+    //   await new Promise((resolve) => setTimeout(resolve, 1000));
+    //   // simulated response
+    //   const generatedResponse = {
+    //     requiresValidation: true,
+    //     contentOutput: {
+    //       id: 3,
+    //       created_by: 1,
+    //       content_type_id: 1,
+    //       content_subtype_id: 1,
+    //       original_content_id: 1,
+    //       version_number: 1,
+    //       content: "",
+    //       created_at: "2024-09-20T10:00:00Z",
+    //       status: 'pending validation' as 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed',
+    //       is_current_version: true,
+    //     },
+    //     validationData: [
+    //       {
+    //         id: 1,
+    //         content_output_id: 1,
+    //         step_output_type: "final_content",
+    //         validation_status: "pending" as "pending" | "completed",
+    //         options: {
+    //           "1": "10 Ways to Boost Your Productivity",
+    //           "2": "Unleash Your Productivity: 10 Game-Changing Strategies",
+    //           "3": "Mastering Productivity: 10 Expert Tips for Success"
+    //         },
+    //         feedback: {},
+    //         selected_option: '',
+    //       },
+    //       {
+    //         id: 2,
+    //         content_output_id: 1,
+    //         step_output_type: "BM_title",
+    //         validation_status: "pending" as "pending" | "completed",
+    //         options: {
+    //           "1": "9 Ways to Boost Your Efficiency",
+    //           "2": "Unleash Your Efficiency: 9 Game-Changing Strategies",
+    //           "3": "Mastering Efficiency: 9 Expert Tips for Success"
+    //         },
+    //         feedback: {},
+    //         selected_option: '',
+    //       }
+    //     ],
+    //   };
+    //   // add contentOutput to contentOutputs in the local store
+    //   this.contentOutputs.push(generatedResponse.contentOutput);
+    //   // add each object in ValidationData to validationsItems in the local store
+    //   generatedResponse.validationData.forEach((validationItem) => {
+    //     this.validationsItems.push(validationItem);
+    //   });
+    //   console.log('validation items:', this.validationsItems);
+    //   return generatedResponse;
+    // },
     getFinalContentForContentOutput(contentOutputID: number) {
       // return an array of object with this shape: id: string; title: string; content: string;
       // one of the object is the final content, the others are blog metadata if contentOutput is blog_post_copy

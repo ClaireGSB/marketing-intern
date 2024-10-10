@@ -28,7 +28,7 @@ const menuItems = ref([
   { icon: 'mdi-creation', title: 'Create Content', value: 'createContent', to: '/createContent2' },
   { icon: 'mdi-bullhorn', title: 'Create Campaign', value: 'createCampaign', to: '' },
   { icon: 'mdi-calendar-multiselect', title: 'Content Calendar', value: 'calendar', to: '' },
-  { icon: 'mdi-tune', title: 'Content Settings', value: 'contentSettings', to: '' },
+  { icon: 'mdi-tune', title: 'Content Settings', value: 'contentSettings', to: '/ContentSettings' },
   { icon: 'mdi-account', title: 'My Account', value: 'myAccount', to: '' },
 ])
 </script>

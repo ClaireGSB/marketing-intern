@@ -35,15 +35,17 @@ export interface ContentSubType {
 }
 
 export interface Example {
-  id: number;
-  created_by: number;
-  updated_by: number;
-  content_subtype_id: number | null;
-  content_output_id?: number;
+  id: string;
+  org_id: string
+  created_by: string;
+  updated_by: string;
+  content_subtype_id: string | null;
+  content_output_id?: string;
   example_type: string;
   name: string;
   content: string | null;
   created_at: string;
+  updated_at: string;
   deleted_at: string | null;
   explanation: string | null;
 }
