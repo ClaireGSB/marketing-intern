@@ -1,0 +1,76 @@
+// shared/inputFieldTypes.ts
+
+export type FieldType = 'text' | 'textarea';
+export type FieldUse = 'action_specific' | 'general';
+
+export interface FieldConfig {
+  key: string;
+  label: string;
+  type: FieldType;
+  use: FieldUse;
+  validation?: {
+    minChar?: number;
+    maxChar?: number;
+  };
+}
+
+export const inputFields: Record<string, FieldConfig> = {
+  topic: {
+    key: 'topic',
+    label: 'Topic',
+    type: 'text',
+    use: 'action_specific',
+    validation: { maxChar: 100 }
+  },
+  ideas: {
+    key: 'ideas',
+    label: 'Ideas',
+    type: 'textarea',
+    use: 'action_specific',
+    validation: { maxChar: 500 }
+  },
+  content: {
+    key: 'content',
+    label: 'Content',
+    type: 'textarea',
+    use: 'action_specific',
+    validation: { maxChar: 1000 }
+  },
+  productDescription: {
+    key: 'productDescription',
+    label: 'Product Description',
+    type: 'textarea',
+    use: 'action_specific',
+    validation: { maxChar: 500 }
+  },
+  outline: {
+    key: 'outline',
+    label: 'Outline Topics',
+    type: 'textarea',
+    use: 'action_specific',
+    validation: { maxChar: 500 }
+  },
+  target_audience: {
+    key: 'target_audience',
+    label: 'Target audience. This will override the target audience defined in your settings.',
+    type: 'text',
+    use: 'general',
+    validation: { minChar: 5, maxChar: 50 }
+  },
+  guidelines: {
+    key: 'guidelines',
+    label: 'Guidelines specific to this project. They will be added to the guidelines defined in your settings for this project.',
+    type: 'textarea',
+    use: 'general',
+    validation: { minChar: 10, maxChar: 200 }
+  },
+  context: {
+    key: 'context',
+    label: 'Context specific to this project. It will be added to the context defined in your settings for this project.',
+    type: 'textarea',
+    use: 'general',
+    validation: { minChar: 10, maxChar: 200 }
+  },
+};
+
+export const generalOptionalFields: string[] = ['target_audience', 'guidelines', 'context'];
