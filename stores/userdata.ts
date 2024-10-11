@@ -166,73 +166,67 @@ export const useUserDataStore = defineStore('userData', {
       //   const index = this.blogMetadata.findIndex((metadata) => metadata.content_output_id === contentOutputID);
       //   this.blogMetadata[index] = blogMetadata;
     },
-    // async requestContentGenerationFromAPI(userInput: FrontendTypes.UserInput): Promise<FrontendTypes.GeneratedContentResponse> {
-    //   // create settingsInput object from contentSubtypeID
-    //   // it should be have the datapoints: - context - guidelines - examples - target_audience
-    //   const settingsInput = {
-    //     // get the context and guidelines field from the ContentSubType
-    //     context: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.context ?? '',
-    //     guidelines: this.contentSubTypes.find((contentSubType) => contentSubType.id === userInput.subTypeID)?.guidelines ?? '',
-    //     examples: this.getExamplesByContentSubTypeID(userInput.subTypeID),
-    //     // if user input contains target audience, then do not fecht it from the settings as we want to use the user input
-    //     target_audience: userInput.target_audience ? '' : this.getTargetAudienceByContentSubTypeID(userInput.subTypeID),
-    //   };
-    //   await apiClient.requestContentGenerationFromAPI(userInput.subTypeID, userInput, settingsInput);
-    //   // wait 3 secs to simulate server response
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
-    //   // simulated response
-    //   const generatedResponse = {
-    //     requiresValidation: true,
-    //     contentOutput: {
-    //       id: 3,
-    //       created_by: 1,
-    //       content_type_id: 1,
-    //       content_subtype_id: 1,
-    //       original_content_id: 1,
-    //       version_number: 1,
-    //       content: "",
-    //       created_at: "2024-09-20T10:00:00Z",
-    //       status: 'pending validation' as 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed',
-    //       is_current_version: true,
-    //     },
-    //     validationData: [
-    //       {
-    //         id: 1,
-    //         content_output_id: 1,
-    //         step_output_type: "final_content",
-    //         validation_status: "pending" as "pending" | "completed",
-    //         options: {
-    //           "1": "10 Ways to Boost Your Productivity",
-    //           "2": "Unleash Your Productivity: 10 Game-Changing Strategies",
-    //           "3": "Mastering Productivity: 10 Expert Tips for Success"
-    //         },
-    //         feedback: {},
-    //         selected_option: '',
-    //       },
-    //       {
-    //         id: 2,
-    //         content_output_id: 1,
-    //         step_output_type: "BM_title",
-    //         validation_status: "pending" as "pending" | "completed",
-    //         options: {
-    //           "1": "9 Ways to Boost Your Efficiency",
-    //           "2": "Unleash Your Efficiency: 9 Game-Changing Strategies",
-    //           "3": "Mastering Efficiency: 9 Expert Tips for Success"
-    //         },
-    //         feedback: {},
-    //         selected_option: '',
-    //       }
-    //     ],
-    //   };
-    //   // add contentOutput to contentOutputs in the local store
-    //   this.contentOutputs.push(generatedResponse.contentOutput);
-    //   // add each object in ValidationData to validationsItems in the local store
-    //   generatedResponse.validationData.forEach((validationItem) => {
-    //     this.validationsItems.push(validationItem);
-    //   });
-    //   console.log('validation items:', this.validationsItems);
-    //   return generatedResponse;
-    // },
+    async requestContentGenerationFromAPI(userInput: FrontendTypes.UserInput): Promise<FrontendTypes.GeneratedContentResponse> {
+
+
+      await api.createContentOutput(userInput);
+      // TO DO: implement Poll for response from API
+
+      // wait 3 secs to simulate server response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // simulated response
+      const generatedResponse = {
+        requiresValidation: true,
+        contentOutput: {
+          id: 3,
+          created_by: 1,
+          content_type_id: 1,
+          content_subtype_id: 'abc',
+          original_content_id: 1,
+          version_number: 1,
+          content: "",
+          created_at: "2024-09-20T10:00:00Z",
+          status: 'pending validation' as 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed',
+          is_current_version: true,
+        },
+        validationData: [
+          {
+            id: 1,
+            content_output_id: 1,
+            step_output_type: "final_content",
+            validation_status: "pending" as "pending" | "completed",
+            options: {
+              "1": "10 Ways to Boost Your Productivity",
+              "2": "Unleash Your Productivity: 10 Game-Changing Strategies",
+              "3": "Mastering Productivity: 10 Expert Tips for Success"
+            },
+            feedback: {},
+            selected_option: '',
+          },
+          {
+            id: 2,
+            content_output_id: 1,
+            step_output_type: "BM_title",
+            validation_status: "pending" as "pending" | "completed",
+            options: {
+              "1": "9 Ways to Boost Your Efficiency",
+              "2": "Unleash Your Efficiency: 9 Game-Changing Strategies",
+              "3": "Mastering Efficiency: 9 Expert Tips for Success"
+            },
+            feedback: {},
+            selected_option: '',
+          }
+        ],
+      };
+      // add contentOutput to contentOutputs in the local store
+      this.contentOutputs.push(generatedResponse.contentOutput);
+      // add each object in ValidationData to validationsItems in the local store
+      generatedResponse.validationData.forEach((validationItem) => {
+        this.validationsItems.push(validationItem);
+      });
+      console.log('validation items:', this.validationsItems);
+      return generatedResponse;
+    },
     getFinalContentForContentOutput(contentOutputID: number) {
       // return an array of object with this shape: id: string; title: string; content: string;
       // one of the object is the final content, the others are blog metadata if contentOutput is blog_post_copy

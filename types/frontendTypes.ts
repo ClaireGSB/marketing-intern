@@ -84,7 +84,8 @@ export interface ContentGenerationUserInput {
 }
 
 export interface UserInput {
-  subTypeID: string;
+  content_type_id: number;
+  content_subtype_id: string;
   action: string;
   topic?: string;
   target_audience?: string;

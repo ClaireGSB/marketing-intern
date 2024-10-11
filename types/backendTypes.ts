@@ -152,6 +152,13 @@ export interface UserInput {
   context?: string;
 }
 
+export interface SettingsInputWithoutExamples {
+  target_audience?: string;
+  guidelines?: string;
+  context?: string;
+}
+
+
 export interface SettingsInput {
   target_audience?: string;
   guidelines?: string;

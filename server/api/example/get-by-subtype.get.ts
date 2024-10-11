@@ -29,7 +29,6 @@ export default defineEventHandler(async (event) => {
 
 
     const examplesBySubtype = await examples.getByContentSubtypeId(subtypeId)
-    console.log('examplesBySubtype:', examplesBySubtype)
 
     // Ensure the data matches the ExampleFrontend interface
     const formattedExamples: ExampleFrontend[] = examplesBySubtype.map(example => ({
@@ -40,7 +39,6 @@ export default defineEventHandler(async (event) => {
       explanation: example.explanation,
       name: example.name,
     }))
-    console.log('formattedExamples:', formattedExamples)
 
     return {
       statusCode: 200,
