@@ -2,7 +2,7 @@
 
 // this is just a draft example, the actual implementation may vary
 
-import { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 import { generateSystemPrompt, generateUserContentPrompt, generateRatingAndFeedbackPrompt } from '../promptGenerators/socialMediaPromptGenerator';
 
 // Config defines the inputs to the recipe

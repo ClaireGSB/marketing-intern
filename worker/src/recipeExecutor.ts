@@ -159,6 +159,13 @@ export class recipeExecutor {
               status: "pending validation",
               options: response.fullResponse.options
             };
+            // Create validation item
+            console.log("Creating validation item for step", stepIndex);
+            console.log('this.orgID', this.orgID);
+            console.log('this.userID', this.userID);
+            console.log('this.contentOutputId', this.contentOutputId);
+            console.log('stepConfig.outputType', stepConfig.outputType);
+            console.log('response.fullResponse.options', response.fullResponse.options);
             await dataAccess.createValidationItem(this.orgID, this.userID, this.contentOutputId, stepConfig.outputType, response.fullResponse.options);
           } else {
             stepStatus = "completed";

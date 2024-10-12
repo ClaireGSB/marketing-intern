@@ -71,7 +71,7 @@ export const contentOutputs = {
 
     const jobData = {
       recipe_name: recipe_name,
-      contentOutputId: contentOutput.id,
+      content_output_id: contentOutput.id,
       org_id: contentOutput.org_id,
       user_id: contentOutput.created_by,
       subtype_id: subtypeId,

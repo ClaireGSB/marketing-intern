@@ -3,7 +3,6 @@
 
 import { recipeExecutor } from "./src/recipeExecutor";
 import { FileService } from "./src/fileService";
-import { getUserInputAndRecipe } from "./src/userInputProcessing";
 import { dataAccess } from './src/dataAccess';
 import path from 'path';
 import { loadRecipeByName } from "./src/recipeLoader";
