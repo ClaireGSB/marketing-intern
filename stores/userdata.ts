@@ -41,7 +41,7 @@ export const useUserDataStore = defineStore('userData', {
       this.validationsItems = [];
       this.blogMetadata = [];
     },
-    getContentOutputById(contentOutputID: number) {
+    getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
     },
     async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
@@ -138,7 +138,7 @@ export const useUserDataStore = defineStore('userData', {
       // const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
       // this.validationsItems[index] = updatedValidationItem;
     },
-    async confirmValidations(contentOutputID: number) {
+    async confirmValidations(contentOutputID: string) {
       // TO DO: uncomment this when the API is ready
 
       // --- to remove---
@@ -178,11 +178,11 @@ export const useUserDataStore = defineStore('userData', {
       const generatedResponse = {
         requiresValidation: true,
         contentOutput: {
-          id: 3,
-          created_by: 1,
+          id: '3',
+          created_by: '1',
           content_type_id: 1,
           content_subtype_id: 'abc',
-          original_content_id: 1,
+          original_content_id: '1',
           version_number: 1,
           content: "",
           created_at: "2024-09-20T10:00:00Z",
@@ -191,8 +191,8 @@ export const useUserDataStore = defineStore('userData', {
         },
         validationData: [
           {
-            id: 1,
-            content_output_id: 1,
+            id: '1',
+            content_output_id: '1',
             step_output_type: "final_content",
             validation_status: "pending" as "pending" | "completed",
             options: {
@@ -204,8 +204,8 @@ export const useUserDataStore = defineStore('userData', {
             selected_option: '',
           },
           {
-            id: 2,
-            content_output_id: 1,
+            id: '2',
+            content_output_id: '1',
             step_output_type: "BM_title",
             validation_status: "pending" as "pending" | "completed",
             options: {
@@ -227,7 +227,7 @@ export const useUserDataStore = defineStore('userData', {
       console.log('validation items:', this.validationsItems);
       return generatedResponse;
     },
-    getFinalContentForContentOutput(contentOutputID: number) {
+    getFinalContentForContentOutput(contentOutputID: string) {
       // return an array of object with this shape: id: string; title: string; content: string;
       // one of the object is the final content, the others are blog metadata if contentOutput is blog_post_copy
       const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
