@@ -162,6 +162,61 @@ class apiClient {
     }
   }
 
+  async updateValidation(id: string, updates: Partial<FrontendTypes.Validations>): Promise<FrontendTypes.Validations> {
+    try {
+      console.log('Updating validation');
+      const { data, error } = await useFetch<{ body: FrontendTypes.Validations }>('/api/validation/'+id+'/update', {
+        method: 'POST',
+        body: { ...updates }
+      });
+
+      if (error.value) {
+        console.log('Error in updateValidation ', error.value);
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('Updated validation:', data.value.body);
+      return data.value.body;
+    } catch (error) {
+      console.error('Error updating validation:', error);
+      throw new Error('Error updating validation');
+    }
+  }
+
+  async confirmValidations(contentOutputID: string): Promise<FrontendTypes.ContentOutput> {
+    try {
+      console.log('Confirming validations');
+      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/' + contentOutputID + '/confirm-validations', {
+        method: 'POST'
+      });
+
+      if (error.value) {
+        console.log('Error in confirmValidations ', error.value);
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('updated Content Output:', data.value.body);
+      return data.value.body;
+    } catch (error) {
+      console.error('Error confirming validations:', error);
+      throw new Error('Error confirming validations');
+    }
+  }
+
 
   // ##############################
   // # Content Subtypes

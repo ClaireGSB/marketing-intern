@@ -5,7 +5,7 @@ import dbclient from '../database';
 import { BlogMetadata } from '../../types/backendTypes';
 
 export const blogMetadatas = {
-  async create(blogMetadata: Omit<BlogMetadata, 'id'>): Promise<BlogMetadata> {
+  async create(content_output_id: string, blogMetadata: Partial<BlogMetadata>): Promise<BlogMetadata> {
     const id = uuidv4();
     const query = `
       INSERT INTO blog_metadata (id, content_output_id, title_options, title, meta_description, formatted_post)
@@ -14,17 +14,17 @@ export const blogMetadatas = {
     `;
     const values = [
       id,
-      blogMetadata.content_output_id,
+      content_output_id,
       blogMetadata.title_options ? JSON.stringify(blogMetadata.title_options) : null,
-      blogMetadata.title,
-      blogMetadata.meta_description,
-      blogMetadata.formatted_post
+      blogMetadata.title? blogMetadata.title : '',
+      blogMetadata.meta_description ? blogMetadata.meta_description : '',
+      blogMetadata.formatted_post? blogMetadata.formatted_post : ''
     ];
     const result = await dbclient.query(query, values);
     return result.rows[0];
   },
 
-  async update(id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata | null> {
+  async update(id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata> {
     const setClause = Object.keys(updates)
       .map((key, index) => {
         if (key === 'title_options') {
@@ -46,7 +46,10 @@ export const blogMetadatas = {
       )
     ];
     const result = await dbclient.query(query, values);
-    return result.rows[0] || null;
+    if (result.rows.length === 0) {
+      throw new Error('Blog metadata not found');
+    }
+    return result.rows[0];
   },
 
   async getBlogMetadataByID(id: string): Promise<BlogMetadata | null> {
@@ -67,5 +70,13 @@ export const blogMetadatas = {
     `;
     const result = await dbclient.query(query, [contentOutputId]);
     return result.rows[0] || null;
+  },
+
+  async updateOrCreate(content_output_id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata> {
+    const existingMetadata = await this.getBlogMetadataByContentOutputId(content_output_id);
+    if (existingMetadata) {
+      return this.update(existingMetadata.id, updates);
+    }
+    return this.create(content_output_id, updates);
   }
 };

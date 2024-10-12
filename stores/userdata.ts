@@ -126,17 +126,18 @@ export const useUserDataStore = defineStore('userData', {
     },
     async updateValidationItem(validationItem: FrontendTypes.Validations) {
       // TO DO: uncomment this when the API is ready
+      validationItem.validation_status = 'completed';
+      const updatedValidationItem = await api.updateValidation(validationItem.id, validationItem);
+      console.log('userStore updating validationItem:', updatedValidationItem);
 
       // --- to remove---
       // in the meantime, console log the updated item
-      console.log('userStore updating validationItem:', validationItem);
       // dummy update in the local store
-      this.validationsItems = this.validationsItems.map((item) => item.id === validationItem.id ? validationItem : item);
+      // this.validationsItems = this.validationsItems.map((item) => item.id === validationItem.id ? updatedValidationItem : item);
       // --- end of to remove---
 
-      // const updatedValidationItem = await apiClient.updateValidationItem(validationItem);
-      // const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
-      // this.validationsItems[index] = updatedValidationItem;
+      const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
+      this.validationsItems[index] = updatedValidationItem;
     },
     async confirmValidations(contentOutputID: string) {
       // TO DO: uncomment this when the API is ready
@@ -144,21 +145,21 @@ export const useUserDataStore = defineStore('userData', {
       // --- to remove---
       // in the meantime, console log the updated item
       // dummy update in the local store
-      this.validationsItems = this.validationsItems.map((item) => item.content_output_id === contentOutputID ? { ...item, validation_status: 'completed', content: item.options[item.selected_option] } : item);
-      // update the content in the contentOutputs if output_step_type is final_content
-      const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
-      const finalContentValidationItem = this.validationsItems.find((item) => item.content_output_id === contentOutputID && item.step_output_type === 'final_content') ?? null;
-      const finalContent = finalContentValidationItem ? finalContentValidationItem.options[finalContentValidationItem.selected_option] : '';
-      if (contentOutput) {
-        this.contentOutputs = this.contentOutputs.map((contentOutput) => contentOutput.id === contentOutputID ? { ...contentOutput, status: 'completed', content: finalContent } : contentOutput);
-      }
-      console.log('userStore updated validations:', this.validationsItems);
-      console.log('userStore updated contentOutput:', this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID));
+      // this.validationsItems = this.validationsItems.map((item) => item.content_output_id === contentOutputID ? { ...item, validation_status: 'completed', content: item.options[item.selected_option] } : item);
+      // // update the content in the contentOutputs if output_step_type is final_content
+      // const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
+      // const finalContentValidationItem = this.validationsItems.find((item) => item.content_output_id === contentOutputID && item.step_output_type === 'final_content') ?? null;
+      // const finalContent = finalContentValidationItem ? finalContentValidationItem.options[finalContentValidationItem.selected_option] : '';
+      // if (contentOutput) {
+      //   this.contentOutputs = this.contentOutputs.map((contentOutput) => contentOutput.id === contentOutputID ? { ...contentOutput, status: 'completed', content: finalContent } : contentOutput);
+      // }
+      // console.log('userStore updated validations:', this.validationsItems);
+      // console.log('userStore updated contentOutput:', this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID));
       // --- end of to remove---
 
-      // const updatedContentOutput = await apiClient.confirmValidations(contentOutputID);
-      // const index = this.contentOutputs.findIndex((contentOutput) => contentOutput.id === contentOutputID);
-      // this.contentOutputs[index] = updatedContentOutput;
+      const updatedContentOutput = await api.confirmValidations(contentOutputID);
+      const index = this.contentOutputs.findIndex((contentOutput) => contentOutput.id === contentOutputID);
+      this.contentOutputs[index] = updatedContentOutput;
 
       // ------ if contentType is blog_post_copy, then update the blogMetadata
       // if (updatedContentOutput.content_type_id === 8) {
@@ -192,59 +193,6 @@ export const useUserDataStore = defineStore('userData', {
         };
       }
 
-      // // wait 3 secs to simulate server response
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-      // // simulated response
-      // const generatedResponse = {
-      //   requiresValidation: true,
-      //   contentOutput: {
-      //     id: '3',
-      //     created_by: '1',
-      //     content_type_id: 1,
-      //     content_subtype_id: 'abc',
-      //     original_content_id: '1',
-      //     version_number: 1,
-      //     content: "",
-      //     created_at: "2024-09-20T10:00:00Z",
-      //     status: 'pending validation' as 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed',
-      //     is_current_version: true,
-      //   },
-      //   validationData: [
-      //     {
-      //       id: '1',
-      //       content_output_id: '1',
-      //       step_output_type: "final_content",
-      //       validation_status: "pending" as "pending" | "completed",
-      //       options: {
-      //         "1": "10 Ways to Boost Your Productivity",
-      //         "2": "Unleash Your Productivity: 10 Game-Changing Strategies",
-      //         "3": "Mastering Productivity: 10 Expert Tips for Success"
-      //       },
-      //       feedback: {},
-      //       selected_option: '',
-      //     },
-      //     {
-      //       id: '2',
-      //       content_output_id: '1',
-      //       step_output_type: "BM_title",
-      //       validation_status: "pending" as "pending" | "completed",
-      //       options: {
-      //         "1": "9 Ways to Boost Your Efficiency",
-      //         "2": "Unleash Your Efficiency: 9 Game-Changing Strategies",
-      //         "3": "Mastering Efficiency: 9 Expert Tips for Success"
-      //       },
-      //       feedback: {},
-      //       selected_option: '',
-      //     }
-      //   ],
-      // };
-      // // add contentOutput to contentOutputs in the local store
-      // this.contentOutputs.push(generatedResponse.contentOutput);
-      // // add each object in ValidationData to validationsItems in the local store
-      // generatedResponse.validationData.forEach((validationItem) => {
-      //   this.validationsItems.push(validationItem);
-      // });
-      // console.log('validation items:', this.validationsItems);
       return generatedResponse;
     },
     getFinalContentForContentOutput(contentOutputID: string) {
