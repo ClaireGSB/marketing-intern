@@ -133,13 +133,16 @@ export const contentOutputs = {
     }));
   },
 
-  async getContentOutputById(id: string): Promise<ContentOutput | null> {
+  async getContentOutputById(id: string): Promise<ContentOutput> {
     const query = `
       SELECT * FROM content_outputs
       WHERE id = $1
     `;
     const result = await dbclient.query(query, [id]);
-    return result.rows[0] || null;
+    if (result.rows.length === 0) {
+      throw new Error('Content output not found');
+    }
+    return result.rows[0];
   },
 
 };
