@@ -29,8 +29,8 @@ import * as BackendTypes from './backendTypes';
 // }
 
 export interface Users {
-  id: number;
-  org_id: number;
+  id: string;
+  org_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -57,8 +57,8 @@ export interface Example {
 }
 
 export interface ContentOutput {
-  id: number;
-  created_by: number;
+  id: string;
+  created_by: string;
   content_type_id: number;
   content_subtype_id: string | null;
   content: string;
@@ -67,8 +67,8 @@ export interface ContentOutput {
 }
 
 export interface BlogMetadata {
-  id: number;
-  content_output_id: number;
+  id: string;
+  content_output_id: string;
   title_options: string[];
   title?: string;
   meta_description: string;
@@ -109,8 +109,8 @@ export interface GeneratedContentResponse {
 }
 
 export interface Validations {
-  id: number;
-  content_output_id: number;
+  id: string;
+  content_output_id: string;
   step_output_type: string;
   validation_status: "pending" | "completed";
   options: Record<string, string>;
