@@ -132,7 +132,10 @@ class apiClient {
   // # Validations
   // ##############################
 
-  async fetchValidations(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
+  // TO DO: add fetchALLValidations
+  
+  
+  async fetchValidationsByContentOutput(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
     try {
       console.log('Fetching validations');
       const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/content-output/' + contentOutputID + '/validations');

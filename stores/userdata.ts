@@ -126,6 +126,7 @@ export const useUserDataStore = defineStore('userData', {
     },
     fetchValidations(contentOutputID: string) {
       const validations = this.validationsItems.filter((validationItem) => validationItem.content_output_id === contentOutputID);
+      console.log('userStore fetching validations:', validations);
       return validations;
     },
     async updateValidationItem(validationItem: FrontendTypes.Validations) {
@@ -157,7 +158,7 @@ export const useUserDataStore = defineStore('userData', {
       let generatedResponse: FrontendTypes.GeneratedContentResponse;
       if (newContentOutput.status === 'pending validation') {
         console.log('getting validation items');
-        const validations = await api.fetchValidations(newContentOutput.id);
+        const validations = await api.fetchValidationsByContentOutput(newContentOutput.id);
         validations.forEach((validationItem) => {
           this.validationsItems.push(validationItem);
         });

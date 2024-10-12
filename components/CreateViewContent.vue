@@ -15,21 +15,20 @@
               <ContentProjectSetup 
                 @generate="generateContent" 
                 :initialData="contentOutput" 
-                :isEditable="isEditable"
+                :isEditable="isProjectSetupEditable"
               />
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="validations" value="validation">
               <ContentValidation 
-                :validations="validations" 
+                :contentOutputID="contentOutputID"
                 @confirm="handleConfirmation"
                 @regenerate="handleRegeneration"
-                :isEditable="isEditable"
               />
             </v-tabs-window-item>
 
-            <v-tabs-window-item v-if="finalContent" value="final">
-              <FinalContent :content="finalContent" />
+            <v-tabs-window-item v-if="hasFinalContent" value="final">
+              <FinalContent :contentOutputID="contentOutputID" />
             </v-tabs-window-item>
           </v-tabs-window>
         </v-container>
@@ -61,14 +60,9 @@ const userStore = useUserDataStore();
 const tab = ref('setup');
 const isLoading = ref(false);
 const validations = ref<Validations[] | null>(null);
-const finalContent = ref<FinalContentItem[] | null>(null);
+// const finalContent = ref<FinalContentItem[] | null>(null);
 const contentOutputID = ref('');
 const contentOutput = ref<ContentOutput | null>(null);
-
-// const contentOutput = computed(() => {
-//   if (contentOutputID) return null;
-//   return userStore.getContentOutputById(props.id);
-// });
 
 const pageTitle = computed(() => {
   if (!props.id) return 'Create Content';
@@ -76,9 +70,11 @@ const pageTitle = computed(() => {
   return 'Edit Content';
 });
 
-const isEditable = computed(() => !contentOutput.value || contentOutput.value.status !== 'completed');
+
 const hasValidations = computed(() => !!validations.value);
-const hasFinalContent = computed(() => !!finalContent.value);
+const hasFinalContent = computed(() => !!contentOutputID.value && contentOutput.value?.status === 'completed');
+const isProjectSetupEditable = computed(() => !hasValidations.value);
+const areValidationsEditable = computed(() => !contentOutput.value || contentOutput.value.status !== 'completed');
 
 watch(() => props.id, loadExistingContent, { immediate: true });
 
@@ -97,7 +93,8 @@ async function loadExistingContent() {
       console.log('validations', validations.value);
       tab.value = 'validation';
     } else if (contentOutput.value.status === 'completed') {
-      finalContent.value = userStore.getFinalContentForContentOutput(props.id);
+      validations.value = await userStore.fetchValidations(props.id);
+      // finalContent.value = userStore.getFinalContentForContentOutput(props.id);
       tab.value = 'final';
     } else {
       tab.value = 'setup';
@@ -115,7 +112,7 @@ async function generateContent(config: any) {
       tab.value = 'validation';
     } else {
       if (data.contentOutput.status === 'completed') {
-        finalContent.value = userStore.getFinalContentForContentOutput(data.contentOutput.id);
+        // finalContent.value = userStore.getFinalContentForContentOutput(data.contentOutput.id);
         tab.value = 'final';
       }
     }
@@ -133,7 +130,8 @@ async function handleConfirmation(results: Validations[]) {
   }
   if (contentOutputID.value) {
     await userStore.confirmValidations(contentOutputID.value);
-    finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
+    contentOutput.value = userStore.getContentOutputById(contentOutputID.value);
+    // finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
     tab.value = 'final';
   }
 }
