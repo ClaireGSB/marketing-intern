@@ -16,7 +16,6 @@ export default defineEventHandler(async (event) => {
 
   try {
     const contentOutputsByOrg = await contentOutputs.getContentOutputsByOrgId(orgId)
-    console.log('contentOutputsByOrg:', contentOutputsByOrg)
 
     // Ensure the data matches the ContentOutputFrontend interface
     const formattedOutputs: ContentOutputFrontend[] = contentOutputsByOrg.map(output => ({
@@ -28,8 +27,6 @@ export default defineEventHandler(async (event) => {
       created_at: output.created_at,
       status: output.status as ContentOutputFrontend['status'], // Ensure this is one of the valid status values
     }))
-
-    console.log('formattedOutputs:', formattedOutputs)
 
     return {
       statusCode: 200,

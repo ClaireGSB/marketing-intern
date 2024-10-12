@@ -17,8 +17,8 @@ export interface Example {
 }
 
 export interface Users {
-  id: number;
-  org_id: number;
+  id: string;
+  org_id: string;
   first_name: string;
   last_name: string;
   email: string;

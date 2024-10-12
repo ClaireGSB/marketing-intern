@@ -58,9 +58,9 @@ export const examples = {
     return result.rowCount ? result.rowCount > 0 : false;
   },
 
-  async getByContentSubtypeId(contentSubtypeId: string): Promise<ExampleFrontend[]> {
+  async getByContentSubtypeId(contentSubtypeId: string): Promise<Example[]> {
     const query = `
-      SELECT id, content_subtype_id, example_type, name, content, explanation
+      SELECT *
       FROM examples
       WHERE content_subtype_id = $1 AND deleted_at IS NULL
     `;

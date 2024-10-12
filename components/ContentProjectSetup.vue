@@ -93,8 +93,8 @@ import { ref, computed, reactive, watch } from 'vue';
 import { useUserDataStore } from '../stores/userdata';
 import { storeToRefs } from 'pinia';
 import { VForm } from 'vuetify/components';
-import { ContentType } from '../types/contentTypes';
-import { FieldConfig, inputFields, generalOptionalFields } from '../types/inputFieldTypes';
+import type { ContentType } from '../types/contentTypes';
+import { type FieldConfig, inputFields, generalOptionalFields } from '../types/inputFieldTypes';
 
 export default {
   emits: ['generate'],
@@ -121,8 +121,8 @@ export default {
       created_at: '',
       _status: ''
     });
-    const selectedSubType = ref<{ id: number; name: string }>({ id: -1, name: '' });
-    const possibleSubTypes = ref([] as { id: number; name: string; }[])
+    const selectedSubType = ref<{ id: string; name: string }>({ id: '', name: '' });
+    const possibleSubTypes = ref([] as { id: string; name: string; }[])
 
     const selectContentType = (id: number) => {
       const foundType = contentTypes.value.find(type => type.id === id);
@@ -145,7 +145,7 @@ export default {
         step.value = Math.min(step.value, 3);
       }
       if (!possibleSubTypes.value.some(subType => subType.id === selectedSubType.value.id)) {
-        selectedSubType.value = possibleSubTypes.value[0] || { id: -1, name: '' };
+        selectedSubType.value = possibleSubTypes.value[0] || { id: '', name: '' };
         step.value = Math.min(step.value, 2);
       }
     });
@@ -234,15 +234,13 @@ export default {
           formFields,
         });
         const userInput = {
+          content_type_id: selectedContentType.value.id,
+          content_subtype_id: selectedSubType.value.id,
           action: selectedAction.value,
           ...formFields,
         };
-        const config = {
-          subTypeID: selectedSubType.value.id,
-          ...userInput,
-        };
-        console.log('requesting content generation with:', config)
-        emit('generate', config);
+        console.log('requesting content generation with:', userInput)
+        emit('generate', userInput);
       }
     };
 

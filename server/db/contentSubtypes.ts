@@ -1,5 +1,6 @@
 // server/db/contentSubtypes.ts
 import { ContentSubType as ContentSubTypeFrontend } from '../../types/frontendTypes'
+import { SettingsInputWithoutExamples } from '../../types/backendTypes'
 import { ContentSubType } from '../../types/backendTypes';
 
 import dbclient from '../database';
@@ -68,5 +69,17 @@ export const contentSubtypes = {
       guidelines: row.guidelines,
       target_audience: row.target_audience,
     }));
+  },
+
+  async getContentSubtypeSettingsById(id: string): Promise<SettingsInputWithoutExamples> {
+    const query = `
+      SELECT target_audience, context, guidelines FROM content_subtypes
+      WHERE id = $1
+    `;
+    const result = await dbclient.query(query, [id]);
+    if (!result.rows.length) {
+      throw new Error(`Content subtype not found: ${id}`);
+    }
+    return result.rows[0];
   }
 };

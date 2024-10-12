@@ -1,8 +1,8 @@
-// shared/backendTypes.ts
+// types/backendTypes.ts
 
 export interface Users {
-  id: number;
-  org_id: number;
+  id: string;
+  org_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -14,7 +14,7 @@ export interface Users {
 }
 
 export interface Organizations {
-  id: number;
+  id: string;
   name: string;
   created_at: string;
   deleted_at: string | null;
@@ -66,17 +66,18 @@ export interface ContentOutput {
 }
 
 export interface BlogMetadata {
-  id: number;
-  content_output_id: number;
-  title_options: string[];
+  id: string;
+  content_output_id: string;
+  title_options?: string[];
   title?: string;
   meta_description: string;
   formatted_post?: string;
 }
 
 export interface Validations {
-  id: number;
-  content_output_id: number;
+  id: string;
+  org_id: string;
+  content_output_id: string;
   step_output_type: string;
   validation_status: "pending" | "completed";
   options: Record<string, string>;
@@ -114,18 +115,19 @@ export interface ContentGenerationUserInput {
 }
 
 export interface TokenUsage {
-  id: number;
-  user_id: number;
-  content_output_id: number;
-  step_output_id: number;
+  id: string;
+  org_id: string;
+  content_output_id: string;
+  step_output_id: string;
   model: string;
   input_tokens: number;
   output_tokens: number;
 }
 
 export interface StepOutput {
-  id: number;
-  content_output_id: number;
+  id: string;
+  index: number;
+  content_output_id: string;
   step_name: string;
   step_output_type: string;
   step_status: "completed" | "failed" | "skipped" | "pending validation";
@@ -151,6 +153,13 @@ export interface UserInput {
   guidelines?: string;
   context?: string;
 }
+
+export interface SettingsInputWithoutExamples {
+  target_audience?: string;
+  guidelines?: string;
+  context?: string;
+}
+
 
 export interface SettingsInput {
   target_audience?: string;

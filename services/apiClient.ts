@@ -37,6 +37,35 @@ class apiClient {
     }
   }
 
+  async createContentOutput(user_input: FrontendTypes.UserInput): Promise<FrontendTypes.ContentOutput> {
+    try {
+      console.log('Creating content output in api client');
+      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/initialize', {
+        method: 'POST',
+        body: {
+          ...user_input
+        }
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('Created content output:', data.value.body);
+      return data.value.body;
+    } catch (error) {
+      console.error('Error creating content output:', error);
+      throw new Error('Error creating content output');
+    }
+  }
+
   // ##############################
   // # Content Subtypes
   // ##############################
