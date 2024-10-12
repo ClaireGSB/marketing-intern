@@ -1,6 +1,6 @@
 // src/recipeExecutor.ts
 
-import {
+import type {
   ProjectSettings,
   RecipeStepConfig,
   StepType,
@@ -22,7 +22,7 @@ import { executeCLISelectionStep } from './stepExecutors/cliSelectionStepExecuto
 import { executeJSONParseStep } from './stepExecutors/jsonParseStepExecutor';
 import { executeUserValidationStep } from './stepExecutors/userValidationStepExecutor';
 import { dataAccess } from './dataAccess';
-import { getOutlineContent, getParentOutlineId } from './contentOperations';
+// import { getOutlineContent, getParentOutlineId } from './contentOperations';
 import { isActionAvailable, areRequiredInputsPresent, getRequiredInputsForAction } from './actionConfig';
 
 
@@ -45,7 +45,11 @@ export class recipeExecutor {
   // Store the content generated throughout the recipe execution
   private content: { [key: string]: string } = {};
   // Store the id of the content output
-  private contentOutputId: number = -1;
+  private contentOutputId: string = '';
+  // Store the org ID
+  private orgID: string = '';
+  // Store the user ID
+  private userID: string = '';
 
   // Constructor initializes the executor with default empty objects
   // The actual initialization happens in the executeRecipe method
@@ -54,10 +58,10 @@ export class recipeExecutor {
     this.content = initialContent;
   }
 
-  private async saveTokenUsage(tokenUsage: TokenUsage, step_output_id: number) {
+  private async saveTokenUsage(tokenUsage: TokenUsage, step_output_id: string) {
     if (this.contentOutputId) {
       await dataAccess.saveTokenUsage({
-        user_id: this.recipeConfig.userID,
+        org_id: this.orgID,
         content_output_id: this.contentOutputId,
         step_output_id,
         ...tokenUsage
@@ -66,7 +70,7 @@ export class recipeExecutor {
   }
 
   private async saveFinalContent(stepOutput: string, stepOutputType: string, stepOutputStatus: string) {
-    if (this.contentOutputId === -1) {
+    if (!this.contentOutputId) {
       throw new Error("Content output ID is not set");
     }
     // if stepOutputType starts with "final_"
@@ -109,7 +113,7 @@ export class recipeExecutor {
   }
 
   // Execute a single step in the recipe
-  private async executeStep(userID: number, stepIndex: number, stepConfig: RecipeStepConfig, recipeData: SubtypeSettings): Promise<void> {
+  private async executeStep(stepIndex: number, stepConfig: RecipeStepConfig, recipeData: SubtypeSettings): Promise<void> {
     this.stepReports[stepIndex].status = "in progress";
     let stepStatus: "completed" | "failed" | "skipped" | "pending validation" = "completed";
     let stepOutput: string | object = "";
@@ -155,7 +159,7 @@ export class recipeExecutor {
               status: "pending validation",
               options: response.fullResponse.options
             };
-            await dataAccess.createValidationItem(userID, this.contentOutputId, stepConfig.outputType, response.fullResponse.options);
+            await dataAccess.createValidationItem(this.orgID, this.userID, this.contentOutputId, stepConfig.outputType, response.fullResponse.options);
           } else {
             stepStatus = "completed";
             this.stepReports[stepIndex].status = "completed";
@@ -190,9 +194,10 @@ export class recipeExecutor {
     }
 
     // Save step output
-    let stepOutputId: number | undefined;
+    let stepOutputId: string | undefined;
     if (this.contentOutputId) {
       stepOutputId = await dataAccess.saveStepOutput({
+        index: stepIndex,
         content_output_id: this.contentOutputId,
         step_name: stepConfig.stepName,
         step_output_type: stepConfig.outputType,
@@ -221,13 +226,21 @@ export class recipeExecutor {
   // This method uses generics to allow for flexible typing of configurations and outputs
   async executeRecipe<T extends ProjectSettings, O extends string>(
     recipe: Recipe<T, O, SubtypeSettings>,
-    userID: number,
+    contentOutputId: string,
+    userID: string,
+    orgID: string,
     projectSettings: T,
     OutputTypes: readonly O[],
     subtypeSettingsPromise: Promise<SubtypeSettings>
   ): Promise<{ [K in O]: string }> {
     // T is a type parameter that extends RecipeConfig, allowing for specific recipe configurations
     // O is a type parameter that extends string, used for the output types
+
+    // Store the org ID and user ID and content output ID
+    this.contentOutputId = contentOutputId;
+    this.orgID = orgID;
+    this.userID = userID;
+
 
     // Initialize the content with empty strings for each output type
     const initialContent = Object.fromEntries(
@@ -246,13 +259,14 @@ export class recipeExecutor {
     // const parentOutlineId = (componentType === 'full_content' && recipe.contentType === 'blog_post') ? await getParentOutlineId(config) : null;
 
     // Initialize content output and user input
-    this.contentOutputId = await dataAccess.saveContentOutput(
-      userID,
-      subtypeSettings.contentSubType.content_type_id,
-      subtypeSettings.contentSubType?.id,
-      // componentType,
-      // parentOutlineId
-    );
+    // THIS IS NOW DONE BEFORE THIS METHOD IS CALLED
+    // this.contentOutputId = await dataAccess.saveContentOutput(
+    //   userID,
+    //   subtypeSettings.contentSubType.content_type_id,
+    //   subtypeSettings.contentSubType?.id,
+    //   // componentType,
+    //   // parentOutlineId
+    // );
 
     // Validate action
     if (projectSettings.action) {
@@ -265,13 +279,13 @@ export class recipeExecutor {
       }
     }
 
-    await dataAccess.saveContentGenerationUserInput(this.contentOutputId, projectSettings.userID, projectSettings);
+    // await dataAccess.saveContentGenerationUserInput(this.contentOutputId, projectSettings.userID, projectSettings);
 
     try {
       // Execute each step in order
       for (let stepIndex = 0; stepIndex < recipe.steps.length; stepIndex++) {
         const stepConfig = recipe.steps[stepIndex];
-        await this.executeStep(userID, stepIndex, stepConfig, subtypeSettings);
+        await this.executeStep(stepIndex, stepConfig, subtypeSettings);
 
         if (this.stepReports[stepIndex].status === "failed") {
           throw new Error(`Recipe execution failed at step ${stepIndex}: ${stepConfig.stepName}`);
@@ -291,8 +305,8 @@ export class recipeExecutor {
 
 
     // Update content output with final status
-    if (this.contentOutputId) {
-      await dataAccess.updateContentOutput(this.contentOutputId, undefined, finalStatus);
+    if (contentOutputId) {
+      await dataAccess.updateContentOutput(contentOutputId, undefined, finalStatus);
     }
 
     // Return the final content after executing all steps
@@ -300,13 +314,4 @@ export class recipeExecutor {
     return this.content as { [K in O]: string };
   }
 
-  // Get the status report for a specific step
-  getStepStatus(stepIndex: number): StepReport {
-    return this.stepReports[stepIndex];
-  }
-
-  // Get status reports for all steps
-  getAllStepReports(): StepReport[] {
-    return this.stepReports;
-  }
 }

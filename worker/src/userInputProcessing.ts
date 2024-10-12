@@ -1,6 +1,6 @@
 // src/userInputProcessing.ts
 
-import { UserInput } from './recipeTypes';
+import type { UserInput } from './recipeTypes';
 import { loadRecipes } from './recipeLoader';
 import { FileService } from './fileService';
 import { getOutlineContent } from './contentOperations';

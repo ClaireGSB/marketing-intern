@@ -1,17 +1,17 @@
 // src/validationHandler.ts
 
 import { dataAccess } from './dataAccess';
-import { ContentOutput, StepOutput } from '@shared/backendTypes';
+import type { ContentOutput, StepOutput } from '../../types/backendTypes';
 
 export async function getPendingValidations(): Promise<ContentOutput[]> {
   return await dataAccess.getPendingValidationOutputs();
 }
 
-export async function getPendingSteps(contentOutputId: number): Promise<StepOutput[]> {
+export async function getPendingSteps(contentOutputId: string): Promise<StepOutput[]> {
   return await dataAccess.OLD_getPendingValidationItems(contentOutputId);
 }
 
-export async function validateSingleStep(stepOutputId: number, validationData: any): Promise<void> {
+export async function validateSingleStep(stepOutputId: string, validationData: any): Promise<void> {
   const stepOutput = await dataAccess.getStepOutputById(stepOutputId);
   if (!stepOutput) {
     throw new Error(`Step output with id ${stepOutputId} not found`);
@@ -47,7 +47,7 @@ export async function validateSingleStep(stepOutputId: number, validationData: a
   }
 }
 
-export async function checkAndUpdateContentOutputStatus(contentOutputId: number): Promise<void> {
+export async function checkAndUpdateContentOutputStatus(contentOutputId: string): Promise<void> {
   const updatedSteps = await dataAccess.OLD_getPendingValidationItems(contentOutputId);
   const allStepsCompleted = updatedSteps.every(step => step.step_status === "completed");
 

@@ -1,5 +1,5 @@
 // src/recipeTypes.ts
-import { ContentSubType, Example } from '@shared/backendTypes';
+import type { ContentSubType, Example } from '../../types/backendTypes';
 
 export interface ProjectSettings {
   [key: string]: any;

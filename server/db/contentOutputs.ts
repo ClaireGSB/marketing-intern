@@ -71,10 +71,15 @@ export const contentOutputs = {
 
     const jobData = {
       recipe_name: recipe_name,
+      contentOutputId: contentOutput.id,
+      org_id: contentOutput.org_id,
+      user_id: contentOutput.created_by,
       subtype_id: subtypeId,
       user_settings: userInput,
       subtype_settings: subtypeSettings
     };
+
+    // TO DO: save user settings to db - need new table
 
     console.log('Job data:', jobData);
 
@@ -83,7 +88,6 @@ export const contentOutputs = {
     try {
       const job = await myQueue.add('InitializeRecipe', { 
         jobData: jobData,
-        contentOutputId: contentOutput.id,
       });
       console.log('Job added to queue:', job.id);
       // This might log something like: "Job added to queue: 1"
@@ -127,6 +131,15 @@ export const contentOutputs = {
       created_at: row.created_at.toISOString(),
       status: row.status as ContentOutputFrontend['status'],
     }));
+  },
+
+  async getContentOutputById(id: string): Promise<ContentOutput | null> {
+    const query = `
+      SELECT * FROM content_outputs
+      WHERE id = $1
+    `;
+    const result = await dbclient.query(query, [id]);
+    return result.rows[0] || null;
   },
 
 };

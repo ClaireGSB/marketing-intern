@@ -1,5 +1,5 @@
-import { contentTypes } from '../../shared/contentTypes';
-import { actions } from '../../shared/actionTypes';
+import { contentTypes } from '../../types/contentTypes';
+import { actions } from '../../types/actionTypes';
 
 export function isActionAvailable(
   action: string,

@@ -3,7 +3,7 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { config } from "./config";
-import {
+import type {
   AnthropicUserMessage,
   AnthropicAssistantMessage,
   AnthropicMessage,

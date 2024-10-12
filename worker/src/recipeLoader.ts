@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { Recipe } from './recipeTypes';
+import type { Recipe } from './recipeTypes';
 
 // type RecipeIndex = {
 //   [contentType: string]: {
