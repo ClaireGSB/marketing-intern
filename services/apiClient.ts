@@ -37,7 +37,7 @@ class apiClient {
     }
   }
 
-  async createContentOutput(user_input: FrontendTypes.UserInput): Promise<FrontendTypes.ContentOutput> {
+  async initializeContentOutput(user_input: FrontendTypes.UserInput): Promise<FrontendTypes.ContentOutput> {
     try {
       console.log('Creating content output in api client');
       const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/initialize', {
@@ -65,6 +65,103 @@ class apiClient {
       throw new Error('Error creating content output');
     }
   }
+
+  async getContentOutputById(id: string): Promise<FrontendTypes.ContentOutput> {
+    try {
+      console.log('Fetching content output by ID');
+      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/' + id);
+
+      if (error.value) {
+        console.log('Error in getContentOutputById ', error.value);
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching content output by ID:', error);
+      throw new Error('Error fetching content output by ID');
+    }
+  }
+
+  isContentOutputReady(contentOutput: FrontendTypes.ContentOutput): boolean {
+    console.log('Checking if content output is ready');
+    console.log('Content output status:', contentOutput.status);
+    const ready = contentOutput.status === 'pending validation' || contentOutput.status === 'completed';
+    console.log('Content output is ready:', ready);
+    return ready;
+  }
+
+  async pollForContentOutput(id: string): Promise<FrontendTypes.ContentOutput> {
+    // poll every 5 seconds until the content output is ready
+    // return the content output
+    let contentOutput = await this.getContentOutputById(id);
+    console.log('Content output status:', contentOutput.status);
+    let ready = this.isContentOutputReady(contentOutput);
+    console.log('Content output is ready in poll for Content Output:', ready);
+    while (!this.isContentOutputReady(contentOutput)) {
+      console.log('Content output not ready yet, polling again in 1 second');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      contentOutput = await this.getContentOutputById(id);
+    }
+    console.log('Content output status:', contentOutput.status);
+    console.log('Content output is ready:', contentOutput);
+    return contentOutput;
+  }
+
+  async generateContentOutput(user_input: FrontendTypes.UserInput): Promise<FrontendTypes.ContentOutput> {
+    try {
+      console.log('Generating content output');
+      const contentOutput = await this.initializeContentOutput(user_input);
+      return await this.pollForContentOutput(contentOutput.id);
+    } catch (error) {
+      console.error('Error generating content output:', error);
+      throw new Error('Error generating content output');
+    }
+  }
+
+  // ##############################
+  // # Validations
+  // ##############################
+
+  async fetchValidations(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
+    try {
+      console.log('Fetching validations');
+      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/content-output/' + contentOutputID + '/validations');
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+
+      if (data.value.body.length === 0) {
+        throw new Error('No validations found');
+      }
+
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching validations:', error);
+      throw new Error('Error fetching validations');
+    }
+  }
+
 
   // ##############################
   // # Content Subtypes
