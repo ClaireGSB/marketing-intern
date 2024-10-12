@@ -3,7 +3,7 @@
 import type { UserInput } from './recipeTypes';
 import { loadRecipes } from './recipeLoader';
 import { FileService } from './fileService';
-import { getOutlineContent } from './contentOperations';
+// import { getOutlineContent } from './contentOperations';
 import * as userInputs from './userInputs';
 import path from 'path';
 
@@ -56,7 +56,7 @@ export async function getUserInputAndRecipe(): Promise<{
   // If outline is provided as an ID, fetch the content
   if (userInput.config.outline && typeof userInput.config.outline === 'number') {
     userInput.config.outline_id = userInput.config.outline;
-    userInput.config.outline = await getOutlineContent(userInput.config.outline);
+    // userInput.config.outline = await getOutlineContent(userInput.config.outline);
   }
 
   return { userInput, recipe, contentType, contentSubType, userID };

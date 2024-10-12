@@ -1,6 +1,6 @@
 // src/stepExecutors/jsonParseStepExecutor.ts
 
-import { JSONParseStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { JSONParseStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 
 function sanitizeJSON(input: string): string {
   // Replace newlines within string values with \n

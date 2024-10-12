@@ -1,4 +1,4 @@
-import { UserValidationStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { UserValidationStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 
 
 export async function executeUserValidationStep(

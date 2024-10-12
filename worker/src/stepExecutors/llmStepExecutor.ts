@@ -1,7 +1,7 @@
 // src/stepExecutors/llmStepExecutor.ts
 
 import { fetchCompletion } from "../llm";
-import { LLMStepConfig, ProjectSettings, SubtypeSettings, StepResponse, TokenUsage } from '../recipeTypes';
+import type { LLMStepConfig, ProjectSettings, SubtypeSettings, StepResponse, TokenUsage } from '../recipeTypes';
 
 export async function executeLLMStep(
   stepConfig: LLMStepConfig,

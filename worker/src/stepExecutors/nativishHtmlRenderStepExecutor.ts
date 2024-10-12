@@ -1,6 +1,6 @@
 // src/stepExecutors/nativishHtmlRenderStepExecutor.ts
 
-import { NativishHtmlRenderStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
+import type { NativishHtmlRenderStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
 import { diffWords } from 'diff';
 
 export async function executeNativishHtmlRenderStep(

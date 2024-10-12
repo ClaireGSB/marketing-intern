@@ -1,6 +1,6 @@
 // src/stepExecutors/nativishApiStepExecutor.ts
 
-import { NativishAPIStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
+import type { NativishAPIStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
 import { config } from '../config';
 import markdownit from 'markdown-it';
 

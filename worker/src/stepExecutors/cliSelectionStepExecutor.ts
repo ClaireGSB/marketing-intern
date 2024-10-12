@@ -1,7 +1,7 @@
 // src/stepExecutors/cliSelectionStepExecutor.ts
 
 import readline from 'readline';
-import { CLISelectionStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { CLISelectionStepConfig, StepResponse, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 
 const rl = readline.createInterface({
   input: process.stdin,

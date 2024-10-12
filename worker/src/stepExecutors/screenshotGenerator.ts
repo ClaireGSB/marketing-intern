@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import fs from 'fs/promises';
 import path from 'path';
 import { FileService } from '../fileService';
-import { ScreenshotStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
+import type { ScreenshotStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
 
 const fileService = new FileService(path.join(__dirname, '..', '..'));
 
