@@ -26,7 +26,7 @@ const worker = new Worker('foo', async job => {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
   console.log('Worker starting job:', job.name);
-  executeRecipe(job.data);
+  await executeRecipe(job.data);
 }, { connection });
 
 // Log worker properties to make sure it's initialized

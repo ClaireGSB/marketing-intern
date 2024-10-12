@@ -3,7 +3,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import { FileService } from '../fileService';
 import type { ScreenshotStepConfig, ProjectSettings, StepResponse, SubtypeSettings } from '../recipeTypes';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const fileService = new FileService(path.join(__dirname, '..', '..'));
 
 async function getImageAsBase64(imagePath: string): Promise<string> {

@@ -87,7 +87,7 @@ export const contentOutputs = {
     // add job to queue
     try {
       const job = await myQueue.add('InitializeRecipe', { 
-        jobData: jobData,
+        ...jobData,
       });
       console.log('Job added to queue:', job.id);
       // This might log something like: "Job added to queue: 1"

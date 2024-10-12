@@ -6,39 +6,20 @@
 import fs from 'fs';
 import path from 'path';
 import type { Recipe } from './recipeTypes';
+import twitter_post from './recipes/twitter_post';
+// Add other recipes here
 
-// type RecipeIndex = {
-//   [contentType: string]: {
-//     [componentType: string]: Recipe<any, any, any>
-//   }
-// };
+const recipeMap: { [key: string]: Recipe<any, any, any> } = {
+  'twitter_post': twitter_post,
+  // Add other recipes here
+};
 
-export function loadRecipes(): { [key: string]: Recipe<any, any, any> } {
-  const recipesDir = path.join(__dirname, 'recipes');
-  const recipeFiles = fs.readdirSync(recipesDir);
-
-  const recipes: { [key: string]: Recipe<any, any, any> } = {};
-
-  recipeFiles.forEach(file => {
-    if (file.endsWith('.ts') || file.endsWith('.js')) {
-      const recipePath = path.join(recipesDir, file);
-      const recipeModule = require(recipePath);
-
-      // Assume each recipe file exports a default recipe object
-      const recipe: Recipe<any, any, any> = recipeModule.default;
-
-      if (recipe && recipe.contentType) {
-        recipes[recipe.contentType] = recipe;
-      }
-    }
-  });
-
-  return recipes;
-}
-
-export function loadRecipeByName(recipeName: string): Recipe<any, any, any> {
-  const recipePath = path.join(__dirname, 'recipes', `${recipeName}.ts`);
-  const recipeModule = require(recipePath);
-
-  return recipeModule.default;
+export async function loadRecipeByName(recipeName: string): Promise<Recipe<any, any, any>> {
+  console.log('Loading recipe for:', recipeName);
+  const recipeModule = recipeMap[recipeName];
+  if (!recipeModule) {
+    throw new Error(`Recipe not found: ${recipeName}`);
+  }
+  console.log('Loaded recipe');
+  return recipeModule;
 }
