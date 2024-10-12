@@ -130,33 +130,10 @@ export const useUserDataStore = defineStore('userData', {
       const updatedValidationItem = await api.updateValidation(validationItem.id, validationItem);
       console.log('userStore updating validationItem:', updatedValidationItem);
 
-      // --- to remove---
-      // in the meantime, console log the updated item
-      // dummy update in the local store
-      // this.validationsItems = this.validationsItems.map((item) => item.id === validationItem.id ? updatedValidationItem : item);
-      // --- end of to remove---
-
       const index = this.validationsItems.findIndex((item) => item.id === validationItem.id);
       this.validationsItems[index] = updatedValidationItem;
     },
     async confirmValidations(contentOutputID: string) {
-      // TO DO: uncomment this when the API is ready
-
-      // --- to remove---
-      // in the meantime, console log the updated item
-      // dummy update in the local store
-      // this.validationsItems = this.validationsItems.map((item) => item.content_output_id === contentOutputID ? { ...item, validation_status: 'completed', content: item.options[item.selected_option] } : item);
-      // // update the content in the contentOutputs if output_step_type is final_content
-      // const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
-      // const finalContentValidationItem = this.validationsItems.find((item) => item.content_output_id === contentOutputID && item.step_output_type === 'final_content') ?? null;
-      // const finalContent = finalContentValidationItem ? finalContentValidationItem.options[finalContentValidationItem.selected_option] : '';
-      // if (contentOutput) {
-      //   this.contentOutputs = this.contentOutputs.map((contentOutput) => contentOutput.id === contentOutputID ? { ...contentOutput, status: 'completed', content: finalContent } : contentOutput);
-      // }
-      // console.log('userStore updated validations:', this.validationsItems);
-      // console.log('userStore updated contentOutput:', this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID));
-      // --- end of to remove---
-
       const updatedContentOutput = await api.confirmValidations(contentOutputID);
       const index = this.contentOutputs.findIndex((contentOutput) => contentOutput.id === contentOutputID);
       this.contentOutputs[index] = updatedContentOutput;
