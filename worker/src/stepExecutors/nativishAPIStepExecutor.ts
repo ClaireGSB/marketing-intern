@@ -32,7 +32,7 @@ async function pollForImprovement(
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const data: NativishAPIResponse = await response.json();
+  const data: NativishAPIResponse = await response.json() as NativishAPIResponse;
 
   if (data.status === 'completed') {
     return data;
@@ -71,7 +71,7 @@ export async function executeNativishApiStep(
       throw new Error(`HTTP error! status: ${initResponse.status}`);
     }
 
-    const initData: { id: string } = await initResponse.json();
+    const initData: { id: string } = await initResponse.json() as { id: string };
     const result = await pollForImprovement(improveUrl, initData.id, authToken);
 
     if (result.error) {
