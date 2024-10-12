@@ -2,7 +2,7 @@
   <v-container class="fill-height pa-0">
     <v-row no-gutters class="fill-height justify-center">
       <v-col cols="12" xl="8" class="d-flex flex-column relative-container pa-0">
-        <h1 class="text-h4 px-4 py-10">{{ id ? 'Edit' : 'Create' }} Content</h1>
+        <h1 class="text-h4 px-4 py-10">{{ pageTitle }}</h1>
         <v-container fluid class="flex-grow-1 overflow-y-auto pb-16">
           <v-tabs v-model="tab" grow color="primary" class="mb-10">
             <v-tab value="setup" text="Project setup"></v-tab>
@@ -12,12 +12,20 @@
 
           <v-tabs-window v-model="tab" class="pb-6">
             <v-tabs-window-item value="setup">
-              <ContentProjectSetup @generate="generateContent" :initialData="contentOutput" />
+              <ContentProjectSetup 
+                @generate="generateContent" 
+                :initialData="contentOutput" 
+                :isEditable="isEditable"
+              />
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="validations" value="validation">
-              <ContentValidation :validations="validations" @confirm="handleConfirmation"
-                @regenerate="handleRegeneration" />
+              <ContentValidation 
+                :validations="validations" 
+                @confirm="handleConfirmation"
+                @regenerate="handleRegeneration"
+                :isEditable="isEditable"
+              />
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="finalContent" value="final">
@@ -40,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useUserDataStore } from '~/stores/userdata';
 import { Validations, GeneratedContentResponse, FinalContentItem } from '~/types/frontendTypes';
 
@@ -54,28 +62,45 @@ const tab = ref('setup');
 const isLoading = ref(false);
 const validations = ref<Validations[] | null>(null);
 const finalContent = ref<FinalContentItem[] | null>(null);
+const contentOutputID = ref('');
+const contentOutput = ref<ContentOutput | null>(null);
 
-const contentOutput = computed(() => {
-  if (!props.id) return null;
-  return userStore.getContentOutputById(props.id);
+// const contentOutput = computed(() => {
+//   if (contentOutputID) return null;
+//   return userStore.getContentOutputById(props.id);
+// });
+
+const pageTitle = computed(() => {
+  if (!props.id) return 'Create Content';
+  if (contentOutput.value?.status === 'completed') return 'View Content';
+  return 'Edit Content';
 });
 
+const isEditable = computed(() => !contentOutput.value || contentOutput.value.status !== 'completed');
 const hasValidations = computed(() => !!validations.value);
 const hasFinalContent = computed(() => !!finalContent.value);
 
 watch(() => props.id, loadExistingContent, { immediate: true });
 
 async function loadExistingContent() {
-  if (!props.id) return;
+  if (!props.id) {
+    tab.value = 'setup';
+    return;
+  }
 
-  const output = userStore.getContentOutputById(props.id);
-  if (output) {
-    if (output.status === 'pending validation') {
+  contentOutput.value = userStore.getContentOutputById(props.id);
+  
+  contentOutputID.value = props.id;
+  if (contentOutput.value) {
+    if (contentOutput.value.status === 'pending validation') {
       validations.value = await userStore.fetchValidations(props.id);
+      console.log('validations', validations.value);
       tab.value = 'validation';
-    } else if (output.status === 'completed') {
+    } else if (contentOutput.value.status === 'completed') {
       finalContent.value = userStore.getFinalContentForContentOutput(props.id);
       tab.value = 'final';
+    } else {
+      tab.value = 'setup';
     }
   }
 }
@@ -84,6 +109,7 @@ async function generateContent(config: any) {
   isLoading.value = true;
   try {
     const data: GeneratedContentResponse = await userStore.requestContentGenerationFromAPI(config);
+    contentOutputID.value = data.contentOutput.id;
     if (data.requiresValidation) {
       validations.value = data.validationData || [];
       tab.value = 'validation';
@@ -105,9 +131,9 @@ async function handleConfirmation(results: Validations[]) {
   for (const result of results) {
     await userStore.updateValidationItem(result);
   }
-  if (props.id) {
-    await userStore.confirmValidations(props.id);
-    finalContent.value = userStore.getFinalContentForContentOutput(props.id);
+  if (contentOutputID.value) {
+    await userStore.confirmValidations(contentOutputID.value);
+    finalContent.value = userStore.getFinalContentForContentOutput(contentOutputID.value);
     tab.value = 'final';
   }
 }

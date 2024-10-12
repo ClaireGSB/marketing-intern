@@ -85,6 +85,10 @@ export default {
       type: Array as () => Validations[],
       required: true,
     },
+    isEditable: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props, { emit }) {
     const openPanels = ref<number[]>([0]);

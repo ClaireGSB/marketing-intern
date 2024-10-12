@@ -25,7 +25,7 @@
 import { ref } from 'vue'
 
 const menuItems = ref([
-  { icon: 'mdi-creation', title: 'Create Content OLD', value: 'createContent', to: '/createContent2' },
+  { icon: 'mdi-creation', title: 'Create Content OLD', value: 'createContentOld', to: '/createContent2' },
   { icon: 'mdi-creation', title: 'Create Content NEW', value: 'createContent', to: '/Content' },
   { icon: 'mdi-bullhorn', title: 'Create Campaign', value: 'createCampaign', to: '' },
   { icon: 'mdi-view-list', title: 'Content List', value: 'contentList', to: '/ContentList' },

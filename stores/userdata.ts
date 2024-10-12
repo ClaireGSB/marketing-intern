@@ -124,6 +124,10 @@ export const useUserDataStore = defineStore('userData', {
         target_audience: target_audience,
       };
     },
+    fetchValidations(contentOutputID: string) {
+      const validations = this.validationsItems.filter((validationItem) => validationItem.content_output_id === contentOutputID);
+      return validations;
+    },
     async updateValidationItem(validationItem: FrontendTypes.Validations) {
       // TO DO: uncomment this when the API is ready
       validationItem.validation_status = 'completed';

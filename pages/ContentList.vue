@@ -5,12 +5,10 @@
         <h1 class="text-h4 px-4 py-10">Content Outputs</h1>
         <v-container fluid class="flex-grow-1 overflow-y-auto">
           <v-btn color="primary" class="mb-4" @click="createNewContent">Create New Content</v-btn>
-          <v-data-table
-            :headers="headers"
-            :items="contentOutputsFormatted"
-            :items-per-page="10"
-            class="elevation-1 custom-table"
-          >
+          <v-data-table :headers="headers" :items="contentOutputsFormatted" :items-per-page="10"
+            class="elevation-1 custom-table" :header-props="{
+              class: 'custom-header text-uppercase'
+            }">
             <template v-slot:item.created_at="{ item }">
               {{ formatDate(item.created_at) }}
             </template>
@@ -19,11 +17,7 @@
               <span v-else>-</span>
             </template>
             <template v-slot:item.actions="{ item }">
-              <v-btn
-                color="primary"
-                size="small"
-                @click="editContent(item.id)"
-              >
+              <v-btn color="primary" size="small" @click="editContent(item.id)">
                 Edit
               </v-btn>
             </template>
@@ -85,16 +79,21 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style>
 .custom-table {
   width: 100%;
 }
 
-.custom-table th {
-  background-color: #f5f5f5;
-  color: #333;
-  font-weight: bold;
-  text-transform: uppercase;
+.custom-table {
+  border: 1px solid #e0e0e0;
+}
+
+.custom-header {
+  background-color: #f5f5f5 !important;
+  color: #333 !important;
+  font-weight: bold !important;
+  font-size: 0.875rem !important;
+  border-bottom: 2px solid #e0e0e0 !important;
 }
 
 .relative-container {
