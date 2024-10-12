@@ -85,7 +85,7 @@ export interface Validations {
   selected_option: string;
   created_at: string;
   updated_at: string;
-  updated_by: number;
+  updated_by: string;
 }
 
 // options will look like this:

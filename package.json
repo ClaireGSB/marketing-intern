@@ -10,20 +10,27 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.29.0",
     "@mdi/font": "^7.4.47",
     "@nuxthub/core": "^0.7.26",
     "@pinia/nuxt": "^0.5.5",
     "@types/pg": "^8.11.10",
     "@types/uuid": "^10.0.0",
     "bullmq": "^5.19.0",
+    "diff": "^7.0.0",
+    "markdown-it": "^14.1.0",
     "nuxt": "^3.13.0",
+    "openai": "^4.67.3",
     "pg": "^8.13.0",
     "pinia": "^2.2.4",
+    "puppeteer": "^23.5.3",
     "uuid": "^10.0.0",
     "vue": "latest",
     "vue-router": "latest"
   },
   "devDependencies": {
+    "@types/diff": "^5.2.3",
+    "@types/markdown-it": "^14.1.2",
     "vite-plugin-vuetify": "^2.0.4",
     "vuetify": "^3.7.2",
     "wrangler": "^3.80.1"
