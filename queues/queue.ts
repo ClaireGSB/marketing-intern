@@ -3,6 +3,7 @@
 import { Queue } from 'bullmq';
 import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
+import { executeRecipe } from '~/worker';
 
 const connection = {
   host: 'localhost', // or your Docker host IP if not on localhost
@@ -12,11 +13,11 @@ const connection = {
 
 export const myQueue = new Queue('foo', { connection});
 
-export async function addJobs() {
-  console.log('Adding jobs');
-  await myQueue.add('myJobName', { foo: 'bar' });
-  await myQueue.add('myJobName', { qux: 'baz' });
-}
+// export async function addJobs() {
+//   console.log('Adding jobs');
+//   await myQueue.add('myJobName', { foo: 'bar' });
+//   await myQueue.add('myJobName', { qux: 'baz' });
+// }
 
 // await addJobs();
 
@@ -24,7 +25,8 @@ export async function addJobs() {
 const worker = new Worker('foo', async job => {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
-  console.log(job.data);
+  console.log('Worker starting job:', job.name);
+  executeRecipe(job.data);
 }, { connection });
 
 // Log worker properties to make sure it's initialized
