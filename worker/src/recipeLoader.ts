@@ -35,3 +35,10 @@ export function loadRecipes(): { [key: string]: Recipe<any, any, any> } {
 
   return recipes;
 }
+
+export function loadRecipeByName(recipeName: string): Recipe<any, any, any> {
+  const recipePath = path.join(__dirname, 'recipes', `${recipeName}.ts`);
+  const recipeModule = require(recipePath);
+
+  return recipeModule.default;
+}

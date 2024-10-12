@@ -230,11 +230,13 @@ export class recipeExecutor {
     userID: string,
     orgID: string,
     projectSettings: T,
-    OutputTypes: readonly O[],
-    subtypeSettingsPromise: Promise<SubtypeSettings>
+    subtypeSettings: SubtypeSettings
   ): Promise<{ [K in O]: string }> {
     // T is a type parameter that extends RecipeConfig, allowing for specific recipe configurations
     // O is a type parameter that extends string, used for the output types
+
+    console.log('executeRecipe Starting in Recipe Executor.');
+
 
     // Store the org ID and user ID and content output ID
     this.contentOutputId = contentOutputId;
@@ -244,7 +246,7 @@ export class recipeExecutor {
 
     // Initialize the content with empty strings for each output type
     const initialContent = Object.fromEntries(
-      OutputTypes.map(key => [key, ""])
+      recipe.outputTypes.map(key => [key, ""])
     ) as { [K in O]: string };
 
     // Set the recipe configuration and initial content
@@ -254,7 +256,6 @@ export class recipeExecutor {
     // Initialize step reports for all steps in the recipe
     this.initializeStepReports(recipe.steps);
 
-    const subtypeSettings = await subtypeSettingsPromise;
     // const componentType = recipe.componentType || 'full_content';
     // const parentOutlineId = (componentType === 'full_content' && recipe.contentType === 'blog_post') ? await getParentOutlineId(config) : null;
 
