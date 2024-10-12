@@ -3,6 +3,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import dbclient from '../database';
 import { Validations } from '../../types/backendTypes';
+import { Validations as ValidationsFrontend } from '../../types/frontendTypes';
+import { blogMetadatas } from './blogMetadatas';
+import { ContentOutput as ContentOutputFrontend } from '../../types/frontendTypes';
 
 export const validations = {
   async create(validation: Omit<Validations, 'id' | 'created_at' | 'updated_at'>): Promise<Validations> {
@@ -27,7 +30,7 @@ export const validations = {
     return result.rows[0];
   },
 
-  async update(id: string, updates: Partial<Validations>): Promise<Validations | null> {
+  async update(id: string, updates: Partial<Validations>): Promise<ValidationsFrontend> {
     const setClause = Object.keys(updates)
       .map((key, index) => {
         if (key === 'options' || key === 'feedback') {
@@ -44,12 +47,24 @@ export const validations = {
     `;
     const values = [
       id,
-      ...Object.entries(updates).map(([key, value]) => 
+      ...Object.entries(updates).map(([key, value]) =>
         key === 'options' || key === 'feedback' ? JSON.stringify(value) : value
       )
     ];
     const result = await dbclient.query(query, values);
-    return result.rows[0] || null;
+    if (result.rows.length === 0) {
+      throw new Error('Validation not found');
+    }
+    // map the result to the frontend type
+    return {
+      id: result.rows[0].id,
+      content_output_id: result.rows[0].content_output_id,
+      step_output_type: result.rows[0].step_output_type,
+      validation_status: result.rows[0].validation_status,
+      options: result.rows[0].options,
+      feedback: result.rows[0].feedback,
+      selected_option: result.rows[0].selected_option,
+    };
   },
 
   async getValidationsByContentOutputID(contentOutputId: string): Promise<Validations[]> {
@@ -80,5 +95,79 @@ export const validations = {
     `;
     const result = await dbclient.query(query, [contentOutputId]);
     return result.rows;
+  },
+
+  async confirmValidations(contentOutputId: string): Promise<ContentOutputFrontend> {
+    console.log('confirmValidations process started');
+    // 1. get all the validations for the content output
+    const validations = await this.getValidationsByContentOutputID(contentOutputId);
+    // 2. check if all validations are completed
+    const allValidationsCompleted = validations.every(validation => validation.validation_status === 'completed');
+    if (!allValidationsCompleted) {
+      throw new Error('Not all validations are completed');
+    }
+    // 3. check that they all have a selected option 
+    const allValidationsHaveSelectedOption = validations.every(validation => validation.selected_option !== null);
+    if (!allValidationsHaveSelectedOption) {
+      throw new Error('Not all validations have a selected option');
+    }
+    // 4. check that for all of them, option['selected_option'] is not null or empty
+    const allValidationsHaveSelectedOptionValue = validations.every(validation => validation.options[validation.selected_option] !== null && validation.options[validation.selected_option] !== '');
+    if (!allValidationsHaveSelectedOptionValue) {
+      throw new Error('Not all validations have a selected option value');
+    }
+
+    // 5. find the validation where step output type is 'final_content' and assign the content to the content output
+    const finalContentValidation = validations.find(validation => validation.step_output_type === 'final_content');
+    if (!finalContentValidation) {
+      throw new Error('Final content validation not found');
+    }
+    const finalContent = finalContentValidation.options[finalContentValidation.selected_option];
+
+    // 6. update the content output with the final content and set the status to 'completed'
+    const query = `
+      UPDATE content_outputs
+      SET content = $2, status = 'completed'
+      WHERE id = $1
+      RETURNING *
+    `;
+    const values = [contentOutputId, finalContent];
+    const result = await dbclient.query(query, values);
+    if (result.rowCount === 0 || result.rowCount === null) {
+      throw new Error('Content output not found');
+    }
+    const updatedContentOutput = result.rows[0]; 
+    console.log('Content output updated:', updatedContentOutput);
+
+    // 7. if there are validations where step output type starts with "final_BM_", for each of them, Extract the metadata field name - it's everything after the second underscore
+    // and update or create blog metadata
+    const finalBMValidations = validations.filter(validation => validation.step_output_type.startsWith('final_BM_'));
+    for (const validation of finalBMValidations) {
+      // extract the metadata field name
+      const metadataFieldName = validation.step_output_type.split('_').slice(2).join('_');
+      const metadataValue = validation.options[validation.selected_option];
+      // use blogMetadatas.updateOrCreate to update or create the blog metadata
+      const updateData = {
+        [metadataFieldName]: metadataValue
+      };
+
+      await blogMetadatas.updateOrCreate(contentOutputId, updateData);
+      // TO DO - handle the case where the metadata field name is not found or other errors
+      // also handle the fact the we're not telling the frontend that the metadata was updated
+    }
+
+    // 8. return Content output formatted for frontend if all validations are completed and the content output is updated
+
+    const formattedContentOutput: ContentOutputFrontend = {
+      id: updatedContentOutput.id,
+      content_subtype_id: updatedContentOutput.content_subtype_id,
+      content: updatedContentOutput.content,
+      status: updatedContentOutput.status,
+      created_at: updatedContentOutput.created_at,
+      created_by: updatedContentOutput.created_by,
+      content_type_id: updatedContentOutput.content_type_id,
+    };
+
+    return formattedContentOutput;
   }
 };

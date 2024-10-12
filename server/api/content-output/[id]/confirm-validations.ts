@@ -1,5 +1,3 @@
-// server/api/validation/get-by-co.get.ts
-
 import { defineEventHandler } from 'h3'
 import { Validations as ValidationFrontend } from '../../../../types/frontendTypes';
 import { validations } from '~/server/db/validations';
@@ -8,6 +6,7 @@ export default defineEventHandler(async (event) => {
 
   try {
 
+    console.log('API received a request to confirm validations')
     // TO DO: replace this with auth check 
     const orgId = '7c9e6679-7425-40de-944b-e07fc1f90ae7'
 
@@ -28,29 +27,25 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const validationList = await validations.getValidationsByContentOutputID(contentOutputID)
-
-    // Ensure the data matches the ExampleFrontend interface
-    const formattedValidations: ValidationFrontend[] = validationList.map(validation => ({
-      id: validation.id,
-      content_output_id: validation.content_output_id,
-      options: validation.options,
-      feedback: validation.feedback,
-      selected_option: validation.selected_option,
-      step_output_type: validation.step_output_type,
-      validation_status: validation.validation_status,
-    }))
+    const updatedContentOutput = await validations.confirmValidations(contentOutputID)
+    
+    if(!updatedContentOutput) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Error confirming validations',
+      })
+    }
 
     return {
       statusCode: 200,
-      body: formattedValidations,
+      body: updatedContentOutput,
     }
+
   } catch (error) {
-    console.error('Error fetching examples:', error)
+    console.error('Error confirming validations:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: 'Error fetching examples',
+      statusMessage: 'Error confirming validations',
     })
   }
 })
-

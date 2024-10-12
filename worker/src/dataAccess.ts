@@ -137,7 +137,7 @@ class DataAccess {
     };
 
     // Create the blog metadata entry in the database
-    const createdMetadata = await blogMetadatas.create(newMetadata);
+    const createdMetadata = await blogMetadatas.create(metadata.content_output_id, newMetadata);
 
     return createdMetadata;
   }
