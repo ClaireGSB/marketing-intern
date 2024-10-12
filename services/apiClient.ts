@@ -135,10 +135,7 @@ class apiClient {
   async fetchValidations(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
     try {
       console.log('Fetching validations');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/validation/get-by-co', {
-        method: 'POST',
-        body: { contentOutputID: contentOutputID }
-      });
+      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/content-output/' + contentOutputID + '/validations');
 
       if (error.value) {
         throw createError({
