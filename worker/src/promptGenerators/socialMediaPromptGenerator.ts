@@ -76,8 +76,8 @@ const productDescriptionSnippet = (projectSettings: ProjectSettings): string =>
 
 const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
   // the project settings target audience overrides the subtype settings target audience
-  if (projectSettings.targetAudience) {
-    return `<target_audience>${projectSettings.targetAudience}</target_audience>`;
+  if (projectSettings.target_audience) {
+    return `<target_audience>${projectSettings.target_audience}</target_audience>`;
   } else if (subtypeSettings.target_audience) {
     return `<target_audience>${subtypeSettings.target_audience}</target_audience>`;
   } else {
