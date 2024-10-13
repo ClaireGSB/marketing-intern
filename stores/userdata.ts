@@ -15,6 +15,7 @@ type State = {
   contentOutputs: FrontendTypes.ContentOutput[];
   validationsItems: FrontendTypes.Validations[];
   blogMetadata: FrontendTypes.BlogMetadata[];
+  projectSetups: FrontendTypes.UserInput[];
 };
 
 export const useUserDataStore = defineStore('userData', {
@@ -27,7 +28,8 @@ export const useUserDataStore = defineStore('userData', {
     contentOutputs: [],
     blogMetadata: [],
     validationsItems: [],
-    userID: ''
+    userID: '',
+    projectSetups: [],
   }),
   actions: {
     async fetchUserData() {
@@ -41,6 +43,10 @@ export const useUserDataStore = defineStore('userData', {
     },
     getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
+    },
+    async fetchProjectSetup(contentOutputID: string) {
+      const projectSetup = await api.fetchProjectSetup(contentOutputID);
+      this.projectSetups.push(projectSetup);
     },
     async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
       // remove id from data (it was a temp local ID)

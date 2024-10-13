@@ -41,5 +41,22 @@ export const projectSetups = {
     }
 
     return result.rows[0].content;
+  },
+
+  async getProjectSetupByContentOutputID(contentOutputID: string): Promise<UserInput> {
+    const query = `
+      SELECT ps.content
+      FROM content_outputs co
+      JOIN project_setups ps ON co.project_setup_id = ps.id
+      WHERE co.id = $1
+    `;
+
+    const result = await dbclient.query(query, [contentOutputID]);
+
+    if (result.rows.length === 0) {
+      throw new Error('Project setup not found for content output: ' + contentOutputID);
+    }
+
+    return result.rows[0].content;
   }
 };
