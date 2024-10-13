@@ -17,9 +17,20 @@
               <span v-else>-</span>
             </template>
             <template v-slot:item.actions="{ item }">
-              <v-btn color="primary" size="small" @click="editContent(item.id)">
-                Edit
-              </v-btn>
+              <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            variant="plain"
+            v-bind="attrs"
+            v-on="on"
+            @click="viewContent(item.id)"
+            class="pa-0"
+          >
+            <v-icon color="primary">mdi-eye</v-icon>
+          </v-btn>
+        </template>
+        <span>View Content</span>
+      </v-tooltip>
             </template>
           </v-data-table>
         </v-container>
@@ -71,7 +82,7 @@ const createNewContent = () => {
   router.push('/Content');
 };
 
-const editContent = (contentId: string) => {
+const viewContent = (contentId: string) => {
   router.push(`/Content/${contentId}`);
 };
 

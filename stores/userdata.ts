@@ -1,6 +1,5 @@
 // Utilities
 import { defineStore } from 'pinia';
-import { mockApiClient as apiClient } from '../services/mockApiClient';
 import { api } from '../services/apiClient';
 import * as FrontendTypes from '../types/frontendTypes';
 import { type ContentType, contentTypesFrontEnd } from '../types/contentTypes';
@@ -32,13 +31,11 @@ export const useUserDataStore = defineStore('userData', {
   }),
   actions: {
     async fetchUserData() {
-      // Dummy data
       this.userID = await api.fetchUserID();
       this.users = await api.fetchUsers();
       this.contentSubTypes = await api.fetchContentSubtypes();
       this.examples = await api.fetchExamples();
       this.contentOutputs = await api.fetchContentOutputs();
-      // to do: fetch validations & blogMetadata
       this.validationsItems = await api.fetchValidations();
       this.blogMetadata = await api.fetchBlogMetadatas();
     },
