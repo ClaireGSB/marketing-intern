@@ -147,7 +147,8 @@ export interface AppData {
 }
 
 export interface UserInput {
-  subTypeID: number;
+  content_type_id: number;
+  content_subtype_id: string;
   action: string;
   topic?: string;
   target_audience?: string;

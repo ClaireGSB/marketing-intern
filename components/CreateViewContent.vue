@@ -117,6 +117,7 @@ async function generateContent(config: any) {
       if (data.contentOutput.status === 'failed') {
         // TO DO: Handle error (e.g., show an error message to the user)
         console.log('Error generating content. Content Status is Failed');
+      }
     }
   } catch (error) {
     console.error('Error generating content:', error);
