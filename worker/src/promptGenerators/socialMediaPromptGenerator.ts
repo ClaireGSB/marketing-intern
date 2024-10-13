@@ -38,13 +38,10 @@ let goodExamples = ''
 let badExamples = ''
 
 function processExamples(subtypeSettings: SubtypeSettings) {
-  console.log('PROCESSING EXAMPLES', subtypeSettings.examples);
   if (subtypeSettings.examples) {
     goodExamples = processGoodExamples(subtypeSettings.examples);
     badExamples = processBadExamples(subtypeSettings.examples);
   }
-  console.log('GOOD EXAMPLES', goodExamples);
-  console.log('BAD EXAMPLES', badExamples);
 };
 
 // Preliminary instructions
