@@ -9,6 +9,7 @@ import { examples } from './examples';
 import { Example} from '../../types/backendTypes';
 import { SettingsInputWithoutExamples, SettingsInput } from '../../types/backendTypes'
 import { getContentTypeNameByID } from '../../types/contentTypes';
+import { projectSetups } from './projectSetups';
 
 import dbclient from '../database';
 
@@ -16,13 +17,14 @@ export const contentOutputs = {
 
   async create(contentOutput: ContentOutput, userInput: UserInput): Promise<ContentOutput> {
     console.log('db file received a new initialization request')
+    const project_setup_id = await projectSetups.saveProjectSetup(userInput);
 
     // insert new content output into db
     const query = `
-      INSERT INTO content_outputs (id, org_id, created_by, content_type_id, content_subtype_id, content, status, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *
-    `;
+    INSERT INTO content_outputs (id, org_id, created_by, content_type_id, content_subtype_id, content, status, created_at, updated_at, project_setup_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    RETURNING *
+  `;
     const values = [
       contentOutput.id,
       contentOutput.org_id,
@@ -32,25 +34,11 @@ export const contentOutputs = {
       contentOutput.content,
       contentOutput.status,
       contentOutput.created_at,
-      contentOutput.updated_at
+      contentOutput.updated_at,
+      project_setup_id
     ];
     const result = await dbclient.query(query, values);
     console.log('New content output initialized in db')
-
-    // compile data for job
-    // the payload for the request has this shape:
-    // {
-    // subtype_id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
-    // content_type_id: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
-    // user_settings: {
-    //   action: 'generate',
-    //   target_audience: 'This is the content',
-    //   context: 'This is the context',
-    //   guidelines: 'These are the guidelines',
-    // },
-    // }
-    // we need to add to this object the subtype settings
-    // get the subtype settings from the db
 
     const subtypeId = contentOutput.content_subtype_id;
     if (!subtypeId) {
@@ -130,6 +118,7 @@ export const contentOutputs = {
       content: row.content,
       created_at: row.created_at.toISOString(),
       status: row.status as ContentOutputFrontend['status'],
+      project_setup_id: row.project_setup_id,
     }));
   },
 

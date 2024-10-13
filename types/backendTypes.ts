@@ -64,6 +64,7 @@ export interface ContentOutput {
   updated_at: string;
   status: 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed';
   // is_current_version: boolean;
+  project_setup_id?: string;
 }
 
 export interface BlogMetadata {
@@ -147,7 +148,9 @@ export interface AppData {
 }
 
 export interface UserInput {
-  subTypeID: number;
+  id?: string;
+  content_type_id: number;
+  content_subtype_id: string;
   action: string;
   topic?: string;
   target_audience?: string;

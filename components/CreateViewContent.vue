@@ -12,19 +12,14 @@
 
           <v-tabs-window v-model="tab" class="pb-6">
             <v-tabs-window-item value="setup">
-              <ContentProjectSetup 
-                @generate="generateContent" 
-                :initialData="contentOutput" 
-                :isEditable="isProjectSetupEditable"
-              />
+              <ContentProjectSetup v-if="isProjectSetupEditable" @generate="generateContent"
+                :initialData="contentOutput" />
+              <ContentProjectSetupReadOnly v-else :contentOutputId="contentOutputID" />
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="validations" value="validation">
-              <ContentValidation 
-                :contentOutputID="contentOutputID"
-                @confirm="handleConfirmation"
-                @regenerate="handleRegeneration"
-              />
+              <ContentValidation :contentOutputID="contentOutputID" @confirm="handleConfirmation"
+                @regenerate="handleRegeneration" />
             </v-tabs-window-item>
 
             <v-tabs-window-item v-if="hasFinalContent" value="final">
@@ -85,7 +80,7 @@ async function loadExistingContent() {
   }
 
   contentOutput.value = userStore.getContentOutputById(props.id);
-  
+
   contentOutputID.value = props.id;
   if (contentOutput.value) {
     if (contentOutput.value.status === 'pending validation') {
@@ -117,6 +112,7 @@ async function generateContent(config: any) {
       if (data.contentOutput.status === 'failed') {
         // TO DO: Handle error (e.g., show an error message to the user)
         console.log('Error generating content. Content Status is Failed');
+      }
     }
   } catch (error) {
     console.error('Error generating content:', error);

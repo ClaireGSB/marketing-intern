@@ -557,6 +557,36 @@ class apiClient {
     }
   }
 
+  // ##############################
+  // # Project Setups
+  // ##############################
+
+  async fetchProjectSetup(contentOutputID: string): Promise<FrontendTypes.UserInput> {
+    try {
+      console.log('Fetching project setup');
+      const { data, error } = await useFetch<{ body: FrontendTypes.UserInput }>('/api/content-output/' + contentOutputID + '/project_setup', {
+        method: 'GET'
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching project setup:', error);
+      throw new Error('Error fetching project setup');
+    }
+  }
 
 }
 

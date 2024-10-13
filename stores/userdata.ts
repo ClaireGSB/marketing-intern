@@ -15,6 +15,7 @@ type State = {
   contentOutputs: FrontendTypes.ContentOutput[];
   validationsItems: FrontendTypes.Validations[];
   blogMetadata: FrontendTypes.BlogMetadata[];
+  projectSetups: FrontendTypes.UserInput[];
 };
 
 export const useUserDataStore = defineStore('userData', {
@@ -27,7 +28,8 @@ export const useUserDataStore = defineStore('userData', {
     contentOutputs: [],
     blogMetadata: [],
     validationsItems: [],
-    userID: ''
+    userID: '',
+    projectSetups: [],
   }),
   actions: {
     async fetchUserData() {
@@ -41,6 +43,23 @@ export const useUserDataStore = defineStore('userData', {
     },
     getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
+    },
+    async fetchProjectSetupByContentOutput(contentOutputID: string) {
+      // If the project setup is not in the store, fetch it from the API
+      if (!this.getProjectSetupByContentOutputId(contentOutputID)) {
+        console.log('Project setup not in store, fetching from API for ID:', contentOutputID);
+        const projectSetup = await api.fetchProjectSetup(contentOutputID);
+        console.log('Project setup fetched from API:', projectSetup);
+        this.projectSetups.push(projectSetup);
+        return projectSetup;
+      } else {
+        console.log('Project setup already in store');
+        console.log('Project setup:', this.getProjectSetupByContentOutputId(contentOutputID));
+        return this.getProjectSetupByContentOutputId(contentOutputID);
+      }
+    },
+    getProjectSetup(ID: string) {
+      return this.projectSetups.find((projectSetup) => projectSetup.id === ID) ?? null;
     },
     async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
       // remove id from data (it was a temp local ID)
@@ -203,7 +222,14 @@ export const useUserDataStore = defineStore('userData', {
       return Object.fromEntries(
         this.users.map(user => [user.id, user.first_name])
       );
+    },
+    getProjectSetupByContentOutputId: (state) => (contentOutputId: string) => {
+      const contentOutput = state.contentOutputs.find(output => output.id === contentOutputId);
+      if (!contentOutput) return null;
+
+      return state.projectSetups.find(setup => setup.id === contentOutput.project_setup_id) || null;
     }
+    
   },
 });
 
