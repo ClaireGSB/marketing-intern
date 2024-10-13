@@ -13,12 +13,6 @@
             <p><strong>Content Subtype:</strong> {{ getContentSubTypeName(projectSetup.content_subtype_id) }}</p>
             <p><strong>Action:</strong> {{ projectSetup.action }}</p>
             <p v-if="projectSetup.topic"><strong>Topic:</strong> {{ projectSetup.topic }}</p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-text>
             <p v-if="projectSetup.target_audience"><strong>Target Audience:</strong> {{ projectSetup.target_audience }}</p>
             <p v-if="projectSetup.guidelines"><strong>Guidelines:</strong> {{ projectSetup.guidelines }}</p>
             <p v-if="projectSetup.context"><strong>Context:</strong> {{ projectSetup.context }}</p>
@@ -48,7 +42,10 @@ const projectSetup = computed(() =>
 );
 
 onMounted(async () => {
+  console.log('projectSetup', projectSetup.value);
+  console.log('Mounted, fetching project setup for content output ID:', props.contentOutputId);
   await userStore.fetchProjectSetupByContentOutput(props.contentOutputId);
+  console.log('projectSetup', projectSetup.value);
 });
 
 const getContentTypeDisplayName = (contentTypeId: number) => {
