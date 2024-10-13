@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
 
     // Ensure the data matches the UserInputFrontend interface
     const formattedSetups: UserInputFrontend = {
+      id: setup.id,
       content_subtype_id: setup.content_subtype_id,
       content_type_id: setup.content_type_id,
       action: setup.action || '',

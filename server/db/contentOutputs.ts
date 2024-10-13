@@ -118,6 +118,7 @@ export const contentOutputs = {
       content: row.content,
       created_at: row.created_at.toISOString(),
       status: row.status as ContentOutputFrontend['status'],
+      project_setup_id: row.project_setup_id,
     }));
   },
 

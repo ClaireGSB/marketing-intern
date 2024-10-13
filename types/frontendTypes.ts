@@ -37,6 +37,7 @@ export interface ContentOutput {
   content: string;
   created_at: string;
   status: 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed';
+  project_setup_id?: string;
 }
 
 export interface BlogMetadata {
@@ -57,6 +58,7 @@ export interface ContentGenerationUserInput {
 }
 
 export interface UserInput {
+  id?: string;
   content_type_id: number;
   content_subtype_id: string;
   action: string;

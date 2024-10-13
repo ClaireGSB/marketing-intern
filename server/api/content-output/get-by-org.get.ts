@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
       content: output.content,
       created_at: output.created_at,
       status: output.status as ContentOutputFrontend['status'], // Ensure this is one of the valid status values
+      project_setup_id: output.project_setup_id,
     }))
 
     return {

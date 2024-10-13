@@ -45,7 +45,7 @@ export const projectSetups = {
 
   async getProjectSetupByContentOutputID(contentOutputID: string): Promise<UserInput> {
     const query = `
-      SELECT ps.content
+      SELECT ps.content, ps.id
       FROM content_outputs co
       JOIN project_setups ps ON co.project_setup_id = ps.id
       WHERE co.id = $1
@@ -57,6 +57,14 @@ export const projectSetups = {
       throw new Error('Project setup not found for content output: ' + contentOutputID);
     }
 
-    return result.rows[0].content;
+    const content = result.rows[0].content;
+    content.id = result.rows[0].id;
+    console.log('Project setup found : ');
+    // iterate over the content object and log the keys and values
+    for (const [key, value] of Object.entries(content)) {
+      console.log(key + ' : ' + value);
+    }
+
+    return content;
   }
 };
