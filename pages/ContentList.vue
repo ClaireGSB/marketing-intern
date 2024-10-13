@@ -41,6 +41,7 @@ const { contentOutputs } = storeToRefs(userStore);
 
 const headers = [
   { title: 'Date Created', key: 'created_at', sortable: true },
+  { title: 'Created By', key: 'created_by', sortable: true },
   { title: 'Content Type', key: 'content_type', sortable: true },
   { title: 'Content Subtype', key: 'content_subtype', sortable: true },
   { title: 'Status', key: 'status', sortable: true },
@@ -49,10 +50,12 @@ const headers = [
 ];
 
 const contentOutputsFormatted = computed(() => {
+  const userFirstNames = userStore.userFirstNames;
   return contentOutputs.value.map(output => ({
     ...output,
     content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
     content_subtype: userStore.getContentSubTypeNameById(output.content_subtype_id || ''),
+    created_by: userFirstNames[output.created_by] || 'Unknown',
   }));
 });
 
@@ -61,7 +64,7 @@ const formatDate = (dateString: string) => {
 };
 
 const truncateContent = (content: string) => {
-  return content.length > 100 ? content.slice(0, 100) + '...' : content;
+  return content.length > 50 ? content.slice(0, 50) + '...' : content;
 };
 
 const createNewContent = () => {

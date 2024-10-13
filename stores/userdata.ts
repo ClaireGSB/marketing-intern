@@ -202,6 +202,11 @@ export const useUserDataStore = defineStore('userData', {
     }
   },
   getters: {
+    userFirstNames(): Record<string, string> {
+      return Object.fromEntries(
+        this.users.map(user => [user.id, user.first_name])
+      );
+    }
   },
 });
 

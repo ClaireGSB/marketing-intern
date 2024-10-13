@@ -1,32 +1,4 @@
-// shared/frontendTypes.ts
-
-import * as BackendTypes from './backendTypes';
-
-// type OmitHousekeeping<T> = Omit<T, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'created_by' | 'updated_by'>;
-
-// export type Users = OmitHousekeeping<BackendTypes.Users>;
-// export type Organizations = OmitHousekeeping<BackendTypes.Organizations>;
-// export type ContentType = OmitHousekeeping<BackendTypes.ContentType>;
-// export type ContentSubType = OmitHousekeeping<BackendTypes.ContentSubType>;
-// export type Example = OmitHousekeeping<BackendTypes.Example>;
-// export type ContentOutput = OmitHousekeeping<BackendTypes.ContentOutput>;
-// export type BlogMetadata = OmitHousekeeping<BackendTypes.BlogMetadata>;
-// export type ContentGenerationUserInput = OmitHousekeeping<BackendTypes.ContentGenerationUserInput>;
-// export type TokenUsage = OmitHousekeeping<BackendTypes.TokenUsage>;
-// export type StepOutput = OmitHousekeeping<BackendTypes.StepOutput>;
-// export type UserInput = OmitHousekeeping<BackendTypes.UserInput>;
-// export type SettingsInput = OmitHousekeeping<BackendTypes.SettingsInput>;
-
-// export interface AppData {
-//   content_types: ContentType[];
-//   content_sub_types: ContentSubType[];
-//   examples: Example[];
-//   content_outputs: ContentOutput[];
-//   blog_metadata: BlogMetadata[];
-//   content_generation_user_input: ContentGenerationUserInput[];
-//   token_usage: TokenUsage[];
-//   step_outputs: StepOutput[];
-// }
+// types/frontendTypes.ts
 
 export interface Users {
   id: string;
