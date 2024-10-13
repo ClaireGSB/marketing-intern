@@ -7,7 +7,8 @@ import { type ContentType, contentTypesFrontEnd } from '../types/contentTypes';
 import { actions, type ActionConfig } from '../types/actionTypes';
 
 type State = {
-  user: FrontendTypes.Users | null;
+  userID: string;
+  users: FrontendTypes.Users[];
   contentTypes: ContentType[];
   actions: Record<string, ActionConfig>;
   contentSubTypes: FrontendTypes.ContentSubType[]; // Replace any with specific type if known
@@ -15,12 +16,11 @@ type State = {
   contentOutputs: FrontendTypes.ContentOutput[];
   validationsItems: FrontendTypes.Validations[];
   blogMetadata: FrontendTypes.BlogMetadata[];
-  userID: number;
 };
 
 export const useUserDataStore = defineStore('userData', {
   state: (): State => ({
-    user: null,
+    users: [],
     contentTypes: contentTypesFrontEnd,
     actions: actions,
     contentSubTypes: [],
@@ -28,18 +28,19 @@ export const useUserDataStore = defineStore('userData', {
     contentOutputs: [],
     blogMetadata: [],
     validationsItems: [],
-    userID: 1
+    userID: ''
   }),
   actions: {
     async fetchUserData() {
       // Dummy data
-      this.user = await apiClient.getUserBytId(1);
+      this.userID = await api.fetchUserID();
+      this.users = await api.fetchUsers();
       this.contentSubTypes = await api.fetchContentSubtypes();
       this.examples = await api.fetchExamples();
       this.contentOutputs = await api.fetchContentOutputs();
       // to do: fetch validations & blogMetadata
-      this.validationsItems = [];
-      this.blogMetadata = [];
+      this.validationsItems = await api.fetchValidations();
+      this.blogMetadata = await api.fetchBlogMetadatas();
     },
     getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
@@ -158,7 +159,7 @@ export const useUserDataStore = defineStore('userData', {
       let generatedResponse: FrontendTypes.GeneratedContentResponse;
       if (newContentOutput.status === 'pending validation') {
         console.log('getting validation items');
-        const validations = await api.fetchValidationsByContentOutput(newContentOutput.id);
+        const validations = await api.getValidationsByContentOutput(newContentOutput.id);
         validations.forEach((validationItem) => {
           this.validationsItems.push(validationItem);
         });

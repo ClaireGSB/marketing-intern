@@ -30,11 +30,12 @@ import * as BackendTypes from './backendTypes';
 
 export interface Users {
   id: string;
-  org_id: string;
+  // org_id: string;
   first_name: string;
   last_name: string;
   email: string;
   is_admin: boolean;
+  is_org_admin: boolean;
 }
 
 export interface ContentSubType {
@@ -69,7 +70,7 @@ export interface ContentOutput {
 export interface BlogMetadata {
   id: string;
   content_output_id: string;
-  title_options: string[];
+  title_options?: string[];
   title?: string;
   meta_description: string;
   formatted_post?: string;

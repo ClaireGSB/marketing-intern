@@ -132,10 +132,35 @@ class apiClient {
   // # Validations
   // ##############################
 
-  // TO DO: add fetchALLValidations
-  
-  
-  async fetchValidationsByContentOutput(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
+  async fetchValidations(): Promise<FrontendTypes.Validations[]> {
+    try {
+      console.log('Fetching validations');
+      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/validation/get-by-org', {
+        method: 'GET'
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching validations:', error);
+      throw new Error('Error fetching validations');
+    }
+  }
+
+
+  async getValidationsByContentOutput(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
     try {
       console.log('Fetching validations');
       const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/content-output/' + contentOutputID + '/validations');
@@ -168,7 +193,7 @@ class apiClient {
   async updateValidation(id: string, updates: Partial<FrontendTypes.Validations>): Promise<FrontendTypes.Validations> {
     try {
       console.log('Updating validation');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Validations }>('/api/validation/'+id+'/update', {
+      const { data, error } = await useFetch<{ body: FrontendTypes.Validations }>('/api/validation/' + id + '/update', {
         method: 'POST',
         body: { ...updates }
       });
@@ -442,6 +467,97 @@ class apiClient {
       throw new Error('Error deleting example');
     }
   }
+
+  // ##############################
+  // # Blog Metadata
+  // ##############################
+
+  async fetchBlogMetadatas(): Promise<FrontendTypes.BlogMetadata[]> {
+    try {
+      console.log('Fetching blog metadatas');
+      const { data, error } = await useFetch<{ body: FrontendTypes.BlogMetadata[] }>('/api/blog-metadata/get-by-org', {
+        method: 'GET'
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching blog metadatas:', error);
+      throw new Error('Error fetching blog metadatas');
+    }
+  }
+
+  // ##############################
+  // # Users
+  // ##############################
+
+  async fetchUsers(): Promise<FrontendTypes.Users[]> {
+    try {
+      console.log('Fetching users');
+      const { data, error } = await useFetch<{ body: FrontendTypes.Users[] }>('/api/user/get-by-org', {
+        method: 'GET'
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching users:', error);
+      throw new Error('Error fetching users');
+    }
+  }
+
+  async fetchUserID(): Promise<string> {
+    try {
+      console.log('Fetching userID');
+      const { data, error } = await useFetch<{ body: string }>('/api/user/get-id', {
+        method: 'GET'
+      });
+
+      if (error.value) {
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching userID:', error);
+      throw new Error('Error fetching userID');
+    }
+  }
+
+
 }
 
 export const api = new apiClient();

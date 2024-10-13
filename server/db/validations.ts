@@ -67,6 +67,16 @@ export const validations = {
     };
   },
 
+  async getValidationsByOrgID(orgId: string): Promise<Validations[]> {
+    const query = `
+      SELECT *
+      FROM validations
+      WHERE org_id = $1
+    `;
+    const result = await dbclient.query(query, [orgId]);
+    return result.rows;
+  },
+
   async getValidationsByContentOutputID(contentOutputId: string): Promise<Validations[]> {
     const query = `
       SELECT *
