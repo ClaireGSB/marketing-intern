@@ -1,6 +1,6 @@
 // src/dataProcessors/exampleProcessor.ts
 
-import { Example } from '@shared/backendTypes';
+import type { Example } from '../../../types/backendTypes';
 
 export function processExamples(examples: Example[]): string {
   return examples.map(example => {

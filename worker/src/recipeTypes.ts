@@ -11,6 +11,7 @@ export interface SubtypeSettings {
   // contentType: ContentType | undefined;
   contentSubType: ContentSubType;
   context: string | null;
+  target_audience: string | null;
   // processedContext: string;
   guidelines: string | null;
   // processedGuidelines: string;
