@@ -52,6 +52,16 @@ export const blogMetadatas = {
     return result.rows[0];
   },
 
+  async getBlogMetadataByOrgId(Org: string): Promise<BlogMetadata[]> {
+    const query = `
+      SELECT *
+      FROM blog_metadata
+      WHERE org_id = $1
+    `;
+    const result = await dbclient.query(query, [Org]);
+    return result.rows;
+  },
+
   async getBlogMetadataByID(id: string): Promise<BlogMetadata | null> {
     const query = `
       SELECT *

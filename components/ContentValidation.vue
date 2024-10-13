@@ -22,12 +22,15 @@
                 </v-card-title>
                 <v-card-text>{{ content }}</v-card-text>
                 <v-card-actions>
-                  <v-btn @click="toggleSelection(itemIndex, versionNum)"
+                  <v-btn v-if="isEditable" @click="toggleSelection(itemIndex, versionNum)"
                     :color="item.selected_option === versionNum ? 'primary' : ''">
                     {{ item.selected_option === versionNum ? 'Unselect version' : 'Select this version' }}
                   </v-btn>
+                  <v-chip v-else-if="item.selected_option === versionNum" color="primary" label>
+                    Selected version
+                  </v-chip>
                   <v-btn @click="toggleFeedback(itemIndex, versionNum)">
-                    {{ showFeedback[itemIndex]?.[versionNum] ? 'Hide feedback' : 'Give feedback' }}
+                    {{ showFeedback[itemIndex]?.[versionNum] ? 'Hide feedback' : (isEditable ? 'Add feedback' : 'Show Feedback') }}
                   </v-btn>
                 </v-card-actions>
                 <v-expand-transition>
@@ -35,7 +38,7 @@
                     <v-divider></v-divider>
                     <v-card-text>
                       <v-textarea v-model="validations[itemIndex].feedback[versionNum]" label="Your feedback" rows="3"
-                        auto-grow></v-textarea>
+                        auto-grow :disabled="!isEditable"></v-textarea>
                     </v-card-text>
                   </div>
                 </v-expand-transition>
@@ -46,7 +49,7 @@
       </v-expansion-panel>
     </v-expansion-panels>
 
-    <v-row class="mt-4">
+    <v-row v-if="isEditable" class="mt-4">
       <v-col cols="12" class="d-flex justify-space-between">
         <v-tooltip bottom>
           <template v-slot:activator="{ props }">
@@ -81,20 +84,28 @@ import { Validations } from '../types/frontendTypes';
 export default {
   emits: ['confirm', 'regenerate'],
   props: {
-    validations: {
-      type: Array as () => Validations[],
+    contentOutputID: {
+      type: String,
       required: true,
     },
   },
   setup(props, { emit }) {
+    const userStore = useUserDataStore();
+    const validations = ref<Validations[]>([]);
     const openPanels = ref<number[]>([0]);
     const showFeedback = ref<Record<number, Record<string, boolean>>>({});
 
-    watch(() => props.validations.length, (newLength) => {
-      if (openPanels.value.length === 0 && newLength > 0) {
-        openPanels.value = [0];
-      }
-    }, { immediate: true });
+    const isEditable = computed(() => {
+      const contentOutput = userStore.getContentOutputById(props.contentOutputID);
+      return !contentOutput || contentOutput.status !== 'completed';
+    });
+
+    const loadValidations = async () => {
+      validations.value = await userStore.fetchValidations(props.contentOutputID);
+    };
+
+    onMounted(loadValidations);
+    watch(() => props.contentOutputID, loadValidations);
 
     const toggleFeedback = (itemIndex: number, versionNum: string) => {
       if (!showFeedback.value[itemIndex]) {
@@ -104,29 +115,29 @@ export default {
     };
 
     const toggleSelection = (itemIndex: number, optionKey: string) => {
-      if (props.validations[itemIndex].selected_option === optionKey) {
-        props.validations[itemIndex].selected_option = "";
+      if (validations.value[itemIndex].selected_option === optionKey) {
+        validations.value[itemIndex].selected_option = "";
       } else {
-        props.validations[itemIndex].selected_option = optionKey;
-        props.validations[itemIndex].validation_status = 'completed';
+        validations.value[itemIndex].selected_option = optionKey;
+        validations.value[itemIndex].validation_status = 'completed';
       }
     };
 
-    const isItemSelected = (itemIndex: number) => props.validations[itemIndex].selected_option !== "";
+    const isItemSelected = (itemIndex: number) => validations.value[itemIndex].selected_option !== "";
 
     const isItemFullyReviewed = (itemIndex: number) => {
-      return Object.values(props.validations[itemIndex].feedback).some(feedback => feedback.trim() !== '');
+      return Object.values(validations.value[itemIndex].feedback).some(feedback => feedback.trim() !== '');
     };
 
-    const canConfirmSelection = computed(() => props.validations.every(v => v.selected_option !== ""));
+    const canConfirmSelection = computed(() => validations.value.every(v => v.selected_option !== ""));
 
     const canRegenerate = computed(() => {
-      return props.validations.some(v => v.selected_option === "") &&
-        props.validations.some(v => Object.values(v.feedback).some(f => f.trim() !== ''));
+      return validations.value.some(v => v.selected_option === "") &&
+        validations.value.some(v => Object.values(v.feedback).some(f => f.trim() !== ''));
     });
 
     const regenerateButtonText = computed(() => {
-      const itemsToRegenerate = props.validations
+      const itemsToRegenerate = validations.value
         .filter(v => v.selected_option === "")
         .map(item => item.step_output_type);
       return itemsToRegenerate.join(', ');
@@ -149,16 +160,14 @@ export default {
     const confirmSelection = () => {
       if (canConfirmSelection.value) {
         console.log("confirm");
-        console.log(props.validations);
-        emit('confirm', props.validations);
+        emit('confirm', validations.value);
       }
     };
 
     const regenerate = () => {
       if (canRegenerate.value) {
         console.log("regenerate");
-        console.log(props.validations);
-        const itemsToRegenerate = props.validations
+        const itemsToRegenerate = validations.value
           .filter(v => v.selected_option === "");
         emit('regenerate', itemsToRegenerate);
       }
@@ -178,6 +187,8 @@ export default {
     };
 
     return {
+      validations,
+      isEditable,
       openPanels,
       showFeedback,
       toggleFeedback,

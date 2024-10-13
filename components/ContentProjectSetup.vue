@@ -97,6 +97,16 @@ import type { ContentType } from '../types/contentTypes';
 import { type FieldConfig, inputFields, generalOptionalFields } from '../types/inputFieldTypes';
 
 export default {
+  props: {
+    isEditable: {
+      type: Boolean,
+      default: false,
+    },
+    initialData: {
+      type: Object as () => Record<string, string>,
+      default: () => ({}),
+    },
+  },
   emits: ['generate'],
   setup(props, { emit }) {
     const userStore = useUserDataStore();

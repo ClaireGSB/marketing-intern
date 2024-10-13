@@ -8,20 +8,14 @@
         <v-container fluid class="flex-grow-1 overflow-y-auto pb-16">
 
           <v-tabs v-model="tab" grow color="primary" class="mb-10">
-            <v-tab value="test" text="Test"></v-tab>
             <v-tab value="setup" text="Project setup"></v-tab>
             <v-tab value="validation" :disabled="!hasValidations" text="Validation"></v-tab>
             <v-tab value="final" :disabled="!hasFinalContent" text="Final Content"></v-tab>
           </v-tabs>
 
           <v-tabs-window v-model="tab" class="pb-6">
-            <v-tabs-window-item value="test">
-              <p> blabla </p>
-              <initializeContent />
-            </v-tabs-window-item>
             
             <v-tabs-window-item value="setup">
-              <p> blabla </p>
               <ContentProjectSetup @generate="generateContent" />
             </v-tabs-window-item>
 

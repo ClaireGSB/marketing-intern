@@ -11,13 +11,30 @@
 
 <script lang="ts">
 import { FinalContentItem } from '../types/frontendTypes';
+import { ref, onMounted, watch } from 'vue';
+import { useUserDataStore } from '~/stores/userdata';
 
 export default {
   props: {
-    content: {
-      type: Array as () => FinalContentItem[],
+    contentOutputID: {
+      type: String,
       required: true,
     },
+  },
+  setup(props) {
+    const userStore = useUserDataStore();
+    const content = ref<FinalContentItem[]>([]);
+
+    const loadContent = () => {
+      content.value = userStore.getFinalContentForContentOutput(props.contentOutputID);
+    };
+
+    onMounted(loadContent);
+    watch(() => props.contentOutputID, loadContent);
+
+    return {
+      content,
+    };
   },
 };
 </script>

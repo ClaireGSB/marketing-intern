@@ -11,6 +11,7 @@ export interface Users {
   updated_at: string;
   deleted_at: string | null;
   is_admin: boolean;
+  is_org_admin: boolean;
 }
 
 export interface Organizations {
