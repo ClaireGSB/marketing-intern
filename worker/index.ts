@@ -59,7 +59,7 @@ export async function executeRecipe(jobData: any) {
 
   // get recipe by name
   const recipe = await loadRecipeByName(jobData.recipe_name);
-  console.log('Index got recipe');
+  console.log('Index got recipe');  
 
   // Execute the selected recipe
   await executor.executeRecipe(

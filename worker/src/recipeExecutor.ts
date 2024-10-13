@@ -302,7 +302,10 @@ export class recipeExecutor {
     } catch (error) {
       console.error(`Recipe execution failed:`, error);
       // Perform any necessary cleanup here
-      // Re-throw the error to be handled by the caller
+      // update database with error status
+      if (contentOutputId) {
+        await dataAccess.updateContentOutput(contentOutputId, undefined, "failed");
+      }
       throw error;
     }
 

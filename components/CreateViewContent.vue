@@ -112,9 +112,11 @@ async function generateContent(config: any) {
       tab.value = 'validation';
     } else {
       if (data.contentOutput.status === 'completed') {
-        // finalContent.value = userStore.getFinalContentForContentOutput(data.contentOutput.id);
         tab.value = 'final';
       }
+      if (data.contentOutput.status === 'failed') {
+        // TO DO: Handle error (e.g., show an error message to the user)
+        console.log('Error generating content. Content Status is Failed');
     }
   } catch (error) {
     console.error('Error generating content:', error);

@@ -95,7 +95,7 @@ class apiClient {
   isContentOutputReady(contentOutput: FrontendTypes.ContentOutput): boolean {
     console.log('Checking if content output is ready');
     console.log('Content output status:', contentOutput.status);
-    const ready = contentOutput.status === 'pending validation' || contentOutput.status === 'completed';
+    const ready = contentOutput.status === 'pending validation' || contentOutput.status === 'completed' || contentOutput.status === 'failed';
     console.log('Content output is ready:', ready);
     return ready;
   }

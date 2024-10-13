@@ -1,7 +1,8 @@
 // src/promptGenerators/socialMediaPromptGenerator.ts
 
-import { ProjectSettings, SubtypeSettings } from '../recipeTypes';
-import { ContentTypeName } from '@shared/contentTypes';
+import type { ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { ContentTypeName } from '../../../types/contentTypes';
+import { processBadExamples, processGoodExamples } from '../dataProcessors/exampleProcessor';
 
 // System prompt snippets
 const expertiseSnippet = (projectSettings: ProjectSettings): string =>
@@ -32,13 +33,25 @@ const actionInstructionSnippet = (projectSettings: ProjectSettings, platform: st
   return instruction + '.';
 };
 
+// Process examples
+let goodExamples = ''
+let badExamples = ''
+
+function processExamples(subtypeSettings: SubtypeSettings) {
+  if (subtypeSettings.examples) {
+    goodExamples = processGoodExamples(subtypeSettings.examples);
+    badExamples = processBadExamples(subtypeSettings.examples);
+  }
+};
+
 // Preliminary instructions
 const additionalInstructionsSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
   const elements = [];
   if (projectSettings.ideas) elements.push('ideas: make sure to include and develop them');
   if (subtypeSettings.guidelines || projectSettings.guidelines) elements.push('guidelines: make sure to follow them');
-  if (subtypeSettings.goodExamples || projectSettings.goodExamples) elements.push('good examples: make sure to be consistent with them');
-  if (subtypeSettings.badExamples || projectSettings.badExamples) elements.push('bad examples: identify what makes them bad and avoid this in your answer');
+  if (subtypeSettings.context || projectSettings.context) elements.push('context: make sure to take it into account');
+  if (goodExamples) elements.push('good examples: make sure to be consistent with them');
+  if (badExamples) elements.push('bad examples: identify what makes them bad and avoid this in your answer');
 
   if (elements.length === 0) return '';
 
@@ -58,23 +71,43 @@ const contentSnippet = (projectSettings: ProjectSettings): string =>
 const productDescriptionSnippet = (projectSettings: ProjectSettings): string =>
   projectSettings.productDescription ? `<product_description>${projectSettings.productDescription}</product_description>` : '';
 
-const targetAudienceSnippet = (projectSettings: ProjectSettings): string =>
-  `<target_audience>${projectSettings.targetAudience}</target_audience>`;
+const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
+  // the project settings target audience overrides the subtype settings target audience
+  if (projectSettings.target_audience) {
+    return `<target_audience>${projectSettings.target_audience}</target_audience>`;
+  } else if (subtypeSettings.target_audience) {
+    return `<target_audience>${subtypeSettings.target_audience}</target_audience>`;
+  } else {
+    return '';
+  }
+}
 
 const characterLimitSnippet = (projectSettings: ProjectSettings, contentType: ContentTypeName): string =>
   contentType === 'twitter_post' && typeof projectSettings.characterLimit === 'number'
     ? `<character_limit>${projectSettings.characterLimit}</character_limit>`
     : '';
 
-const processedGuidelinesSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string =>
-  subtypeSettings.guidelines || projectSettings.guidelines ? `<guidelines>
-  ${subtypeSettings.guidelines ? `${subtypeSettings.guidelines}\n` : ""}
-  ${projectSettings.guidelines ? `${projectSettings.guidelines}\n` : ""}
-  </guidelines>` : '';
+const processedGuidelinesSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
+  const guidelinesInstructions = (subtypeSettings.guidelines && projectSettings.guidelines) ? 'Here are generic guidelines and guidelines specific to this task. Follow both sets of guidelines, but in case of conflict, the task-specific guidelines take precedence. ' : '';
+  const generalGuidelines = subtypeSettings.guidelines ? (projectSettings.guidelines? `<general_guidelines>${subtypeSettings.guidelines}</general_guidelines>`: `${subtypeSettings.guidelines}` ): "";
+  const specificGuidelines = projectSettings.guidelines ? (subtypeSettings.guidelines? `<task_specific_guidelines>${projectSettings.guidelines}</task_specific_guidelines>`: `${projectSettings.guidelines}` ): "";
 
-const examplesSnippet = (subtypeSettings: SubtypeSettings): string => {
-  if (!subtypeSettings.goodExamples && !subtypeSettings.badExamples) return '';
-  const examples = `<examples>${subtypeSettings.goodExamples}\n${subtypeSettings.badExamples}</examples>`
+  if (generalGuidelines || specificGuidelines) {
+    return `<guidelines>${guidelinesInstructions}${generalGuidelines}${specificGuidelines}</guidelines>`;
+  } else {
+    return '';
+  }
+};
+
+const processedContextSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string =>
+  subtypeSettings.context || projectSettings.context ? `<context>
+  ${subtypeSettings.context ? `${subtypeSettings.context}\n` : ""}
+  ${projectSettings.context ? `${projectSettings.context}\n` : ""}
+  </context>` : '';
+
+const examplesSnippet = (): string => {
+  if (!goodExamples && !badExamples) return '';
+  const examples = `<examples>${goodExamples}\n${badExamples}</examples>`
   return examples;
 };
 
@@ -88,6 +121,7 @@ export function generateSystemPrompt(projectSettings: ProjectSettings, contentTy
 }
 
 export function generateUserContentPrompt(projectSettings: ProjectSettings, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
+  processExamples(subtypeSettings);
   const platform = platformSnippet(contentType);
   const snippets = [
     actionInstructionSnippet(projectSettings, platform),
@@ -96,10 +130,11 @@ export function generateUserContentPrompt(projectSettings: ProjectSettings, subt
     ideasSnippet(projectSettings),
     contentSnippet(projectSettings),
     productDescriptionSnippet(projectSettings),
-    targetAudienceSnippet(projectSettings),
+    targetAudienceSnippet(subtypeSettings, projectSettings),
     characterLimitSnippet(projectSettings, contentType),
     processedGuidelinesSnippet(subtypeSettings, projectSettings),
-    examplesSnippet(subtypeSettings),
+    processedContextSnippet(subtypeSettings, projectSettings),
+    examplesSnippet(),
     `Reply with only the ${platform === 'LinkedIn' ? 'post' : 'tweet'}, no comment or intro.`
   ];
 
