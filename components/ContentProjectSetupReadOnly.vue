@@ -37,14 +37,12 @@ const props = defineProps<{
 
 const userStore = useUserDataStore();
 
-const projectSetup = computed(() => 
-  userStore.getProjectSetupByContentOutputId(props.contentOutputId)
-);
+const projectSetup = ref<UserInput | null>(null);
 
 onMounted(async () => {
   console.log('projectSetup', projectSetup.value);
   console.log('Mounted, fetching project setup for content output ID:', props.contentOutputId);
-  await userStore.fetchProjectSetupByContentOutput(props.contentOutputId);
+  projectSetup.value = await userStore.fetchProjectSetupByContentOutput(props.contentOutputId);
   console.log('projectSetup', projectSetup.value);
 });
 

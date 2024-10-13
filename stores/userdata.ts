@@ -51,9 +51,11 @@ export const useUserDataStore = defineStore('userData', {
         const projectSetup = await api.fetchProjectSetup(contentOutputID);
         console.log('Project setup fetched from API:', projectSetup);
         this.projectSetups.push(projectSetup);
+        return projectSetup;
       } else {
         console.log('Project setup already in store');
         console.log('Project setup:', this.getProjectSetupByContentOutputId(contentOutputID));
+        return this.getProjectSetupByContentOutputId(contentOutputID);
       }
     },
     getProjectSetup(ID: string) {
