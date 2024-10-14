@@ -148,6 +148,10 @@ export const useUserDataStore = defineStore('userData', {
         target_audience: target_audience,
       };
     },
+    getSelectedContentOutput(contentOutputId: string | undefined): FrontendTypes.ContentOutput | null {
+      if (!contentOutputId) return null;
+      return this.contentOutputs.find(output => output.id === contentOutputId) || null;
+    },
     fetchValidations(contentOutputID: string) {
       const validations = this.validationsItems.filter((validationItem) => validationItem.content_output_id === contentOutputID);
       console.log('userStore fetching validations:', validations);

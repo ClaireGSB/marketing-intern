@@ -35,6 +35,11 @@ export const contentOutputs = {
     };
 
     // 2. SAVE PROJECT SETUP AND SUBTYPE SETTINGS HISTORY
+    
+    // if selected_content_output_id is provided, clear the content field (no need to store it)
+    if (userInput.selected_content_output_id) {
+      userInput.content = '';
+    }
     const project_setup_id = await projectSetups.saveProjectSetup(userInput);
     const subtype_settings_history_id = await subtypeSettingsHistory.saveSubtypeSettingsHistory(subtypeSettings);
 

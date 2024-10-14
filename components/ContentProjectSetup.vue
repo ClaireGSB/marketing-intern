@@ -327,7 +327,6 @@ export default {
       clearSelectedContent,
       isContentSelectable,
       truncateContent,
-
     };
   },
 };
