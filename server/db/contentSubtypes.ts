@@ -59,7 +59,7 @@ export const contentSubtypes = {
   async getContentSubtypesByOrgId(orgId: string): Promise<ContentSubTypeFrontend[]> {
     const query = `
       SELECT * FROM content_subtypes
-      WHERE org_id = $1 OR org_id IS NULL
+      WHERE org_id = $1 AND deleted_at IS NULL
       ORDER BY content_type_id, name
     `;
     const result = await dbclient.query(query, [orgId]);
