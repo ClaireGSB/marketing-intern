@@ -16,6 +16,7 @@ type State = {
   validationsItems: FrontendTypes.Validations[];
   blogMetadata: FrontendTypes.BlogMetadata[];
   projectSetups: FrontendTypes.UserInput[];
+  subtypeSettingsHistory: FrontendTypes.SettingsInput[];
 };
 
 export const useUserDataStore = defineStore('userData', {
@@ -30,6 +31,7 @@ export const useUserDataStore = defineStore('userData', {
     validationsItems: [],
     userID: '',
     projectSetups: [],
+    subtypeSettingsHistory: [],
   }),
   actions: {
     async fetchUserData() {
@@ -58,18 +60,19 @@ export const useUserDataStore = defineStore('userData', {
         return this.getProjectSetupByContentOutputId(contentOutputID);
       }
     },
-    getProjectSetup(ID: string) {
-      return this.projectSetups.find((projectSetup) => projectSetup.id === ID) ?? null;
-    },
-    async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
-      // remove id from data (it was a temp local ID)
-      const { id, ...dataWithoutId } = data;
-      // add contentSubtypeID to data
-      dataWithoutId.content_subtype_id = contentSubtypeID;
-      const newExample = await api.createExample(dataWithoutId);
-      console.log(newExample);
-      this.examples.push(newExample);
-      return newExample;
+    async fetchSubtypeSettingsHistoryByContentOutput(contentSubtypeID: string) {
+      // If the subtype settings history is not in the store, fetch it from the API
+      if (!this.getSubtypeSettingsHistoryByContentOutputId(contentSubtypeID)) {
+        console.log('Subtype settings history not in store, fetching from API for ID:', contentSubtypeID);
+        const subtypeSettingsHistory = await api.fetchSubtypeSettingsHistory(contentSubtypeID);
+        console.log('Subtype settings history fetched from API:', subtypeSettingsHistory);
+        this.subtypeSettingsHistory.push(subtypeSettingsHistory);
+        return subtypeSettingsHistory;
+      } else {
+        console.log('Subtype settings history already in store');
+        console.log('Subtype settings history:', this.getSubtypeSettingsHistoryByContentOutputId(contentSubtypeID));
+        return this.getSubtypeSettingsHistoryByContentOutputId(contentSubtypeID);
+      }
     },
     async updateExample(exampleID: string, data: Partial<FrontendTypes.Example>) {
       // remove id from data (we have it separately anyway)
@@ -228,8 +231,13 @@ export const useUserDataStore = defineStore('userData', {
       if (!contentOutput) return null;
 
       return state.projectSetups.find(setup => setup.id === contentOutput.project_setup_id) || null;
+    },
+    getSubtypeSettingsHistoryByContentOutputId: (state) => (contentOutputId: string) => {
+      const contentOutput = state.contentOutputs.find(output => output.id === contentOutputId);
+      if (!contentOutput) return null;
+
+      return state.subtypeSettingsHistory.find(settings => settings.id === contentOutput.subtype_settings_history_id) || null;
     }
-    
   },
 });
 

@@ -1,28 +1,30 @@
 <template>
-  <v-container v-if="projectSetup">
-    <v-row>
-      <v-col cols="12">
-        <h2 class="text-h5 mb-4">Project Setup Details</h2>
-      </v-col>
-    </v-row>
-    <v-row>
+  <v-container>
+    <v-row v-if="projectSetup">
       <v-col cols="12" md="6">
         <v-card>
+          <v-card-title>Project Setup</v-card-title>
+          <v-card-subtitle>This are the details provided to generate this content.</v-card-subtitle>
           <v-card-text>
-            <p><strong>Content Type:</strong> {{ getContentTypeDisplayName(projectSetup.content_type_id) }}</p>
-            <p><strong>Content Subtype:</strong> {{ getContentSubTypeName(projectSetup.content_subtype_id) }}</p>
-            <p><strong>Action:</strong> {{ projectSetup.action }}</p>
-            <p v-if="projectSetup.topic"><strong>Topic:</strong> {{ projectSetup.topic }}</p>
-            <p v-if="projectSetup.target_audience"><strong>Target Audience:</strong> {{ projectSetup.target_audience }}</p>
-            <p v-if="projectSetup.guidelines"><strong>Guidelines:</strong> {{ projectSetup.guidelines }}</p>
-            <p v-if="projectSetup.context"><strong>Context:</strong> {{ projectSetup.context }}</p>
+            <p v-for="prop in ProjectSetupProperties" :key="prop.key">
+              <strong>{{ prop.label }}:</strong>
+              {{ prop.value }}
+            </p>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
-  <v-container v-else>
-    <v-alert type="warning">Project setup details not found.</v-alert>
+    <v-container v-else>
+      <v-alert type="warning">Project setup not found.</v-alert>
+    </v-container>
+    <v-row v-if="subtypeSettingsHistory">
+      <v-col cols="12">
+        <SubtypeSettingsHistory :subtypeSettingsHistory="subtypeSettingsHistory" />
+      </v-col>
+    </v-row>
+    <v-container v-else>
+      <v-alert type="warning">Settings history not found.</v-alert>
+    </v-container>
   </v-container>
 </template>
 
@@ -38,12 +40,16 @@ const props = defineProps<{
 const userStore = useUserDataStore();
 
 const projectSetup = ref<UserInput | null>(null);
+const subtypeSettingsHistory = ref<SettingsInput | null>(null);
 
 onMounted(async () => {
   console.log('projectSetup', projectSetup.value);
-  console.log('Mounted, fetching project setup for content output ID:', props.contentOutputId);
+  console.log('subtypeSettingsHistory', subtypeSettingsHistory.value);
+  console.log('Mounted, fetching project setup and subtype settings history for content output ID:', props.contentOutputId);
   projectSetup.value = await userStore.fetchProjectSetupByContentOutput(props.contentOutputId);
+  subtypeSettingsHistory.value = await userStore.fetchSubtypeSettingsHistoryByContentOutput(props.contentOutputId);
   console.log('projectSetup', projectSetup.value);
+  console.log('subtypeSettingsHistory', subtypeSettingsHistory.value);
 });
 
 const getContentTypeDisplayName = (contentTypeId: number) => {
@@ -53,4 +59,32 @@ const getContentTypeDisplayName = (contentTypeId: number) => {
 const getContentSubTypeName = (contentSubTypeId: string) => {
   return userStore.getContentSubTypeNameById(contentSubTypeId);
 };
+
+
+const ProjectSetupProperties = computed(() => {
+  if (!projectSetup.value) return [];
+
+  const properties = [
+    { key: 'content_type_id', label: 'Content Type', value: getContentTypeDisplayName(projectSetup.value.content_type_id) },
+    { key: 'content_subtype_id', label: 'Content Subtype', value: getContentSubTypeName(projectSetup.value.content_subtype_id) },
+    { key: 'action', label: 'Action', value: projectSetup.value.action },
+    { key: 'topic', label: 'Topic', value: projectSetup.value.topic },
+    { key: 'target_audience', label: 'Target Audience', value: projectSetup.value.target_audience },
+    { key: 'guidelines', label: 'Guidelines', value: projectSetup.value.guidelines },
+    { key: 'context', label: 'Context', value: projectSetup.value.context },
+  ];
+
+  return properties.filter(prop => {
+    return prop.value !== undefined &&
+      prop.value !== null &&
+      prop.value !== '' &&
+      (typeof prop.value !== 'string' || prop.value.trim() !== '');
+  });
+});
 </script>
+
+<style scoped>
+.v-card-text p {
+  margin-bottom: 8px;
+}
+</style>
