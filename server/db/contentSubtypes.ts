@@ -9,8 +9,8 @@ export const contentSubtypes = {
 
   async create(contentSubtype:ContentSubType): Promise<ContentSubTypeFrontend> {
     const query = `
-      INSERT INTO content_subtypes (id, org_id, content_type_id, name, context, guidelines, target_audience, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO content_subtypes (id, org_id, content_type_id, name, context, guidelines, target_audience, created_at, updated_at, created_by, updated_by)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING id, org_id, content_type_id, name, context, guidelines, target_audience
     `;
     const values = [
@@ -22,7 +22,9 @@ export const contentSubtypes = {
       contentSubtype.guidelines,
       contentSubtype.target_audience,
       contentSubtype.created_at,
-      contentSubtype.updated_at
+      contentSubtype.updated_at,
+      contentSubtype.created_by,
+      contentSubtype.updated_by
     ];
     const result = await dbclient.query(query, values);
     return result.rows[0];

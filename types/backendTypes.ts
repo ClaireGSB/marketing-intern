@@ -31,8 +31,9 @@ export interface ContentSubType {
   target_audience: string | null;
   created_at: string;
   deleted_at: string | null;
-  created_by: string | null;
+  created_by: string;
   updated_at: string;
+  updated_by: string;
 }
 
 export interface Example {
