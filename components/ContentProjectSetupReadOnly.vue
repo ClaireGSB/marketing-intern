@@ -18,15 +18,7 @@
             </p>
             <template v-if="selectedContentOutput">
               <p><strong>Content: </strong></p>
-              <div class="d-flex align-center">
-                <v-chip
-                  color="primary"
-                  class="mr-2 selected-content-chip"
-                  @click="navigateToContent"
-                >
-                  {{ truncateContent(selectedContentOutput.content) }}
-                </v-chip>
-              </div>
+              <SelectedContentTag :content-output-id="projectSetup.selected_content_output_id" />
             </template>
           </v-card-text>
         </v-card>
