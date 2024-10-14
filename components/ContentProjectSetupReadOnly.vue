@@ -48,7 +48,6 @@ const userStore = useUserDataStore();
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
 const showFullText = ref<{ [key: string]: boolean }>({});
-
 const maxCharDisplay = 500;
 
 
