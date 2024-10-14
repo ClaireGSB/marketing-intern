@@ -76,15 +76,15 @@
                 <v-icon left>mdi-plus</v-icon> Add Bad Example
               </v-btn>
             </div>
+            <div class="section mb-8 d-flex justify-end">
+            <v-btn color="error" variant="plain" @click="confirmDelete">
+              Delete Content Subtype
+            </v-btn>
+          </div>
           </template>
         </div>
         <!-- <v-progress-circular v-else indeterminate></v-progress-circular> -->
       </v-card-text>
-      <v-card-actions class="justify-end pa-4">
-        <v-btn color="error" @click="confirmDelete" v-if="!isNewSubtype">
-          Delete Content Subtype
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
   <ConfirmDialog ref="confirmDialog" title="Confirm Delete"
