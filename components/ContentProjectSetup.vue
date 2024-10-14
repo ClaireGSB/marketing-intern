@@ -36,12 +36,24 @@
       <v-col v-if="step >= 4" cols="12">
         <h3 class="mb-4">4. Action Inputs</h3>
         <template v-for="fieldKey in actionFields" :key="fieldKey">
+          <template v-if="fieldKey === 'content' && isContentSelectable">
+            <div class="d-flex align-center mb-4">
+              <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
+                Select Existing Content
+              </v-btn>
+              <v-chip v-if="selectedContent" color="primary" class="mr-2">
+                Selected: {{ truncateContent(selectedContent.content) }}
+              </v-chip>
+              <v-btn v-if="selectedContent" icon="mdi-close" size="small" @click="clearSelectedContent"></v-btn>
+            </div>
+          </template>
           <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
             :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
             :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
           <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
             :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar" auto-grow></v-textarea>
+            :counter="inputFields[fieldKey].validation?.maxChar" :disabled="fieldKey === 'content' && !!selectedContent"
+            auto-grow></v-textarea>
         </template>
       </v-col>
 
@@ -86,6 +98,7 @@
   </v-container>
   <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
     :content-subtype-id="selectedSubType.id" />
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected" />
 </template>
 
 <script lang="ts">
@@ -162,7 +175,7 @@ export default {
 
     // --------- Action Selection & Action-Related Required Fields ---------
     const selectedAction = ref<string>('');
-
+    
     const isActionAvailable = (action: string): boolean => {
       return action in actions.value && selectedContentType.value.available_actions.includes(action);
     };
@@ -181,6 +194,33 @@ export default {
         return action.requiredFields.includes(fieldKey);
       }
       return false;
+    };
+
+    const showContentSelectionModal = ref(false);
+    const selectedContent = ref(null);
+
+    const openContentSelectionModal = () => {
+      showContentSelectionModal.value = true;
+    };
+
+    const onContentSelected = (content) => {
+      selectedContent.value = content;
+      formFields.content = content.content;
+    };
+
+    const clearSelectedContent = () => {
+      selectedContent.value = null;
+      formFields.content = '';
+    };
+
+    const isContentSelectable = computed(() => {
+      return actionFields.value.includes('content') &&
+        selectedAction.value &&
+        actions.value[selectedAction.value].allowContentSelection;
+    });
+
+    const truncateContent = (content: string) => {
+      return content.length > 50 ? content.slice(0, 50) + '...' : content;
     };
 
 
@@ -248,6 +288,7 @@ export default {
           content_subtype_id: selectedSubType.value.id,
           action: selectedAction.value,
           ...formFields,
+          content_output_id: selectedContent.value?.id
         };
         console.log('requesting content generation with:', userInput)
         emit('generate', userInput);
@@ -278,6 +319,14 @@ export default {
       generalOptionalFields,
       inputFields,
       isFieldRequired,
+      showContentSelectionModal,
+      selectedContent,
+      openContentSelectionModal,
+      onContentSelected,
+      clearSelectedContent,
+      isContentSelectable,
+      truncateContent,
+
     };
   },
 };
