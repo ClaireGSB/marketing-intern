@@ -75,7 +75,7 @@ export const contentSubtypes = {
 
   async getContentSubtypeSettingsById(id: string): Promise<SettingsInputWithoutExamples> {
     const query = `
-      SELECT target_audience, context, guidelines FROM content_subtypes
+      SELECT target_audience, context, guidelines, name FROM content_subtypes
       WHERE id = $1
     `;
     const result = await dbclient.query(query, [id]);

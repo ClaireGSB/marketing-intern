@@ -66,7 +66,6 @@ const ProjectSetupProperties = computed(() => {
 
   const properties = [
     { key: 'content_type_id', label: 'Content Type', value: getContentTypeDisplayName(projectSetup.value.content_type_id) },
-    { key: 'content_subtype_id', label: 'Content Subtype', value: getContentSubTypeName(projectSetup.value.content_subtype_id) },
     { key: 'action', label: 'Action', value: projectSetup.value.action },
     { key: 'topic', label: 'Topic', value: projectSetup.value.topic },
     { key: 'target_audience', label: 'Target Audience', value: projectSetup.value.target_audience },

@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
       guidelines: settings.guidelines || '',
       context: settings.context || '',
       examples: settings.examples || '',
+      name: settings.name || '',
     }
 
 

@@ -161,6 +161,7 @@ export interface UserInput {
 }
 
 export interface SettingsInputWithoutExamples {
+  name: string;
   target_audience?: string;
   guidelines?: string;
   context?: string;
@@ -169,6 +170,7 @@ export interface SettingsInputWithoutExamples {
 
 export interface SettingsInput {
   id?: string;
+  name: string;
   target_audience?: string;
   guidelines?: string;
   context?: string;
