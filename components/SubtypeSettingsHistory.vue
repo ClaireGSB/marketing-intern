@@ -17,8 +17,26 @@
                   {{ index + 1 }}. {{ example.name }}
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
-                  <p v-if="example.content"><strong>Content:</strong> {{ example.content }}</p>
-                  <p v-if="example.explanation"><strong>Explanation:</strong> {{ example.explanation }}</p>
+                  <p v-if="example.content">
+                    <strong>Content:</strong>
+                    <span v-if="example.content.length <= maxCharDisplay">{{ example.content }}</span>
+                    <span v-else>
+                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0, maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-content`)">
+                        {{ showFullText[`good-${index}-content`] ? 'See less' : 'See more' }}
+                      </a>
+                    </span>
+                  </p>
+                  <p v-if="example.explanation">
+                    <strong>Explanation:</strong>
+                    <span v-if="example.explanation.length <= maxCharDisplay">{{ example.explanation }}</span>
+                    <span v-else>
+                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0, maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-explanation`)">
+                        {{ showFullText[`good-${index}-explanation`] ? 'See less' : 'See more' }}
+                      </a>
+                    </span>
+                  </p>
                 </v-expansion-panel-text>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -31,8 +49,26 @@
                   {{ index + 1 }}. {{ example.name }}
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
-                  <p v-if="example.content"><strong>Content:</strong> {{ example.content }}</p>
-                  <p v-if="example.explanation"><strong>Explanation:</strong> {{ example.explanation }}</p>
+                  <p v-if="example.content">
+                    <strong>Content:</strong>
+                    <span v-if="example.content.length <= maxCharDisplay">{{ example.content }}</span>
+                    <span v-else>
+                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0, maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-content`)">
+                        {{ showFullText[`good-${index}-content`] ? 'See less' : 'See more' }}
+                      </a>
+                    </span>
+                  </p>
+                  <p v-if="example.explanation">
+                    <strong>Explanation:</strong>
+                    <span v-if="example.explanation.length <= maxCharDisplay">{{ example.explanation }}</span>
+                    <span v-else>
+                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0, maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-explanation`)">
+                        {{ showFullText[`good-${index}-explanation`] ? 'See less' : 'See more' }}
+                      </a>
+                    </span>
+                  </p>
                 </v-expansion-panel-text>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -54,6 +90,8 @@ const props = defineProps({
     required: true,
   },
 });
+const maxCharDisplay = 500;
+const showFullText = ref<{ [key: string]: boolean }>({});
 
 const formatKey = (key: string) => {
   return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -90,6 +128,10 @@ const groupedExamples = computed(() => {
 
   return { good, bad };
 });
+
+const toggleShowMore = (key: string) => {
+  showFullText.value[key] = !showFullText.value[key];
+};
 </script>
 
 <style scoped>

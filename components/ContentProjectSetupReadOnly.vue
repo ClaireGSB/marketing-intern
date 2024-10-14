@@ -7,8 +7,14 @@
           <v-card-subtitle>This are the details provided to generate this content.</v-card-subtitle>
           <v-card-text>
             <p v-for="prop in ProjectSetupProperties" :key="prop.key">
-              <strong>{{ prop.label }}:</strong>
-              {{ prop.value }}
+              <strong>{{ prop.label }}: </strong>
+              <span v-if="prop.value.length <= maxCharDisplay">{{ prop.value }}</span>
+              <span v-else>
+                {{ showFullText[prop.key] ? prop.value : prop.value.slice(0, maxCharDisplay) + '...' }}
+                <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(prop.key)">
+                  {{ showFullText[prop.key] ? 'See less' : 'See more' }}
+                </a>
+              </span>
             </p>
           </v-card-text>
         </v-card>
@@ -41,6 +47,9 @@ const userStore = useUserDataStore();
 
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
+const showFullText = ref<{ [key: string]: boolean }>({});
+const maxCharDisplay = 500;
+
 
 onMounted(async () => {
   console.log('projectSetup', projectSetup.value);
@@ -83,6 +92,10 @@ const ProjectSetupProperties = computed(() => {
       (typeof prop.value !== 'string' || prop.value.trim() !== '');
   });
 });
+
+const toggleShowMore = (key: string) => {
+  showFullText.value[key] = !showFullText.value[key];
+};
 </script>
 
 <style scoped>
