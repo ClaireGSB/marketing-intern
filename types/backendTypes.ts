@@ -65,6 +65,7 @@ export interface ContentOutput {
   status: 'generating' | 'pending validation' | 'completed' | 'scheduled' | 'published' | 'failed';
   // is_current_version: boolean;
   project_setup_id?: string;
+  subtype_settings_history_id?: string;
 }
 
 export interface BlogMetadata {
@@ -166,6 +167,7 @@ export interface SettingsInputWithoutExamples {
 
 
 export interface SettingsInput {
+  id?: string;
   target_audience?: string;
   guidelines?: string;
   context?: string;

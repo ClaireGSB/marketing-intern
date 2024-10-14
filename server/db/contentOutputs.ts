@@ -10,6 +10,7 @@ import { Example} from '../../types/backendTypes';
 import { SettingsInputWithoutExamples, SettingsInput } from '../../types/backendTypes'
 import { getContentTypeNameByID } from '../../types/contentTypes';
 import { projectSetups } from './projectSetups';
+import { subtypeSettingsHistory } from './subtypeSettingsHistory';
 
 import dbclient from '../database';
 
@@ -17,12 +18,28 @@ export const contentOutputs = {
 
   async create(contentOutput: ContentOutput, userInput: UserInput): Promise<ContentOutput> {
     console.log('db file received a new initialization request')
-    const project_setup_id = await projectSetups.saveProjectSetup(userInput);
 
-    // insert new content output into db
+    // 1. COMPILE SUBTYPE SETTINGS
+    const subtypeId = contentOutput.content_subtype_id;
+    if (!subtypeId) {
+      throw new Error('Content subtype ID is required');
+    }
+
+    const subtypeSettingsExceptExamples: SettingsInputWithoutExamples = await contentSubtypes.getContentSubtypeSettingsById(subtypeId);
+    const subtypeExamples: Example[] = await examples.getByContentSubtypeId(subtypeId);
+    const subtypeSettings: SettingsInput = {
+      ...subtypeSettingsExceptExamples,
+      examples: subtypeExamples,
+    };
+
+    // 2. SAVE PROJECT SETUP AND SUBTYPE SETTINGS HISTORY
+    const project_setup_id = await projectSetups.saveProjectSetup(userInput);
+    const subtype_settings_history_id = await subtypeSettingsHistory.saveSubtypeSettingsHistory(subtypeSettings);
+
+    // 3. INSERT NEW CONTENT OUTPUT INTO DB
     const query = `
-    INSERT INTO content_outputs (id, org_id, created_by, content_type_id, content_subtype_id, content, status, created_at, updated_at, project_setup_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    INSERT INTO content_outputs (id, org_id, created_by, content_type_id, content_subtype_id, content, status, created_at, updated_at, project_setup_id, subtype_settings_history_id)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *
   `;
     const values = [
@@ -35,28 +52,32 @@ export const contentOutputs = {
       contentOutput.status,
       contentOutput.created_at,
       contentOutput.updated_at,
-      project_setup_id
+      project_setup_id,
+      subtype_settings_history_id
     ];
     const result = await dbclient.query(query, values);
     console.log('New content output initialized in db')
 
-    const subtypeId = contentOutput.content_subtype_id;
-    if (!subtypeId) {
-      throw new Error('Content subtype ID is required');
-    }
+    // const subtypeId = contentOutput.content_subtype_id;
+    // if (!subtypeId) {
+    //   throw new Error('Content subtype ID is required');
+    // }
 
+    // 4. GET RECIPE NAME
     const recipe_name = getContentTypeNameByID(contentOutput.content_type_id);
     if (!recipe_name) {
       throw new Error('Could not find recipe name for content type ID');
     }
 
-    const subtypeSettingsExceptExamples: SettingsInputWithoutExamples = await contentSubtypes.getContentSubtypeSettingsById(subtypeId);
-    const subtypeExamples: Example[] = await examples.getByContentSubtypeId(subtypeId);
-    const subtypeSettings: SettingsInput = {
-      ...subtypeSettingsExceptExamples,
-      examples: subtypeExamples,
-    };
+    // const subtypeSettingsExceptExamples: SettingsInputWithoutExamples = await contentSubtypes.getContentSubtypeSettingsById(subtypeId);
+    // const subtypeExamples: Example[] = await examples.getByContentSubtypeId(subtypeId);
+    // const subtypeSettings: SettingsInput = {
+    //   ...subtypeSettingsExceptExamples,
+    //   examples: subtypeExamples,
+    // };
 
+
+    // 5. ADD JOB TO QUEUE
     const jobData = {
       recipe_name: recipe_name,
       content_output_id: contentOutput.id,
@@ -84,7 +105,7 @@ export const contentOutputs = {
     }
 
 
-
+    // 6. RETURN INITIALIZED NEW CONTENT OUTPUT
     return result.rows[0];
   },
 
