@@ -71,6 +71,7 @@ export interface UserInput {
 
 export interface SettingsInput {
   id?: string;
+  name: string;
   target_audience?: string;
   guidelines?: string;
   context?: string;

@@ -19,6 +19,8 @@ export default defineEventHandler(async (event) => {
 
     // TO DO: replace this with auth check 
     const orgId = '7c9e6679-7425-40de-944b-e07fc1f90ae7'
+    const userId = '7c9e6679-7425-40de-954b-e07fc1f90ae7'
+    
 
     if (!orgId) {
       throw createError({
@@ -40,7 +42,8 @@ export default defineEventHandler(async (event) => {
       target_audience: body.target_audience || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      created_by: body.createdBy || null,
+      created_by: userId,
+      updated_by: userId,
       deleted_at: null,
     }
 

@@ -1,7 +1,7 @@
 <!-- SubtypeSettingsHistory.vue -->
 <template>
   <v-card v-if="subtypeSettingsHistory" class="mt-4">
-    <v-card-title>Subtype Settings History</v-card-title>
+    <v-card-title>Content Subtype: {{ subtypeName }}</v-card-title>
     <v-card-subtitle>When this content was created, these were your subtype settings</v-card-subtitle>
     <v-card-text>
       <div v-for="(value, key) in displayableSettings" :key="key">
@@ -63,11 +63,15 @@ const displayableSettings = computed(() => {
   if (!props.subtypeSettingsHistory) return {};
 
   return Object.entries(props.subtypeSettingsHistory).reduce((acc, [key, value]) => {
-    if (value !== null && value !== undefined && value !== '' && key !== 'id') {
+    if (value !== null && value !== undefined && value !== '' && key !== 'id' && key !== 'name') {
       acc[key] = value;
     }
     return acc;
   }, {} as Record<string, any>);
+});
+
+const subtypeName = computed(() => {
+  return props.subtypeSettingsHistory?.name || 'Name not found';
 });
 
 const groupedExamples = computed(() => {
