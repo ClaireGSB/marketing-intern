@@ -64,9 +64,12 @@ export interface UserInput {
   content_subtype_id: string;
   action: string;
   topic?: string;
+  ideas?: string;
   target_audience?: string;
   guidelines?: string;
   context?: string;
+  content?: string;
+  repurpose_instructions?: string;
 }
 
 export interface SettingsInput {
