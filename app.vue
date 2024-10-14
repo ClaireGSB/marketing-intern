@@ -11,18 +11,18 @@
 </template>
 
 <script lang="ts" setup>
-import { useUserDataStore } from './stores/userdata';
+  import { useUserDataStore } from './stores/userdata';
 
-const userStore = useUserDataStore();
-// use the store action to initialize the data
-onMounted(async () => {
-  await userStore.fetchUserData();
-  console.log(userStore.user);
-});
+  const userStore = useUserDataStore();
+  // use the store action to initialize the data
+  onMounted(async () => {
+    await userStore.fetchUserData();
+    console.log(userStore.user);
+  });
 </script>
 
 <style>
-.NuxtPage {
-  padding-top: 64px;
-}
+  .NuxtPage {
+    padding-top: 64px;
+  }
 </style>
