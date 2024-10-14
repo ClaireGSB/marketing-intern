@@ -124,10 +124,4 @@ onMounted(async () => {
   position: relative;
 }
 
-/* Add max-width to v-col for extra large screens */
-/* @media (min-width: 1000px) {
-  .v-container {
-    max-width: 1000px !important;
-  }
-} */
 </style>
