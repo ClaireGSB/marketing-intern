@@ -99,6 +99,10 @@ export const useUserDataStore = defineStore('userData', {
       console.log(newContentSubType);
       return newContentSubType;
     },
+    async deleteContentSubType(contentSubTypeID: string) {
+      await api.deleteContentSubtype(contentSubTypeID);
+      this.contentSubTypes = this.contentSubTypes.filter((contentSubType) => contentSubType.id !== contentSubTypeID);
+    },
     getExamplesByContentSubTypeID(contentSubTypeID: string): FrontendTypes.Example[] {
       return this.examples
         .filter((example) => example.content_subtype_id === contentSubTypeID)

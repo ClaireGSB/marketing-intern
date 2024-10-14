@@ -69,8 +69,16 @@
         </v-form>
         <!-- <v-progress-circular v-else indeterminate></v-progress-circular> -->
       </v-card-text>
+      <v-card-actions class="justify-end pa-4">
+        <v-btn color="error" @click="confirmDelete" v-if="!isNewSubtype">
+          Delete Content Subtype
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
+  <ConfirmDialog ref="confirmDialog" title="Confirm Delete"
+    message="Are you sure you want to delete this content subtype? This action cannot be undone."
+    confirmText="Delete Content Subtype" @confirm="deleteContentSubtype" />
 </template>
 
 
@@ -243,8 +251,28 @@ export default defineComponent({
 
     // --------- Update Other Fields ---------
 
-    const updateField = async (field: 'guidelines' | 'context' | 'target_audience'| 'name', value: string) => {
+    const updateField = async (field: 'guidelines' | 'context' | 'target_audience' | 'name', value: string) => {
       userStore.updateContentSubType(localContentSubtypeID.value, field, value);
+    };
+
+    // --------- Delete Subtype ---------
+
+    const confirmDialog = ref(null);
+
+    const confirmDelete = () => {
+      confirmDialog.value.open();
+    };
+
+    const deleteContentSubtype = async () => {
+      try {
+        console.log('Deleting content subtype:', localContentSubtypeID.value);
+        await userStore.deleteContentSubType(localContentSubtypeID.value);
+        emit('update:modelValue', false); // Close the dialog
+        emit('deleted'); // Emit an event to notify the parent component
+      } catch (error) {
+        console.error('Failed to delete content subtype:', error);
+        // You might want to show an error message to the user here
+      }
     };
 
     return {
@@ -268,6 +296,9 @@ export default defineComponent({
       panelTitle,
       localContentSubtypeID,
       localContentSubtypeName,
+      confirmDialog,
+      confirmDelete,
+      deleteContentSubtype,
     };
   },
 });
