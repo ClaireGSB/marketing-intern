@@ -74,19 +74,6 @@ export const useUserDataStore = defineStore('userData', {
         return this.getSubtypeSettingsHistoryByContentOutputId(contentSubtypeID);
       }
     },
-    // getProjectSetup(ID: string) {
-    //   return this.projectSetups.find((projectSetup) => projectSetup.id === ID) ?? null;
-    // },
-    // async addExample(data: FrontendTypes.Example, contentSubtypeID: string) {
-    //   // remove id from data (it was a temp local ID)
-    //   const { id, ...dataWithoutId } = data;
-    //   // add contentSubtypeID to data
-    //   dataWithoutId.content_subtype_id = contentSubtypeID;
-    //   const newExample = await api.createExample(dataWithoutId);
-    //   console.log(newExample);
-    //   this.examples.push(newExample);
-    //   return newExample;
-    // },
     async updateExample(exampleID: string, data: Partial<FrontendTypes.Example>) {
       // remove id from data (we have it separately anyway)
       const { id, ...dataWithoutId } = data;

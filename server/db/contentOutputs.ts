@@ -58,24 +58,11 @@ export const contentOutputs = {
     const result = await dbclient.query(query, values);
     console.log('New content output initialized in db')
 
-    // const subtypeId = contentOutput.content_subtype_id;
-    // if (!subtypeId) {
-    //   throw new Error('Content subtype ID is required');
-    // }
-
     // 4. GET RECIPE NAME
     const recipe_name = getContentTypeNameByID(contentOutput.content_type_id);
     if (!recipe_name) {
       throw new Error('Could not find recipe name for content type ID');
     }
-
-    // const subtypeSettingsExceptExamples: SettingsInputWithoutExamples = await contentSubtypes.getContentSubtypeSettingsById(subtypeId);
-    // const subtypeExamples: Example[] = await examples.getByContentSubtypeId(subtypeId);
-    // const subtypeSettings: SettingsInput = {
-    //   ...subtypeSettingsExceptExamples,
-    //   examples: subtypeExamples,
-    // };
-
 
     // 5. ADD JOB TO QUEUE
     const jobData = {
@@ -88,8 +75,6 @@ export const contentOutputs = {
       subtype_settings: subtypeSettings
     };
 
-    // TO DO: save user settings to db - need new table
-
     console.log('Job data:', jobData);
 
 
@@ -99,7 +84,6 @@ export const contentOutputs = {
         ...jobData,
       });
       console.log('Job added to queue:', job.id);
-      // This might log something like: "Job added to queue: 1"
     } catch (error) {
       console.error('Error adding job to queue:', error);
     }
