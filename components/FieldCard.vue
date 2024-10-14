@@ -94,7 +94,6 @@ export default defineComponent({
 
     const saveChanges = () => {
       if (isValid.value) {
-        console.log('Saving changes:', editedContent.value);
         localContent.value = editedContent.value;
         isEditing.value = false;
         emit('update:value', editedContent.value);

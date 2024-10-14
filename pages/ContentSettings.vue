@@ -5,9 +5,9 @@
         <h1 class="text-h4 px-4 py-10">Content Settings</h1>
         <v-container fluid class="flex-grow-1 overflow-y-auto">
           <template v-if="isDataFetched">
-            <TextFieldCard :value="generalSettings.companyDescription" fieldName="Company description"
+            <FieldCard :value="generalSettings.companyDescription" fieldName="Company description"
               @update:value="updateField('companyDescription', $event)" :maxChars="maxChars" />
-            <TextFieldCard :value="generalSettings.contentStrategy" fieldName="Content strategy info"
+            <FieldCard :value="generalSettings.contentStrategy" fieldName="Content strategy info"
               @update:value="updateField('contentStrategy', $event)" :maxChars="maxChars" />
           </template>
 
