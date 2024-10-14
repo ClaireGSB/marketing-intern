@@ -11,7 +11,7 @@
         </v-btn>
       </v-toolbar>
       <v-card-text class="flex-grow-1 overflow-y-auto px-0 ">
-        <v-form>
+        <div>
           <div class="section " v-if="isNewSubtype">
             <v-text-field v-model="name" label="Enter New Subtype name" :rules="[v => !!v || 'Name is required']"
               required class="mb-6">
@@ -25,16 +25,17 @@
               <div class="section-header">
                 <h2 class="section-title">General Settings</h2>
               </div>
-              <InputFieldCard :value="localContentSubtypeName" fieldName="Name"
+              <FieldCard :value="localContentSubtypeName" fieldName="Name" :isMultiline="false"
                 @update:value="updateField('name', $event)" />
-              <InputFieldCard :value="targetAudience" fieldName="Target Audience"
+              <FieldCard :value="targetAudience" fieldName="Target Audience" :isMultiline="false"
                 @update:value="updateField('target_audience', $event)" />
-              <TextFieldCard :value="guidelines" fieldName="Guidelines"
-                @update:value="updateField('guidelines', $event)" :maxChars="maxChars" />
-              <TextFieldCard :value="context" fieldName="Context" @update:value="updateField('context', $event)"
-                :maxChars="maxChars" />
+              <FieldCard :value="guidelines" fieldName="Guidelines" :maxChars="maxChars" :isMultiline="true"
+                @update:value="updateField('guidelines', $event)" />
+              <FieldCard :value="context" fieldName="Context" :maxChars="maxChars" :isMultiline="true"
+                @update:value="updateField('context', $event)" />
             </div>
             <v-divider></v-divider>
+
             <div class="section mb-8">
               <div class="section-header">
                 <h2 class="section-title">Examples of Good Content</h2>
@@ -65,15 +66,15 @@
                 <v-icon left>mdi-plus</v-icon> Add Bad Example
               </v-btn>
             </div>
+            <div class="section mb-8 d-flex justify-end">
+            <v-btn color="error" variant="plain" @click="confirmDelete">
+              Delete Content Subtype
+            </v-btn>
+          </div>
           </template>
-        </v-form>
+        </div>
         <!-- <v-progress-circular v-else indeterminate></v-progress-circular> -->
       </v-card-text>
-      <v-card-actions class="justify-end pa-4">
-        <v-btn color="error" @click="confirmDelete" v-if="!isNewSubtype">
-          Delete Content Subtype
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
   <ConfirmDialog ref="confirmDialog" title="Confirm Delete"
@@ -265,7 +266,6 @@ export default defineComponent({
 
     const deleteContentSubtype = async () => {
       try {
-        console.log('Deleting content subtype:', localContentSubtypeID.value);
         await userStore.deleteContentSubType(localContentSubtypeID.value);
         emit('update:modelValue', false); // Close the dialog
         emit('deleted'); // Emit an event to notify the parent component
@@ -321,7 +321,6 @@ export default defineComponent({
 
 .section {
   padding: 24px;
-  /* background-color: #f5f5f5; */
   border-radius: 4px;
 }
 
@@ -341,18 +340,6 @@ export default defineComponent({
 .section-intro {
   margin-bottom: 16px;
 }
-
-/* .guidelines-context {
-  background-color: #e8f5e9;
-}
-
-.good-examples {
-  background-color: #e3f2fd;
-}
-
-.bad-examples {
-  background-color: #fff3e0;
-} */
 
 .v-btn {
   text-transform: none;
