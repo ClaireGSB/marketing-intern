@@ -8,7 +8,7 @@
         <v-alert v-if="selectedContent" type="info" class="mb-4">
           Selected: {{ selectedContent.content_type }} - {{ truncateContent(selectedContent.content) }}
         </v-alert>
-        <ContentTable :selectable="true" @select="onSelect" />
+        <ContentTable :selectable="true" @select="onSelect" :allowed-statuses="allowedStatuses" />
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -27,14 +27,14 @@
 import { ref, computed, watch } from 'vue';
 
 export default {
-  // name: 'ContentSelectionModal',
-  // components: {
-  //   ContentTable
-  // },
   props: {
     modelValue: {
       type: Boolean,
       default: false
+    },
+    allowedStatuses: {
+      type: Array as () => string[],
+      default: () => ['completed']
     }
   },
   emits: ['update:modelValue', 'select'],

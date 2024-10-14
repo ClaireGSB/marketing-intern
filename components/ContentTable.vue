@@ -1,13 +1,8 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="contentOutputsFormatted"
-    :items-per-page="50"
-    class="elevation-1 custom-table"
-    :header-props="{
+  <v-data-table :headers="headers" :items="contentOutputsFormatted" :items-per-page="50"
+    class="elevation-1 custom-table" :header-props="{
       class: 'custom-header text-uppercase'
-    }"
-  >
+    }">
     <template v-slot:item.created_at="{ item }">
       {{ formatDate(item.created_at) }}
     </template>
@@ -18,14 +13,8 @@
     <template v-slot:item.actions="{ item }">
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            variant="plain"
-            v-bind="attrs"
-            v-on="on"
-            @click="handleItemAction(item)"
-            class="pa-0"
-          >
-            <v-icon color="primary">{{ actionIcon }}</v-icon>
+          <v-btn variant="plain" v-bind="attrs" v-on="on" @click="handleItemAction(item)" class="pa-0">
+            <v-icon color="primary">{{ getActionIcon(item) }}</v-icon>
           </v-btn>
         </template>
         <span>{{ actionTooltip }}</span>
@@ -40,17 +29,22 @@ import { useUserDataStore } from '~/stores/userdata';
 import { storeToRefs } from 'pinia';
 
 export default {
-  // name: 'ContentTable',
   props: {
     selectable: {
       type: Boolean,
       default: false
+    },
+    allowedStatuses: {
+      type: Array as () => string[],
+      // Empty array means all statuses are allowed
+      default: () => []
     }
   },
   emits: ['select', 'view'],
   setup(props, { emit }) {
     const userStore = useUserDataStore();
     const { contentOutputs } = storeToRefs(userStore);
+    const selectedItemId = ref(null);
 
     const headers = [
       { title: 'Date Created', key: 'created_at', sortable: true },
@@ -68,6 +62,7 @@ export default {
     const contentOutputsFormatted = computed(() => {
       const userFirstNames = userStore.userFirstNames;
       return contentOutputs.value
+        .filter(output => props.allowedStatuses.length === 0 || props.allowedStatuses.includes(output.status))
         .map(output => ({
           ...output,
           content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
@@ -92,13 +87,21 @@ export default {
 
     const handleItemAction = (item) => {
       if (props.selectable) {
-        emit('select', item);
+        selectedItemId.value = selectedItemId.value === item.id ? null : item.id;
+        emit('select', selectedItemId.value ? item : null);
       } else {
         emit('view', item.id);
       }
     };
 
-    const actionIcon = computed(() => props.selectable ? 'mdi-check-circle' : 'mdi-eye');
+    const getActionIcon = (item) => {
+      if (!props.selectable) return 'mdi-eye';
+      return selectedItemId.value === item.id
+        ? 'mdi-checkbox-marked-circle-outline'
+        : 'mdi-checkbox-blank-circle-outline';
+    };
+
+    // const actionIcon = computed(() => props.selectable ? 'mdi-checkbox-marked-circle-outline' : 'mdi-eye');
     const actionTooltip = computed(() => props.selectable ? 'Select Content' : 'View Content');
 
     return {
@@ -109,7 +112,8 @@ export default {
       formatDate,
       truncateContent,
       handleItemAction,
-      actionIcon,
+      getActionIcon,
+      // actionIcon,
       actionTooltip
     };
   }
