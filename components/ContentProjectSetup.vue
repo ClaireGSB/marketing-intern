@@ -278,11 +278,6 @@ export default {
       const { valid } = await form.value.validate();
 
       if (valid) {
-        console.log('Generating content with:', {
-          subType: selectedSubType.value.name,
-          action: selectedAction.value,
-          formFields,
-        });
         const userInput = {
           content_type_id: selectedContentType.value.id,
           content_subtype_id: selectedSubType.value.id,
@@ -291,7 +286,6 @@ export default {
           selected_content_output_id: selectedContent.value?.id
         };
         console.log('requesting content generation with:', userInput)
-        console.log('selectedContent', userInput.selected_content_output_id)
         emit('generate', userInput);
       }
     };

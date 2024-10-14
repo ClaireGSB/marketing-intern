@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row v-if="projectSetup">
-      <v-col cols="6" md="6">
+      <v-col cols="12" md="6">
         <v-card>
           <v-card-title>Project Setup</v-card-title>
           <v-card-subtitle>This are the details provided to generate this content.</v-card-subtitle>
@@ -58,7 +58,6 @@ const props = defineProps<{
 
 const userStore = useUserDataStore();
 const router = useRouter();
-
 
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
