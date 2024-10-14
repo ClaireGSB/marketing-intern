@@ -11,7 +11,7 @@
         </v-btn>
       </v-toolbar>
       <v-card-text class="flex-grow-1 overflow-y-auto px-0 ">
-        <v-form>
+        <div>
           <div class="section " v-if="isNewSubtype">
             <v-text-field v-model="name" label="Enter New Subtype name" :rules="[v => !!v || 'Name is required']"
               required class="mb-6">
@@ -25,20 +25,17 @@
               <div class="section-header">
                 <h2 class="section-title">General Settings</h2>
               </div>
-              <FieldCard
-  :modelValue="targetAudience"
-  fieldName="target_audience"
-  :maxChars="100"
-  :isMultiline="false"
-  @update:value="updateField('target_audience', $event)"
-/>
-<FieldCard
-  :modelValue="guidelines"
-  fieldName="guidelines"
-  :maxChars="500"
-  :isMultiline="true"
-  @update:value="updateField('target_audience', $event)"
-/>
+              <FieldCard :value="localContentSubtypeName" fieldName="Name" :isMultiline="false"
+                @update:value="updateField('name', $event)" />
+              <FieldCard :value="targetAudience" fieldName="Target Audience" :isMultiline="false"
+                @update:value="updateField('target_audience', $event)" />
+              <FieldCard :value="guidelines" fieldName="Guidelines" :maxChars="maxChars" :isMultiline="true"
+                @update:value="updateField('guidelines', $event)" />
+              <FieldCard :value="context" fieldName="Context" :maxChars="maxChars" :isMultiline="true"
+                @update:value="updateField('context', $event)" />
+
+
+              <!-- 
               <InputFieldCard :value="localContentSubtypeName" fieldName="Name"
                 @update:value="updateField('name', $event)" />
               <InputFieldCard :value="targetAudience" fieldName="Target Audience"
@@ -46,7 +43,7 @@
               <TextFieldCard :value="guidelines" fieldName="Guidelines"
                 @update:value="updateField('guidelines', $event)" :maxChars="maxChars" />
               <TextFieldCard :value="context" fieldName="Context" @update:value="updateField('context', $event)"
-                :maxChars="maxChars" />
+                :maxChars="maxChars" /> -->
             </div>
             <v-divider></v-divider>
             <div class="section mb-8">
@@ -80,7 +77,7 @@
               </v-btn>
             </div>
           </template>
-        </v-form>
+        </div>
         <!-- <v-progress-circular v-else indeterminate></v-progress-circular> -->
       </v-card-text>
       <v-card-actions class="justify-end pa-4">

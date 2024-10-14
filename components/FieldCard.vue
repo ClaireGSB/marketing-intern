@@ -1,7 +1,19 @@
 <template>
   <v-card outlined class="mb-4 field-card">
-    <v-toolbar dense class="toolbar-gradient">
-      <v-toolbar-title class="text-subtitle-1 text-capitalize">{{ fieldName }}</v-toolbar-title>
+    <v-toolbar density="compact" class="toolbar-gradient">
+      <v-toolbar-title class="text-subtitle-1 text-capitalize" v-if="!isEditing || isMultiline">
+        <span class="field-name">{{ fieldName }}:</span> <span v-if="!isMultiline" class="field-content">{{ contentForDisplay }}</span>
+      </v-toolbar-title>
+      <v-text-field
+        v-else-if="!isMultiline"
+        v-model="editedContent"
+        :label="fieldName"
+        dense
+        hide-details
+        class="mt-1"
+        @keyup.enter="saveChanges"
+        @keyup.esc="cancelEditing"
+      ></v-text-field>
       <v-spacer></v-spacer>
       <template v-if="!isEditing">
         <TooltipButton tooltipText="Edit" icon="mdi-pencil" :onClick="startEditing" />
@@ -11,30 +23,21 @@
         <TooltipButton tooltipText="Cancel" icon="mdi-close" :onClick="cancelEditing" />
       </template>
     </v-toolbar>
-    <v-card-text v-if="!isEditing" class="content-area">
+    <v-card-text v-if="!isEditing && isMultiline" class="content-area">
       <p style="white-space: pre-wrap;">{{ contentForDisplay }}</p>
     </v-card-text>
-    <v-form v-else @submit.prevent="saveChanges" class="content-area">
-      <v-text-field
-        v-if="!isMultiline"
-        v-model="editedContent"
-        :label="fieldName"
-        clearable
-        :counter="maxChars"
-        :rules="[v => (v && v.length <= maxChars) || `Max ${maxChars} characters`]"
-        dense
-      ></v-text-field>
+    <div v-if="isEditing && isMultiline" class="content-area">
       <v-textarea
-        v-else
         v-model="editedContent"
         :label="fieldName"
         :rows="3"
         auto-grow
+        max-rows="10"
         clearable
         :counter="maxChars"
         :rules="[v => (v && v.length <= maxChars) || `Max ${maxChars} characters`]"
       ></v-textarea>
-    </v-form>
+    </div>
   </v-card>
 </template>
 
@@ -48,7 +51,7 @@ export default defineComponent({
     TooltipButton,
   },
   props: {
-    modelValue: {
+    value: {
       type: String,
       default: '',
     },
@@ -65,13 +68,13 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ['update:modelValue'],
+  emits: ['update:value'],
   setup(props, { emit }) {
     const isEditing = ref(false);
-    const localContent = ref(props.modelValue || '');
+    const localContent = ref(props.value || '');
     const editedContent = ref(localContent.value);
 
-    watch(() => props.modelValue, (newValue) => {
+    watch(() => props.value, (newValue) => {
       localContent.value = newValue || '';
       if (!isEditing.value) {
         editedContent.value = localContent.value;
@@ -111,6 +114,7 @@ export default defineComponent({
       startEditing,
       saveChanges,
       cancelEditing,
+      // toolbarTitle,
     };
   },
 });
@@ -120,6 +124,14 @@ export default defineComponent({
 .field-card {
   background-color: #f5f5f5;
   border: 1px solid #e0e0e0;
+}
+
+.field-name {
+  font-weight: bold;
+}
+
+.field-content {
+  font-weight: normal;
 }
 
 .toolbar-gradient {

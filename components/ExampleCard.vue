@@ -1,6 +1,6 @@
 <template>
   <v-card outlined class="mb-4 example-card">
-    <v-toolbar class="toolbar-gradient">
+    <v-toolbar density="compact" class="toolbar-gradient">
       <v-tooltip :text="'This is a ' + example.example_type + ' example'" location="top start">
         <template v-slot:activator="{ props }">
       <v-icon class="ml-4" v-bind="props" size="small" :color="(example.example_type === 'good') ? 'teal-darken-1' :'red-darken-2'">mdi-thumb-up</v-icon>
