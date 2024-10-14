@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height pa-0">
     <v-row no-gutters class="fill-height justify-center">
-      <v-col cols="12" xl="8" class="d-flex flex-column relative-container pa-0">
+      <v-col cols="12" class="d-flex flex-column relative-container pa-0">
         <h1 class="text-h4 px-4 py-10">{{ pageTitle }}</h1>
         <v-container fluid class="flex-grow-1 overflow-y-auto pb-16">
           <v-tabs v-model="tab" grow color="primary" class="mb-10">

@@ -36,6 +36,13 @@ export const inputFields: Record<string, FieldConfig> = {
     use: 'action_specific',
     validation: { maxChar: 1000 }
   },
+  repurpose_instructions: {
+    key: 'repurpose_instructions',
+    label: 'Repurpose Instructions',
+    type: 'textarea',
+    use: 'action_specific',
+    validation: { maxChar: 500 }
+  },
   productDescription: {
     key: 'productDescription',
     label: 'Product Description',

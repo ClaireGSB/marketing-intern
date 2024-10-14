@@ -46,6 +46,9 @@ export default defineEventHandler(async (event) => {
       target_audience: setup.target_audience || '',
       guidelines: setup.guidelines || '',
       context: setup.context || '',
+      content: setup.content || '',
+      ideas: setup.ideas || '',
+      repurpose_instructions: setup.repurpose_instructions || '',
     }
 
 
