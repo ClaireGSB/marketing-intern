@@ -160,7 +160,12 @@ export interface UserInput {
   guidelines?: string;
   context?: string;
   content?: string;
+  selected_content_output_id?: string;
+  selected_content_type?: string;
+  selected_content_blog_metadata?: BlogMetadata;
   repurpose_instructions?: string;
+  expertise?: string;
+
 }
 
 export interface SettingsInputWithoutExamples {

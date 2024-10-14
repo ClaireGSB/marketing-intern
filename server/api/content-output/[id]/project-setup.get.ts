@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
       content: setup.content || '',
       ideas: setup.ideas || '',
       repurpose_instructions: setup.repurpose_instructions || '',
+      selected_content_output_id: setup.selected_content_output_id || '',
     }
 
 

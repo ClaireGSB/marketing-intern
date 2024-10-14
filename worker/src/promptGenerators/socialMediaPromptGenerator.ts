@@ -1,11 +1,13 @@
 // src/promptGenerators/socialMediaPromptGenerator.ts
 
-import type { ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { SubtypeSettings } from '../recipeTypes';
+import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
 import { processBadExamples, processGoodExamples } from '../dataProcessors/exampleProcessor';
+import { processContent } from '../dataProcessors/contentProcessor';
 
 // System prompt snippets
-const expertiseSnippet = (projectSettings: ProjectSettings): string =>
+const expertiseSnippet = (projectSettings: UserInput): string =>
   projectSettings.expertise ? ` with deep knowledge in ${projectSettings.expertise}` : '';
 
 const platformSnippet = (contentType: ContentTypeName): string =>
@@ -15,7 +17,7 @@ const contentTypeSnippet = (contentType: ContentTypeName): string =>
   contentType === 'linkedin_post' ? 'Linkedin Post' : 'Twitter Post';
 
 // User content prompt snippets
-const actionInstructionSnippet = (projectSettings: ProjectSettings, platform: string): string => {
+const actionInstructionSnippet = (projectSettings: UserInput, platform: string): string => {
   const actions = {
     write_topic: `Write a ${platform} post on the topic provided below`,
     promote_content: `Write a ${platform} post that promotes the content provided below`,
@@ -26,7 +28,7 @@ const actionInstructionSnippet = (projectSettings: ProjectSettings, platform: st
 
   let instruction = actions[projectSettings.action as keyof typeof actions] || actions.default;
 
-  if (projectSettings.targetAudience) {
+  if (projectSettings.target_audience) {
     instruction += `, optimized for the target audience`;
   }
 
@@ -45,7 +47,7 @@ function processExamples(subtypeSettings: SubtypeSettings) {
 };
 
 // Preliminary instructions
-const additionalInstructionsSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
+const additionalInstructionsSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string => {
   const elements = [];
   if (projectSettings.ideas) elements.push('ideas: make sure to include and develop them');
   if (subtypeSettings.guidelines || projectSettings.guidelines) elements.push('guidelines: make sure to follow them');
@@ -59,22 +61,24 @@ const additionalInstructionsSnippet = (subtypeSettings: SubtypeSettings, project
 ${elements.map(e => `- ${e}`).join('\n')}`;
 };
 
-const topicSnippet = (projectSettings: ProjectSettings): string =>
+const topicSnippet = (projectSettings: UserInput): string =>
   projectSettings.topic ? `<topic>${projectSettings.topic}</topic>` : '';
 
-const ideasSnippet = (projectSettings: ProjectSettings): string =>
+const ideasSnippet = (projectSettings: UserInput): string =>
   projectSettings.ideas ? `<ideas>${projectSettings.ideas}</ideas>\n` : '';
 
-const repurpose_instructionsSnippet = (projectSettings: ProjectSettings): string =>
+const repurpose_instructionsSnippet = (projectSettings: UserInput): string =>
   (projectSettings.repurpose_instructions && projectSettings.action === "repurpose_content")  ? `<repurpose_instructions>${projectSettings.repurpose_instructions}</repurpose_instructions>` : '';
 
-const contentSnippet = (projectSettings: ProjectSettings): string =>
-  projectSettings.content ? `<content>${projectSettings.content}</content>` : '';
 
-const productDescriptionSnippet = (projectSettings: ProjectSettings): string =>
-  projectSettings.productDescription ? `<product_description>${projectSettings.productDescription}</product_description>` : '';
 
-const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
+const contentSnippet = (projectSettings: UserInput): string =>
+  processContent(projectSettings);
+
+// const productDescriptionSnippet = (projectSettings: UserInput): string =>
+//   projectSettings.productDescription ? `<product_description>${projectSettings.productDescription}</product_description>` : '';
+
+const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string => {
   // the project settings target audience overrides the subtype settings target audience
   if (projectSettings.target_audience) {
     return `<target_audience>${projectSettings.target_audience}</target_audience>`;
@@ -85,12 +89,12 @@ const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings
   }
 }
 
-const characterLimitSnippet = (projectSettings: ProjectSettings, contentType: ContentTypeName): string =>
-  contentType === 'twitter_post' && typeof projectSettings.characterLimit === 'number'
-    ? `<character_limit>${projectSettings.characterLimit}</character_limit>`
-    : '';
+// const characterLimitSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string =>
+//   contentType === 'twitter_post' && typeof projectSettings.characterLimit === 'number'
+//     ? `<character_limit>${projectSettings.characterLimit}</character_limit>`
+//     : '';
 
-const processedGuidelinesSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string => {
+const processedGuidelinesSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string => {
   const guidelinesInstructions = (subtypeSettings.guidelines && projectSettings.guidelines) ? 'Here are generic guidelines and guidelines specific to this task. Follow both sets of guidelines, but in case of conflict, the task-specific guidelines take precedence. ' : '';
   const generalGuidelines = subtypeSettings.guidelines ? (projectSettings.guidelines? `<general_guidelines>${subtypeSettings.guidelines}</general_guidelines>`: `${subtypeSettings.guidelines}` ): "";
   const specificGuidelines = projectSettings.guidelines ? (subtypeSettings.guidelines? `<task_specific_guidelines>${projectSettings.guidelines}</task_specific_guidelines>`: `${projectSettings.guidelines}` ): "";
@@ -102,7 +106,7 @@ const processedGuidelinesSnippet = (subtypeSettings: SubtypeSettings, projectSet
   }
 };
 
-const processedContextSnippet = (subtypeSettings: SubtypeSettings, projectSettings: ProjectSettings): string =>
+const processedContextSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string =>
   subtypeSettings.context || projectSettings.context ? `<context>
   ${subtypeSettings.context ? `${subtypeSettings.context}\n` : ""}
   ${projectSettings.context ? `${projectSettings.context}\n` : ""}
@@ -114,7 +118,7 @@ const examplesSnippet = (): string => {
   return examples;
 };
 
-export function generateSystemPrompt(projectSettings: ProjectSettings, contentType: ContentTypeName, outputType: string): string {
+export function generateSystemPrompt(projectSettings: UserInput, contentType: ContentTypeName, outputType: string): string {
   const platform = platformSnippet(contentType);
   const role = outputType === "temp_draftPost" ? "writer" : outputType === "temp_postOptions" ? "editor" : "writer";
   const prompt = `You are an expert content ${role} for ${platform}${expertiseSnippet(projectSettings)}.`;
@@ -123,7 +127,7 @@ export function generateSystemPrompt(projectSettings: ProjectSettings, contentTy
   return prompt;
 }
 
-export function generateUserContentPrompt(projectSettings: ProjectSettings, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
+export function generateUserContentPrompt(projectSettings: UserInput, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
   processExamples(subtypeSettings);
   const platform = platformSnippet(contentType);
   const snippets = [
@@ -133,9 +137,9 @@ export function generateUserContentPrompt(projectSettings: ProjectSettings, subt
     ideasSnippet(projectSettings),
     repurpose_instructionsSnippet(projectSettings),
     contentSnippet(projectSettings),
-    productDescriptionSnippet(projectSettings),
+    // productDescriptionSnippet(projectSettings),
     targetAudienceSnippet(subtypeSettings, projectSettings),
-    characterLimitSnippet(projectSettings, contentType),
+    // characterLimitSnippet(projectSettings, contentType),
     processedGuidelinesSnippet(subtypeSettings, projectSettings),
     processedContextSnippet(subtypeSettings, projectSettings),
     examplesSnippet(),
@@ -148,7 +152,7 @@ export function generateUserContentPrompt(projectSettings: ProjectSettings, subt
   return prompt;
 }
 
-export function generateRatingAndFeedbackPrompt(projectSettings: ProjectSettings, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
+export function generateRatingAndFeedbackPrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
   // Generate the initial user prompt
   const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
   const postType = contentTypeSnippet(contentType);

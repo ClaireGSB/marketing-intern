@@ -98,7 +98,7 @@ export const getContentTypeByName = (name: string): ContentType | undefined => {
   return contentTypes.find(contentType => contentType.name === name)
 }
 
-export const getContentTypeNameByID = (id: number): String | undefined => {
+export const getContentTypeNameByID = (id: number): string | undefined => {
   // only return the ContentType.name
   const name = contentTypes.find(contentType => contentType.id === id)?.name
   return name
