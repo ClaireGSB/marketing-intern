@@ -31,7 +31,6 @@
                       </v-list-item>
                       <!-- Add New Subtype -->
                       <v-list-item @click="openNewSubtypePanel(contentType.id)">
-
                         <v-list-item-title class="font-italic">
                           <v-icon color="secondary" class="mx-2">mdi-plus</v-icon>
                           Add New
