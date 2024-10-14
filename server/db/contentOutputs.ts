@@ -3,6 +3,7 @@
 import { ContentOutput } from '../../types/backendTypes'
 import { ContentOutput as ContentOutputFrontend } from '../../types/frontendTypes'
 import { UserInput } from '../../types/frontendTypes'
+import { UserInput as UserInputBackend } from '../../types/backendTypes';
 import { myQueue } from '../../queues/queue';
 import { contentSubtypes } from './contentSubtypes';
 import { examples } from './examples';
@@ -11,6 +12,7 @@ import { SettingsInputWithoutExamples, SettingsInput } from '../../types/backend
 import { getContentTypeNameByID } from '../../types/contentTypes';
 import { projectSetups } from './projectSetups';
 import { subtypeSettingsHistory } from './subtypeSettingsHistory';
+import { blogMetadatas } from './blogMetadatas';
 
 import dbclient from '../database';
 
@@ -64,6 +66,21 @@ export const contentOutputs = {
       throw new Error('Could not find recipe name for content type ID');
     }
 
+    // 4.5 if selected_content_output_id is provided, get this content output from database
+    const projectSettings: UserInputBackend = {...userInput}
+
+    if (userInput.selected_content_output_id) {
+      console.log(' ###### Selected content output ID provided:', userInput.selected_content_output_id);
+      const selectedContentOutput = await contentOutputs.getContentOutputById(userInput.selected_content_output_id);
+      projectSettings.content = selectedContentOutput.content;
+      projectSettings.selected_content_type = getContentTypeNameByID(selectedContentOutput.content_type_id);
+      // if content_type is blog_post, get blog metadata
+      if ( projectSettings.selected_content_type === 'blog_post') {
+        const blog_metadata = await blogMetadatas.getBlogMetadataByContentOutputId(selectedContentOutput.id);
+        projectSettings.selected_content_blog_metadata = blog_metadata? blog_metadata : undefined;
+      }
+    }
+
     // 5. ADD JOB TO QUEUE
     const jobData = {
       recipe_name: recipe_name,
@@ -71,7 +88,7 @@ export const contentOutputs = {
       org_id: contentOutput.org_id,
       user_id: contentOutput.created_by,
       subtype_id: subtypeId,
-      user_settings: userInput,
+      user_settings: projectSettings,
       subtype_settings: subtypeSettings
     };
 

@@ -288,9 +288,10 @@ export default {
           content_subtype_id: selectedSubType.value.id,
           action: selectedAction.value,
           ...formFields,
-          content_output_id: selectedContent.value?.id
+          selected_content_output_id: selectedContent.value?.id
         };
         console.log('requesting content generation with:', userInput)
+        console.log('selectedContent', userInput.selected_content_output_id)
         emit('generate', userInput);
       }
     };
