@@ -5,7 +5,7 @@
         <h1 class="text-h4 px-4 py-10">Content Outputs</h1>
         <v-container fluid class="flex-grow-1 overflow-y-auto">
           <v-btn color="primary" class="mb-4" @click="createNewContent">Create New Content</v-btn>
-          <v-data-table :headers="headers" :items="contentOutputsFormatted" :items-per-page="10"
+          <v-data-table :headers="headers" :items="contentOutputsFormatted" :items-per-page="50"
             class="elevation-1 custom-table" :header-props="{
               class: 'custom-header text-uppercase'
             }">
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useUserDataStore } from '~/stores/userdata';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -60,14 +60,24 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false },
 ];
 
+const sortBy = ref('created_at');
+const sortDesc = ref(true);
+
 const contentOutputsFormatted = computed(() => {
   const userFirstNames = userStore.userFirstNames;
-  return contentOutputs.value.map(output => ({
-    ...output,
-    content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
-    content_subtype: userStore.getContentSubTypeNameById(output.content_subtype_id || ''),
-    created_by: userFirstNames[output.created_by] || 'Unknown',
-  }));
+  return contentOutputs.value
+    .map(output => ({
+      ...output,
+      content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
+      content_subtype: userStore.getContentSubTypeNameById(output.content_subtype_id || ''),
+      created_by: userFirstNames[output.created_by] || 'Unknown',
+    }))
+    .sort((a, b) => {
+      const modifier = sortDesc.value ? -1 : 1;
+      if (a[sortBy.value] < b[sortBy.value]) return -1 * modifier;
+      if (a[sortBy.value] > b[sortBy.value]) return 1 * modifier;
+      return 0;
+    });
 });
 
 const formatDate = (dateString: string) => {
@@ -114,10 +124,4 @@ onMounted(async () => {
   position: relative;
 }
 
-/* Add max-width to v-col for extra large screens */
-@media (min-width: 1000px) {
-  .v-container {
-    max-width: 1000px !important;
-  }
-}
 </style>
