@@ -25,6 +25,20 @@
               <div class="section-header">
                 <h2 class="section-title">General Settings</h2>
               </div>
+              <FieldCard
+  :modelValue="targetAudience"
+  fieldName="target_audience"
+  :maxChars="100"
+  :isMultiline="false"
+  @update:value="updateField('target_audience', $event)"
+/>
+<FieldCard
+  :modelValue="guidelines"
+  fieldName="guidelines"
+  :maxChars="500"
+  :isMultiline="true"
+  @update:value="updateField('target_audience', $event)"
+/>
               <InputFieldCard :value="localContentSubtypeName" fieldName="Name"
                 @update:value="updateField('name', $event)" />
               <InputFieldCard :value="targetAudience" fieldName="Target Audience"
@@ -252,6 +266,7 @@ export default defineComponent({
     // --------- Update Other Fields ---------
 
     const updateField = async (field: 'guidelines' | 'context' | 'target_audience' | 'name', value: string) => {
+      console.log('Updating field:', field, value);
       userStore.updateContentSubType(localContentSubtypeID.value, field, value);
     };
 
