@@ -19,7 +19,7 @@ const actionInstructionSnippet = (projectSettings: ProjectSettings, platform: st
   const actions = {
     write_topic: `Write a ${platform} post on the topic provided below`,
     promote_content: `Write a ${platform} post that promotes the content provided below`,
-    repurpose_content: `Repurpose the content provided below into a ${platform} post`,
+    repurpose_content: `Repurpose the content provided below, based on the repurposing instructions, into a ${platform} post`,
     promote_product: `Write a ${platform} post that subtly promotes the product described below`,
     default: `Write a ${platform} post`
   };
@@ -64,6 +64,9 @@ const topicSnippet = (projectSettings: ProjectSettings): string =>
 
 const ideasSnippet = (projectSettings: ProjectSettings): string =>
   projectSettings.ideas ? `<ideas>${projectSettings.ideas}</ideas>\n` : '';
+
+const repurpose_instructionsSnippet = (projectSettings: ProjectSettings): string =>
+  (projectSettings.repurpose_instructions && projectSettings.action === "repurpose_content")  ? `<repurpose_instructions>${projectSettings.repurpose_instructions}</repurpose_instructions>` : '';
 
 const contentSnippet = (projectSettings: ProjectSettings): string =>
   projectSettings.content ? `<content>${projectSettings.content}</content>` : '';
@@ -128,6 +131,7 @@ export function generateUserContentPrompt(projectSettings: ProjectSettings, subt
     additionalInstructionsSnippet(subtypeSettings, projectSettings),
     topicSnippet(projectSettings),
     ideasSnippet(projectSettings),
+    repurpose_instructionsSnippet(projectSettings),
     contentSnippet(projectSettings),
     productDescriptionSnippet(projectSettings),
     targetAudienceSnippet(subtypeSettings, projectSettings),
