@@ -1,13 +1,10 @@
 <template>
-  <v-container v-if="projectSetup">
-    <v-row>
-      <v-col cols="12">
-        <h2 class="text-h5 mb-4">Project Setup Details</h2>
-      </v-col>
-    </v-row>
-    <v-row>
+  <v-container>
+    <v-row v-if="projectSetup">
       <v-col cols="12" md="6">
         <v-card>
+          <v-card-title>Project Setup</v-card-title>
+          <v-card-subtitle>This are the details provided to generate this content.</v-card-subtitle>
           <v-card-text>
             <p v-for="prop in ProjectSetupProperties" :key="prop.key">
               <strong>{{ prop.label }}:</strong>
@@ -17,14 +14,17 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-container v-else>
+      <v-alert type="warning">Project setup not found.</v-alert>
+    </v-container>
     <v-row v-if="subtypeSettingsHistory">
       <v-col cols="12">
         <SubtypeSettingsHistory :subtypeSettingsHistory="subtypeSettingsHistory" />
       </v-col>
     </v-row>
-  </v-container>
-  <v-container v-else>
-    <v-alert type="warning">Project setup details not found.</v-alert>
+    <v-container v-else>
+      <v-alert type="warning">Settings history not found.</v-alert>
+    </v-container>
   </v-container>
 </template>
 
@@ -82,3 +82,9 @@ const ProjectSetupProperties = computed(() => {
   });
 });
 </script>
+
+<style scoped>
+.v-card-text p {
+  margin-bottom: 8px;
+}
+</style>
