@@ -46,12 +46,13 @@ export const contentSubtypes = {
   },
 
   async delete(id: string): Promise<boolean> {
+    const deleted_at = new Date().toISOString();
     const query = `
       UPDATE content_subtypes
-      SET deleted_at = CURRENT_TIMESTAMP
+      SET deleted_at = $2
       WHERE id = $1
     `;
-    const result = await dbclient.query(query, [id]);
+    const result = await dbclient.query(query, [id, deleted_at]);
     return result.rowCount ? result.rowCount > 0 : false;
   },
 
