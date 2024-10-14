@@ -21,7 +21,7 @@ export const actions: Record<string, ActionConfig> = {
   },
   repurpose_content: {
     display_name: "Repurpose Content",
-    requiredFields: ['content'],
+    requiredFields: ['content', 'repurpose_instructions'],
     optionalFields: [],
   },
   promote_product: {
