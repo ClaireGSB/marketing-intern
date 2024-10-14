@@ -5,9 +5,6 @@
         <span class="text-h5">Select Content</span>
       </v-card-title>
       <v-card-text>
-        <v-alert v-if="selectedContent" type="info" class="mb-4">
-          Selected: {{ selectedContent.content_type }} - {{ truncateContent(selectedContent.content) }}
-        </v-alert>
         <ContentTable :selectable="true" @select="onSelect" :allowed-statuses="allowedStatuses" />
       </v-card-text>
       <v-card-actions>

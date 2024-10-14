@@ -14,7 +14,9 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-btn variant="plain" v-bind="attrs" v-on="on" @click="handleItemAction(item)" class="pa-0">
-            <v-icon color="primary">{{ getActionIcon(item) }}</v-icon>
+            <v-icon :color="getIconColor(item)">
+              {{ getActionIcon(item) }}
+            </v-icon>
           </v-btn>
         </template>
         <span>{{ actionTooltip }}</span>
@@ -94,6 +96,11 @@ export default {
       }
     };
 
+    const getIconColor = (item) => {
+      if (!props.selectable) return 'primary';
+      return selectedItemId.value === item.id ? 'primary' : 'grey-darken-2';
+    };
+
     const getActionIcon = (item) => {
       if (!props.selectable) return 'mdi-eye';
       return selectedItemId.value === item.id
@@ -101,7 +108,6 @@ export default {
         : 'mdi-checkbox-blank-circle-outline';
     };
 
-    // const actionIcon = computed(() => props.selectable ? 'mdi-checkbox-marked-circle-outline' : 'mdi-eye');
     const actionTooltip = computed(() => props.selectable ? 'Select Content' : 'View Content');
 
     return {
@@ -113,10 +119,10 @@ export default {
       truncateContent,
       handleItemAction,
       getActionIcon,
-      // actionIcon,
-      actionTooltip
+      actionTooltip,
+      getIconColor,
     };
-  }
+  },
 };
 </script>
 
@@ -133,4 +139,17 @@ export default {
   font-size: 0.875rem !important;
   border-bottom: 2px solid #e0e0e0 !important;
 }
+
+.selected-row {
+  background-color: var(--v-primary-lighten-1) !important;
+}
+
+.selected-row:hover {
+  background-color: var(--v-primary-base) !important;
+}
+
+.selected-row td {
+  color: red !important;
+}
+
 </style>
