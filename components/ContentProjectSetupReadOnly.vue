@@ -9,12 +9,17 @@
       <v-col cols="12" md="6">
         <v-card>
           <v-card-text>
-            <p v-for="prop in displayableProjectSetupProperties" :key="prop.key">
+            <p v-for="prop in ProjectSetupProperties" :key="prop.key">
               <strong>{{ prop.label }}:</strong>
               {{ prop.value }}
             </p>
           </v-card-text>
         </v-card>
+      </v-col>
+    </v-row>
+    <v-row v-if="subtypeSettingsHistory">
+      <v-col cols="12">
+        <SubtypeSettingsHistory :subtypeSettingsHistory="subtypeSettingsHistory" />
       </v-col>
     </v-row>
   </v-container>
@@ -55,10 +60,11 @@ const getContentSubTypeName = (contentSubTypeId: string) => {
   return userStore.getContentSubTypeNameById(contentSubTypeId);
 };
 
-const displayableProjectSetupProperties = computed(() => {
+
+const ProjectSetupProperties = computed(() => {
   if (!projectSetup.value) return [];
 
-  return [
+  const properties = [
     { key: 'content_type_id', label: 'Content Type', value: getContentTypeDisplayName(projectSetup.value.content_type_id) },
     { key: 'content_subtype_id', label: 'Content Subtype', value: getContentSubTypeName(projectSetup.value.content_subtype_id) },
     { key: 'action', label: 'Action', value: projectSetup.value.action },
@@ -66,6 +72,13 @@ const displayableProjectSetupProperties = computed(() => {
     { key: 'target_audience', label: 'Target Audience', value: projectSetup.value.target_audience },
     { key: 'guidelines', label: 'Guidelines', value: projectSetup.value.guidelines },
     { key: 'context', label: 'Context', value: projectSetup.value.context },
-  ].filter(prop => prop.value !== undefined && prop.value !== null);
+  ];
+
+  return properties.filter(prop => {
+    return prop.value !== undefined &&
+      prop.value !== null &&
+      prop.value !== '' &&
+      (typeof prop.value !== 'string' || prop.value.trim() !== '');
+  });
 });
 </script>
