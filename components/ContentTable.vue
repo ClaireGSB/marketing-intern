@@ -55,7 +55,7 @@ export default {
       { title: 'Content Subtype', key: 'content_subtype', sortable: true },
       { title: 'Status', key: 'status', sortable: true },
       { title: 'Content', key: 'content', sortable: false },
-      { title: 'Actions', key: 'actions', sortable: false },
+      { title: props.selectable ? 'Select' : 'Actions', key: 'actions', sortable: false },
     ];
 
     const sortBy = ref('created_at');

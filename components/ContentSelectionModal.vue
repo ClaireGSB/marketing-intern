@@ -1,18 +1,18 @@
 <template>
-  <v-dialog v-model="dialog" max-width="900px">
-    <v-card>
+  <v-dialog v-model="dialog" max-width="1000px">
+    <v-card class="pa-4">
       <v-card-title>
         <span class="text-h5">Select Content</span>
       </v-card-title>
       <v-card-text>
         <ContentTable :selectable="true" @select="onSelect" :allowed-statuses="allowedStatuses" />
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="pt-4">
         <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="closeModal">
+        <v-btn color="primary" variant="text" @click="closeModal">
           Cancel
         </v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="confirmSelection" :disabled="!selectedContent">
+        <v-btn color="primary" variant="text" @click="confirmSelection" :disabled="!selectedContent">
           Confirm
         </v-btn>
       </v-card-actions>
