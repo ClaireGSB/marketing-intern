@@ -3,7 +3,10 @@
     <v-app>
       <navBar />
       <navDrawer />
+      <div class="NuxtPage">
+
       <NuxtPage />
+      </div>
     </v-app>
   </NuxtLayout>
 </template>
@@ -18,3 +21,9 @@
     console.log(userStore.user);
   });
 </script>
+
+<style>
+  .NuxtPage {
+    padding-top: 64px;
+  }
+</style>
