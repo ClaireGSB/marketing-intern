@@ -33,19 +33,9 @@
                 @update:value="updateField('guidelines', $event)" />
               <FieldCard :value="context" fieldName="Context" :maxChars="maxChars" :isMultiline="true"
                 @update:value="updateField('context', $event)" />
-
-
-              <!-- 
-              <InputFieldCard :value="localContentSubtypeName" fieldName="Name"
-                @update:value="updateField('name', $event)" />
-              <InputFieldCard :value="targetAudience" fieldName="Target Audience"
-                @update:value="updateField('target_audience', $event)" />
-              <TextFieldCard :value="guidelines" fieldName="Guidelines"
-                @update:value="updateField('guidelines', $event)" :maxChars="maxChars" />
-              <TextFieldCard :value="context" fieldName="Context" @update:value="updateField('context', $event)"
-                :maxChars="maxChars" /> -->
             </div>
             <v-divider></v-divider>
+
             <div class="section mb-8">
               <div class="section-header">
                 <h2 class="section-title">Examples of Good Content</h2>
@@ -263,7 +253,6 @@ export default defineComponent({
     // --------- Update Other Fields ---------
 
     const updateField = async (field: 'guidelines' | 'context' | 'target_audience' | 'name', value: string) => {
-      console.log('Updating field:', field, value);
       userStore.updateContentSubType(localContentSubtypeID.value, field, value);
     };
 
@@ -277,7 +266,6 @@ export default defineComponent({
 
     const deleteContentSubtype = async () => {
       try {
-        console.log('Deleting content subtype:', localContentSubtypeID.value);
         await userStore.deleteContentSubType(localContentSubtypeID.value);
         emit('update:modelValue', false); // Close the dialog
         emit('deleted'); // Emit an event to notify the parent component
@@ -333,7 +321,6 @@ export default defineComponent({
 
 .section {
   padding: 24px;
-  /* background-color: #f5f5f5; */
   border-radius: 4px;
 }
 
@@ -353,18 +340,6 @@ export default defineComponent({
 .section-intro {
   margin-bottom: 16px;
 }
-
-/* .guidelines-context {
-  background-color: #e8f5e9;
-}
-
-.good-examples {
-  background-color: #e3f2fd;
-}
-
-.bad-examples {
-  background-color: #fff3e0;
-} */
 
 .v-btn {
   text-transform: none;
