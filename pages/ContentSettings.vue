@@ -17,17 +17,26 @@
             <v-card-text>
               <v-expansion-panels>
                 <v-expansion-panel v-for="contentType in contentTypes" :key="contentType.id">
-                  <v-expansion-panel-title>{{ contentType.display_name }}</v-expansion-panel-title>
+                  <v-expansion-panel-title class="font-weight-bold">{{ contentType.display_name
+                    }}</v-expansion-panel-title>
                   <v-expansion-panel-text>
                     <v-list>
                       <!-- Subtypes List -->
                       <v-list-item v-for="subtype in getSubtypesForContentType(contentType.id)" :key="subtype.id"
                         @click="openSubtypePanel(contentType.id, subtype.id)">
-                        <v-list-item-title>{{ subtype.name }}</v-list-item-title>
+                        <v-list-item-title>
+                          <v-icon color="secondary" class="mx-2">mdi-pencil</v-icon>
+                        {{ subtype.name }}
+                        
+                        </v-list-item-title>
                       </v-list-item>
                       <!-- Add New Subtype -->
                       <v-list-item @click="openNewSubtypePanel(contentType.id)">
-                        <v-list-item-title>Add New</v-list-item-title>
+                      
+                        <v-list-item-title class="font-italic">
+                          <v-icon color="secondary" class="mx-2">mdi-plus</v-icon>
+                          Add New
+                        </v-list-item-title>
                       </v-list-item>
                     </v-list>
                   </v-expansion-panel-text>
