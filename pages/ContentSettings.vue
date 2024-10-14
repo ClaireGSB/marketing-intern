@@ -26,13 +26,12 @@
                         @click="openSubtypePanel(contentType.id, subtype.id)">
                         <v-list-item-title>
                           <v-icon color="secondary" class="mx-2">mdi-pencil</v-icon>
-                        {{ subtype.name }}
-                        
+                          {{ subtype.name }}
                         </v-list-item-title>
                       </v-list-item>
                       <!-- Add New Subtype -->
                       <v-list-item @click="openNewSubtypePanel(contentType.id)">
-                      
+
                         <v-list-item-title class="font-italic">
                           <v-icon color="secondary" class="mx-2">mdi-plus</v-icon>
                           Add New
