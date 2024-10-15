@@ -43,6 +43,15 @@ const roleSnippet = (outputType: string, contentType: ContentTypeName): string =
         return "Twitter post editor";
       case "blog_post":
         return "Blog post editor";
+      case "blog_outline":
+        return "Blog post editor";
+      default:
+        throw new Error("Unsupported content type");
+    }
+  } else if (outputType === "temp_outline") {
+    switch (contentType) {
+      case "blog_outline":
+        return "content outliner";
       default:
         throw new Error("Unsupported content type");
     }

@@ -52,6 +52,21 @@ export const contentTypeSnippet = (contentType: string): string => {
   }
 }
 
+// specific case for blog outline
+export const actionInstructionSnippetBLOG_OUTLINE = (projectSettings: UserInput, contentType: ContentTypeName): string => {
+  const actions = {
+    write_topic: `Below is a proposed topic for a blog post. Based on it, please create a detailed outline for the post with main sections and subsections. Only answer with the outline, no explanation, comment or question.`,
+    promote_content: `Below is a piece of content that we want to promote in an upcoming blog post. Please create a detailed outline for the blog post with main sections and subsections. Only answer with the outline, no explanation, comment or question.`,
+    repurpose_content: `Below is a piece of content that we want to repurpose in an upcoming blog post. We'll repurpose it in the way detailed in the repurposing instructions provided below. Please create a detailed outline for the blog post with main sections and subsections. If the repurposing instructions are unclear or not provided, provide your best guess. Only answer with the outline, no explanation, comment or question.`,
+    promote_product: `Below is a product that we want to promote in an upcoming blog post. Please create a detailed outline for the blog post with main sections and subsections. Only answer with the outline, no explanation, comment or question.`,
+  };
+
+  let instruction = actions[projectSettings.action as keyof typeof actions];
+
+  return instruction;
+};
+
+
 
 ///////// ACTION FIELDS SNIPPETS //////////
 

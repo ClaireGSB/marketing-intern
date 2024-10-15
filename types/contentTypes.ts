@@ -13,7 +13,7 @@ export interface ContentType {
   created_at: string;
 }
 
-export type ContentTypeName = 'blog_post' | 'twitter_post' | 'linkedin_post' | 'guidelines' | 'nativish_input_text' | 'nativish_screenshot' | 'twitter_post_ideas' | 'blog_post_outline' | 'blog_post_copy'
+export type ContentTypeName = 'blog_post' | 'twitter_post' | 'linkedin_post' | 'guidelines' | 'nativish_input_text' | 'nativish_screenshot' | 'twitter_post_ideas' | 'blog_outline' | 'blog_post_copy'
 
 export const contentTypes: ContentType[] = [
   // {
@@ -71,7 +71,7 @@ export const contentTypes: ContentType[] = [
   // },
   {
     "id": 8,
-    "name": "blog_post_outline",
+    "name": "blog_outline",
     "display_name": "Blog Post Outline",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "to review",

@@ -1,6 +1,6 @@
 // src/recipes/blogPostFullContentRecipe.ts
 
-import { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 
 type Config = ProjectSettings & {
   topic: string;
