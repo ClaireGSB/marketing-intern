@@ -56,7 +56,7 @@ This is what he came up with:
 
 Your task is
 1. review the outline and suggest any changes or improvements. Ensure that the outline is clear, logical, and follows the guidelines provided.
-2. write 2 equally good, but significantly different, versions of the outline, that follow your feedback.
+2. write 2 equally good, but significantly different, (the structure needs to be different, not just the words) versions of the outline, that follow your feedback.
 You should output your response in the following JSON format:
 {
   "options": {

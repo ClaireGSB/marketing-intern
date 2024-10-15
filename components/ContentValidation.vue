@@ -224,4 +224,8 @@ export default {
   opacity: 0.8;
   filter: grayscale(10%);
 }
+
+.v-card-text {
+  white-space: pre-wrap;
+}
 </style>
