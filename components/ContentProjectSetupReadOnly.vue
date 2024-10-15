@@ -115,12 +115,4 @@ const toggleShowMore = (key: string) => {
   margin-bottom: 8px;
 }
 
-.selected-content-chip {
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-.selected-content-chip:hover {
-  opacity: 0.8;
-}
 </style>

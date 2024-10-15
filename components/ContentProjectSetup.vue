@@ -43,7 +43,6 @@
               </v-btn>
               <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
               @remove="clearSelectedContent" />
-              <!-- <v-btn v-if="selectedContent" icon="mdi-close"  size="x-small" @click="clearSelectedContent"></v-btn> -->
             </div>
           </template>
           <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
