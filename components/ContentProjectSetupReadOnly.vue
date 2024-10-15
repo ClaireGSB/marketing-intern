@@ -16,7 +16,7 @@
                 </a>
               </span>
             </p>
-            <template v-if="selectedContentOutput">
+            <template v-if="projectSetup.selected_content_output_id">
               <p><strong>Content: </strong></p>
               <SelectedContentTag :content-output-id="projectSetup.selected_content_output_id" />
             </template>
@@ -42,18 +42,15 @@
 import { ref, onMounted, computed } from 'vue';
 import { useUserDataStore } from '~/stores/userdata';
 import { UserInput } from '~/types/frontendTypes';
-import { useRouter } from 'vue-router';
 
 const props = defineProps<{
   contentOutputId: string;
 }>();
 
 const userStore = useUserDataStore();
-const router = useRouter();
 
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
-const selectedContentOutput = ref<ContentOutput | null>(null);
 const showFullText = ref<{ [key: string]: boolean }>({});
 const maxCharDisplay = 500;
 
@@ -66,9 +63,6 @@ onMounted(async () => {
   subtypeSettingsHistory.value = await userStore.fetchSubtypeSettingsHistoryByContentOutput(props.contentOutputId);
   console.log('projectSetup', projectSetup.value);
   console.log('subtypeSettingsHistory', subtypeSettingsHistory.value);
-  if (projectSetup.value?.selected_content_output_id) {
-    selectedContentOutput.value = userStore.getSelectedContentOutput(projectSetup.value.selected_content_output_id);
-  }
 });
 
 const getContentTypeDisplayName = (contentTypeId: number) => {
@@ -83,15 +77,6 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString();
 };
 
-const truncateContent = (content: string) => {
-  return content.length > 50 ? content.slice(0, 50) + '...' : content;
-};
-
-const navigateToContent = () => {
-  if (selectedContentOutput.value) {
-    router.push(`/Content/${selectedContentOutput.value.id}`);
-  }
-};
 
 const ProjectSetupProperties = computed(() => {
   if (!projectSetup.value) return [];

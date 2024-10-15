@@ -1,15 +1,18 @@
 <template>
-  <v-tooltip :text="tooltipText">
+  <v-tooltip>
     <template v-slot:activator="{ props }">
       <v-chip
         color="primary"
-        class="content-output-tag"
+        variant="tonal"
         v-bind="props"
         @click="navigateToContent"
+        :closable="removable"
+        @click:close="removeTag"
       >
         {{ truncatedContent }}
       </v-chip>
     </template>
+    <div v-html="tooltipText"></div>
   </v-tooltip>
 </template>
 
@@ -21,7 +24,10 @@ import { ContentOutput } from '~/types/frontendTypes';
 
 const props = defineProps<{
   contentOutputId: string;
+  removable?: boolean;
 }>();
+
+const emit = defineEmits(['remove']);
 
 const userStore = useUserDataStore();
 const router = useRouter();
@@ -42,27 +48,28 @@ const truncatedContent = computed(() => {
 const tooltipText = computed(() => {
   if (!contentOutput.value) return '';
   return `
-    Content Type: ${userStore.getContentTypeDisplayNameById(contentOutput.value.content_type_id)}
-    Subtype: ${userStore.getContentSubTypeNameById(contentOutput.value.content_subtype_id)}
-    Created At: ${new Date(contentOutput.value.created_at).toLocaleString()}
-    Status: ${contentOutput.value.status}
+    <strong>Content Type:</strong> ${userStore.getContentTypeDisplayNameById(contentOutput.value.content_type_id)}<br>
+    <strong>Subtype:</strong> ${userStore.getContentSubTypeNameById(contentOutput.value.content_subtype_id)}<br>
+    <strong>Created At:</strong> ${new Date(contentOutput.value.created_at).toLocaleString()}<br>
+    <strong>Status:</strong> ${contentOutput.value.status}
   `;
 });
 
-const navigateToContent = () => {
+const navigateToContent = (event: Event) => {
+  // Prevent navigation if the click was on the close button
+  if ((event.target as HTMLElement).closest('.v-chip__close')) {
+    return;
+  }
   if (contentOutput.value) {
     router.push(`/Content/${contentOutput.value.id}`);
   }
 };
+
+const removeTag = () => {
+  emit('remove', props.contentOutputId);
+};
 </script>
 
 <style scoped>
-.content-output-tag {
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
 
-.content-output-tag:hover {
-  opacity: 0.8;
-}
 </style>
