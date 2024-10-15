@@ -7,20 +7,20 @@ import type { ContentTypeName } from '~/types/contentTypes';
 
 export const actionFieldsSnippet = (projectSettings: UserInput): string => {
   const actionFields = {
-    write_topic: topicSnippet(projectSettings) + ideasSnippet(projectSettings),
-    promote_content: contentSnippet(projectSettings),
-    repurpose_content: contentSnippet(projectSettings) + repurpose_instructionsSnippet(projectSettings),
-    promote_product: ''
+    write_topic: () => topicSnippet(projectSettings) + ideasSnippet(projectSettings),
+    promote_content: () => contentSnippet(projectSettings),
+    repurpose_content: () => contentSnippet(projectSettings) + repurposeInstructionsSnippet(projectSettings),
+    promote_product: () => ''
   };
 
-  return actionFields[projectSettings.action as keyof typeof actionFields] || '';
+  const action = projectSettings.action as keyof typeof actionFields;
+  return actionFields[action] ? actionFields[action]() : '';
 }
-
 
 ///////// INITIAL INSTRUCTIONS SNIPPET //////////
 
 export const actionInstructionSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string => {
-  const content = contentTypeSnippet(projectSettings.content_subtype_id);
+  const content = contentTypeSnippet(contentType);
   const actions = {
     write_topic: `Write a ${content} on the topic provided below`,
     promote_content: `Write a ${content} that promotes the content provided below`,
@@ -39,6 +39,7 @@ export const actionInstructionSnippet = (projectSettings: UserInput, contentType
 };
 
 export const contentTypeSnippet = (contentType: string): string => {
+  console.log('contentType:', contentType);
   switch (contentType) {
     case 'twitter_post':
       return 'tweet';
@@ -56,20 +57,24 @@ export const contentTypeSnippet = (contentType: string): string => {
 
 /// 1. Content & instructions (for promote_content and repurpose_content actions)
 
-const contentSnippet = (projectSettings: UserInput): string =>
-  processContent(projectSettings);
+function contentSnippet(projectSettings: UserInput): string {
+  return processContent(projectSettings);
+}
 
-const repurpose_instructionsSnippet = (projectSettings: UserInput): string =>
-  (projectSettings.repurpose_instructions && projectSettings.action === "repurpose_content")  ? `<repurpose_instructions>${projectSettings.repurpose_instructions}</repurpose_instructions>` : '';
+function repurposeInstructionsSnippet(projectSettings: UserInput): string {
+  return (projectSettings.repurpose_instructions && projectSettings.action === "repurpose_content") ? `<repurpose_instructions>${projectSettings.repurpose_instructions}</repurpose_instructions>` : '';
+}
 
 // TO DO: add promotion instructions
 
 /// 2. Topic (for write_topic action)
 
-const topicSnippet = (projectSettings: UserInput): string =>
-  projectSettings.topic ? `<topic>${projectSettings.topic}</topic>\n` : '';
+function topicSnippet(projectSettings: UserInput): string {
+  return projectSettings.topic ? `<topic>${projectSettings.topic}</topic>\n` : '';
+}
 
-const ideasSnippet = (projectSettings: UserInput): string =>
-  projectSettings.ideas ? `<ideas>${projectSettings.ideas}</ideas>\n` : '';
+function ideasSnippet(projectSettings: UserInput): string {
+  return projectSettings.ideas ? `<ideas>${projectSettings.ideas}</ideas>\n` : '';
+}
 
 /// 3. TO DO: Product fields 

@@ -1,6 +1,6 @@
 // src/promptGenerators/snippetsProcessors/targetAudienceProcessor.ts
 
-import type { SubtypeSettings } from '../recipeTypes';
+import type { SubtypeSettings } from '../../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 
 export const targetAudienceSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string => {
