@@ -1,6 +1,6 @@
 // src/dataProcessors/contentProcessor.ts
 
-import type { UserInput } from '../../../../types/backendTypes';
+import type { UserInput } from '~/types/backendTypes';
 
 export function processContent(projectSettings: UserInput): string {
   console.log('Processing content');
@@ -14,7 +14,7 @@ export function processContent(projectSettings: UserInput): string {
     const contentType = projectSettings.selected_content_type ? `<content_type>${projectSettings.selected_content_type}</content_type>\n` : '';
     const title = projectSettings.selected_content_blog_metadata?.title ? `<title>${projectSettings.selected_content_blog_metadata.title}</title>\n` : '';
     const content = projectSettings.content? `<text>${projectSettings.content}</text>\n` : '';
-    return `<content>${contentType}${title}${content}<content>\n`;
+    return `<content>${contentType}${title}${content}</content>\n`;
   } else {
     console.log('Processing content for new content output');
     // the user manually entered a text content
