@@ -41,10 +41,8 @@
               <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
                 Select Existing Content
               </v-btn>
-              <v-chip v-if="selectedContent" color="primary" class="mr-2">
-                Selected: {{ truncateContent(selectedContent.content) }}
-              </v-chip>
-              <v-btn v-if="selectedContent" icon="mdi-close" size="small" @click="clearSelectedContent"></v-btn>
+              <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
+              @remove="clearSelectedContent" />
             </div>
           </template>
           <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
@@ -219,11 +217,6 @@ export default {
         actions.value[selectedAction.value].allowContentSelection;
     });
 
-    const truncateContent = (content: string) => {
-      return content.length > 50 ? content.slice(0, 50) + '...' : content;
-    };
-
-
     // ---------- Review SubType Settings ----------
     const showSettingsPanel = ref(false);
 
@@ -320,7 +313,6 @@ export default {
       onContentSelected,
       clearSelectedContent,
       isContentSelectable,
-      truncateContent,
     };
   },
 };
