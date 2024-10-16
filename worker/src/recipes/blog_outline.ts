@@ -25,16 +25,6 @@ const recipe: Recipe<Config, OutputType, SubtypeSettings> = {
   // componentType: "outline",
   outputTypes: OutputTypes,
   steps: [
-    // {
-    //   stepName: "Topic Research and Refinement",
-    //   model: "claude-3-haiku-20240307",
-    //   stepType: 'llm',
-    //   outputType: 'temp_topics',
-    //   systemPromptTemplate: (config) =>
-    //     `You are an expert content strategist${config.expertise ? ` with deep knowledge in ${config.expertise}` : ''}. Here is a proposed topic for a blog post. Suggest the top 3 angles to explore. The format for your answer should be: "1. Angle 1, 2. Angle 2, 3. Angle 3." Each angle should be a concise phrase or sentence, not more than 10 words long.`,
-    //   userContentTemplate: (_, config) =>
-    //     `Topic: ${config.topic}\nTarget Audience: ${config.targetAudience}\n`
-    // },
     {
       stepName: "Outline Generation",
       model: "claude-3-haiku-20240307",
