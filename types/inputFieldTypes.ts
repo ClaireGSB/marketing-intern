@@ -52,7 +52,7 @@ export const inputFields: Record<string, FieldConfig> = {
   },
   outline: {
     key: 'outline',
-    label: 'Outline Topics',
+    label: 'Outline',
     type: 'textarea',
     use: 'content_type_specific',
     validation: { minChar: 20, maxChar: 1000 }

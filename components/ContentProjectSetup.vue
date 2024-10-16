@@ -208,18 +208,15 @@ export default {
       return [];
     });
 
-    // const isFieldRequired = (fieldKey: string): boolean => {
-    //   if (selectedAction.value && selectedAction.value in actions.value) {
-    //     const action = actions.value[selectedAction.value as keyof typeof actions.value];
-    //     return action.requiredFields.includes(fieldKey);
-    //   }
-    //   return false;
-    // };
-    // change the above isFieldRequired to also include the contentFields
     const isFieldRequired = (fieldKey: string): boolean => {
-      if (selectedAction.value && selectedAction.value in actions.value) {
-        const action = actions.value[selectedAction.value as keyof typeof actions.value];
-        return action.requiredFields.includes(fieldKey) || contentFields.value.includes(fieldKey);
+      if (actionFields.value.includes(fieldKey)) {
+        if (selectedAction.value && selectedAction.value in actions.value) {
+          const action = actions.value[selectedAction.value as keyof typeof actions.value];
+          return action.requiredFields.includes(fieldKey);
+        }
+      }
+      if (contentFields.value.includes(fieldKey)) {
+        return selectedContentType.value.required_fields.includes(fieldKey);
       }
       return false;
     };
