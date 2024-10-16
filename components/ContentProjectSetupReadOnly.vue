@@ -52,7 +52,7 @@ const userStore = useUserDataStore();
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
 const showFullText = ref<{ [key: string]: boolean }>({});
-const maxCharDisplay = 500;
+const maxCharDisplay = 200;
 
 
 onMounted(async () => {
@@ -90,6 +90,8 @@ const ProjectSetupProperties = computed(() => {
     { key: 'target_audience', label: 'Target Audience', value: projectSetup.value.target_audience },
     { key: 'guidelines', label: 'Guidelines', value: projectSetup.value.guidelines },
     { key: 'context', label: 'Context', value: projectSetup.value.context },
+    { key: 'outline', label: 'Outline', value: projectSetup.value.outline },
+    { key: 'seo_phrase', label: 'SEO Phrase', value: projectSetup.value.seo_phrase },
   ];
 
   // Only add the 'content' field if there's no selected content
@@ -113,6 +115,7 @@ const toggleShowMore = (key: string) => {
 <style scoped>
 .v-card-text p {
   margin-bottom: 8px;
+  white-space: pre-wrap;
 }
 
 </style>

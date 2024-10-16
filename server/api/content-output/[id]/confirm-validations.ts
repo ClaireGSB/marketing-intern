@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const updatedContentOutput = await validations.confirmValidations(contentOutputID)
+    const updatedContentOutput = await validations.confirmValidations(contentOutputID, orgId)
     
     if(!updatedContentOutput) {
       throw createError({
