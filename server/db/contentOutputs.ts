@@ -13,6 +13,7 @@ import { getContentTypeNameByID } from '../../types/contentTypes';
 import { projectSetups } from './projectSetups';
 import { subtypeSettingsHistory } from './subtypeSettingsHistory';
 import { blogMetadatas } from './blogMetadatas';
+import { isActionAvailable, areAllRequiredInputsPresent, getAllRequiredInputs } from '../../worker/src/fieldValidation';
 
 import dbclient from '../database';
 
@@ -21,12 +22,27 @@ export const contentOutputs = {
   async create(contentOutput: ContentOutput, userInput: UserInput): Promise<ContentOutput> {
     console.log('db file received a new initialization request')
 
-    // 1. COMPILE SUBTYPE SETTINGS
-    const subtypeId = contentOutput.content_subtype_id;
-    if (!subtypeId) {
+    // 0. VALIDATE INPUTS based on action and content type
+    if (!userInput.content_type_id) {
+      throw new Error('Content type ID is required');
+    }
+    if (!userInput.content_subtype_id) {
       throw new Error('Content subtype ID is required');
     }
+    if (!userInput.action) {
+      throw new Error('action is required');
+    }
+    if (!isActionAvailable(userInput.action, userInput.content_type_id)) {
+      throw new Error('Action is not available for this content type');
+    }
+    if (!areAllRequiredInputsPresent(userInput.content_type_id, userInput.action, userInput)) {
+      throw new Error('Required inputs are missing: ' + getAllRequiredInputs(userInput.content_type_id, userInput.action).join(', '));
+    }
 
+
+    // 1. COMPILE SUBTYPE SETTINGS
+
+    const subtypeId = userInput.content_subtype_id;
     const subtypeSettingsExceptExamples: SettingsInputWithoutExamples = await contentSubtypes.getContentSubtypeSettingsById(subtypeId);
     const subtypeExamples: Example[] = await examples.getByContentSubtypeId(subtypeId);
     const subtypeSettings: SettingsInput = {
