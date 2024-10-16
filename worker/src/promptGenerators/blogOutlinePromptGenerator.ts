@@ -3,7 +3,7 @@
 import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
-import { actionInstructionSnippetBLOG_OUTLINE, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
+import { actionInstructionBlogOutlineSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
 import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
@@ -24,7 +24,7 @@ export function generateSystemPrompt(projectSettings: UserInput, contentType: Co
 export function generateUserContentPrompt(projectSettings: UserInput, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
   const snippets = [
     // --------- instruction snippets
-    actionInstructionSnippetBLOG_OUTLINE(projectSettings, contentType),
+    actionInstructionBlogOutlineSnippet(projectSettings, contentType),
     additionalInstructionsSnippet(subtypeSettings, projectSettings),
     // --------- enclosed fields in xml tags
     actionFieldsSnippet(projectSettings),
@@ -46,10 +46,9 @@ export function generateReviewPrompt(projectSettings: UserInput, subTypeSettings
   // Generate the initial user prompt
   const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
 
-
   const prompt = `
 A writer was given this assignment:
-<initial_user_prompt>${initialPrompt}</initial_user_prompt>
+<initial_assignment>${initialPrompt}</initial_assignment>
 
 This is what he came up with:
 <outline>${draftPost}</outline>

@@ -74,7 +74,7 @@ export const contentTypes: ContentType[] = [
     "name": "blog_outline",
     "display_name": "Blog Post Outline",
     "created_at": "2024-09-20T10:00:00Z",
-    "_status": "to review",
+    "_status": "mostly good, need to fine tune and change the models to Sonnet",
     "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product']
   },
   {

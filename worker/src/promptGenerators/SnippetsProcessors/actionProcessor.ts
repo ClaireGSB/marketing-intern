@@ -19,7 +19,7 @@ export const actionFieldsSnippet = (projectSettings: UserInput): string => {
 
 ///////// INITIAL INSTRUCTIONS SNIPPET //////////
 
-export const actionInstructionSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string => {
+export const actionInstructionGenericSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string => {
   const content = contentTypeSnippet(contentType);
   const actions = {
     write_topic: `Write a ${content} on the topic provided below`,
@@ -52,8 +52,8 @@ export const contentTypeSnippet = (contentType: string): string => {
   }
 }
 
-// specific case for blog outline
-export const actionInstructionSnippetBLOG_OUTLINE = (projectSettings: UserInput, contentType: ContentTypeName): string => {
+// specific action instructions for blog outline
+export const actionInstructionBlogOutlineSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string => {
   const actions = {
     write_topic: `Below is a proposed topic for a blog post. Based on it, please create a detailed outline for the post with main sections and subsections. Only answer with the outline, no explanation, comment or question.`,
     promote_content: `Below is a piece of content that we want to promote in an upcoming blog post. Please create a detailed outline for the blog post with main sections and subsections. Only answer with the outline, no explanation, comment or question.`,

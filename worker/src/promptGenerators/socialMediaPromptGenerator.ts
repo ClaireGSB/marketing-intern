@@ -3,7 +3,7 @@
 import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
-import { actionInstructionSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
+import { actionInstructionGenericSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
 import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
@@ -33,7 +33,7 @@ export function generateSystemPrompt(projectSettings: UserInput, contentType: Co
 export function generateUserContentPrompt(projectSettings: UserInput, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
   const snippets = [
     // --------- instruction snippets
-    actionInstructionSnippet(projectSettings, contentType),
+    actionInstructionGenericSnippet(projectSettings, contentType),
     additionalInstructionsSnippet(subtypeSettings, projectSettings),
     // --------- enclosed fields in xml tags
     actionFieldsSnippet(projectSettings),
@@ -59,7 +59,7 @@ export function generateRatingAndFeedbackPrompt(projectSettings: UserInput, subT
 
   const prompt = `
 A writer was given this assignment:
-<initial_user_prompt>${initialPrompt}</initial_user_prompt>
+<initial_assignment>${initialPrompt}</initial_assignment>
 
 This is what he came up with:
 <${postType}>${draftPost}</${postType}>
