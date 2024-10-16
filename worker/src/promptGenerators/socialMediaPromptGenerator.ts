@@ -9,6 +9,7 @@ import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalIn
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
 import { targetAudienceSnippet } from './SnippetsProcessors/targetAudienceProcessor';
+import { contextSnippet } from './SnippetsProcessors/contextProcessor';
 
 // const productDescriptionSnippet = (projectSettings: UserInput): string =>
 //   projectSettings.productDescription ? `<product_description>${projectSettings.productDescription}</product_description>` : '';
@@ -17,14 +18,6 @@ import { targetAudienceSnippet } from './SnippetsProcessors/targetAudienceProces
 //   contentType === 'twitter_post' && typeof projectSettings.characterLimit === 'number'
 //     ? `<character_limit>${projectSettings.characterLimit}</character_limit>`
 //     : '';
-
-
-const processedContextSnippet = (subtypeSettings: SubtypeSettings, projectSettings: UserInput): string =>
-  subtypeSettings.context || projectSettings.context ? `<context>
-  ${subtypeSettings.context ? `${subtypeSettings.context}\n` : ""}
-  ${projectSettings.context ? `${projectSettings.context}\n` : ""}
-  </context>` : '';
-
 
 export function generateSystemPrompt(projectSettings: UserInput, contentType: ContentTypeName, outputType: string): string {
   return systemPromptSnippet(projectSettings, contentType, outputType);
@@ -41,7 +34,7 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
     targetAudienceSnippet(subtypeSettings, projectSettings),
     // characterLimitSnippet(projectSettings, contentType),
     guidelinesSnippet(subtypeSettings, projectSettings),
-    processedContextSnippet(subtypeSettings, projectSettings),
+    contextSnippet(subtypeSettings, projectSettings),
     examplesSnippet(subtypeSettings),
     `Reply with only the ${contentTypeSnippet(contentType)}, no comment or intro.`
   ];
