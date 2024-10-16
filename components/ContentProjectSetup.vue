@@ -35,6 +35,24 @@
 
       <v-col v-if="step >= 4" cols="12">
         <h3 class="mb-4">4. Action Inputs</h3>
+        <template v-for="fieldKey in contentFields" :key="fieldKey">
+          <!-- <template v-if="fieldKey === 'content' && isContentSelectable">
+            <div class="d-flex align-center mb-4">
+              <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
+                Select Existing Content
+              </v-btn>
+              <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
+              @remove="clearSelectedContent" />
+            </div>
+          </template> -->
+          <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
+          <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar" :disabled="fieldKey === 'content' && !!selectedContent"
+            auto-grow></v-textarea>
+        </template>
         <template v-for="fieldKey in actionFields" :key="fieldKey">
           <template v-if="fieldKey === 'content' && isContentSelectable">
             <div class="d-flex align-center mb-4">
@@ -178,6 +196,10 @@ export default {
       return action in actions.value && selectedContentType.value.available_actions.includes(action);
     };
 
+    const contentFields = computed(() => {
+      return [...selectedContentType.value.required_fields, ...selectedContentType.value.optional_fields];
+    });
+
     const actionFields = computed((): string[] => {
       if (selectedAction.value && selectedAction.value in actions.value) {
         const action = actions.value[selectedAction.value as keyof typeof actions.value];
@@ -186,10 +208,18 @@ export default {
       return [];
     });
 
+    // const isFieldRequired = (fieldKey: string): boolean => {
+    //   if (selectedAction.value && selectedAction.value in actions.value) {
+    //     const action = actions.value[selectedAction.value as keyof typeof actions.value];
+    //     return action.requiredFields.includes(fieldKey);
+    //   }
+    //   return false;
+    // };
+    // change the above isFieldRequired to also include the contentFields
     const isFieldRequired = (fieldKey: string): boolean => {
       if (selectedAction.value && selectedAction.value in actions.value) {
         const action = actions.value[selectedAction.value as keyof typeof actions.value];
-        return action.requiredFields.includes(fieldKey);
+        return action.requiredFields.includes(fieldKey) || contentFields.value.includes(fieldKey);
       }
       return false;
     };
@@ -303,6 +333,7 @@ export default {
       showSettingsPanel,
       getValidationRules,
       actionFields,
+      contentFields,
       formFields,
       generalOptionalFields,
       inputFields,

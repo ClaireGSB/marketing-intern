@@ -1,4 +1,4 @@
-// shared/actionTypes.ts
+// types/actionTypes.ts
 
 import { inputFields } from './inputFieldTypes';
 
@@ -30,11 +30,6 @@ export const actions: Record<string, ActionConfig> = {
   promote_product: {
     display_name: "Promote Product",
     requiredFields: ['productDescription'],
-    optionalFields: [],
-  },
-  write_outline: {
-    display_name: "Write Outline",
-    requiredFields: ['outline'],
     optionalFields: [],
   }
 };
