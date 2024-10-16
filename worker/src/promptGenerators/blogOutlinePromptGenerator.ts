@@ -1,23 +1,15 @@
-// src/promptGenerators/socialMediaPromptGenerator.ts
+// src/promptGenerators/blog OutlinePromptGenerator.ts
 
 import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
-import { actionInstructionGenericSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
+import { actionInstructionBlogOutlineSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
 import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
 import { targetAudienceSnippet } from './SnippetsProcessors/targetAudienceProcessor';
 import { contextSnippet } from './SnippetsProcessors/contextProcessor';
-
-// const productDescriptionSnippet = (projectSettings: UserInput): string =>
-//   projectSettings.productDescription ? `<product_description>${projectSettings.productDescription}</product_description>` : '';
-
-// const characterLimitSnippet = (projectSettings: UserInput, contentType: ContentTypeName): string =>
-//   contentType === 'twitter_post' && typeof projectSettings.characterLimit === 'number'
-//     ? `<character_limit>${projectSettings.characterLimit}</character_limit>`
-//     : '';
 
 export function generateSystemPrompt(projectSettings: UserInput, contentType: ContentTypeName, outputType: string): string {
   return systemPromptSnippet(projectSettings, contentType, outputType);
@@ -26,7 +18,7 @@ export function generateSystemPrompt(projectSettings: UserInput, contentType: Co
 export function generateUserContentPrompt(projectSettings: UserInput, subtypeSettings: SubtypeSettings, contentType: ContentTypeName): string {
   const snippets = [
     // --------- instruction snippets
-    actionInstructionGenericSnippet(projectSettings, contentType),
+    actionInstructionBlogOutlineSnippet(projectSettings, contentType),
     additionalInstructionsSnippet(subtypeSettings, projectSettings),
     // --------- enclosed fields in xml tags
     actionFieldsSnippet(projectSettings),
@@ -36,7 +28,6 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
     guidelinesSnippet(subtypeSettings, projectSettings),
     contextSnippet(subtypeSettings, projectSettings),
     examplesSnippet(subtypeSettings),
-    `Reply with only the ${contentTypeSnippet(contentType)}, no comment or intro.`
   ];
 
   const prompt = snippets.filter(Boolean).join('\n');
@@ -45,36 +36,32 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
   return prompt;
 }
 
-export function generateRatingAndFeedbackPrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
+export function generateReviewPrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
   // Generate the initial user prompt
   const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
-  const postType = contentTypeSnippet(contentType);
 
   const prompt = `
 A writer was given this assignment:
 <initial_assignment>${initialPrompt}</initial_assignment>
 
 This is what he came up with:
-<${postType}>${draftPost}</${postType}>
+<outline>${draftPost}</outline>
 
-Your task is to:
-1. provide detailed feedback
-3. write 3 equally good, but significantly different, versions of the post, that follow your feedback
-
+Your task is
+1. review the outline and suggest any changes or improvements. Ensure that the outline is clear, logical, and follows the guidelines provided.
+2. write 2 equally good, but significantly different, (the structure needs to be different, not just the words) versions of the outline, that follow your feedback.
 You should output your response in the following JSON format:
 {
-  "feedback": "Your feedback here",
   "options": {
-    "1": "First version of the post",
-    "2": "Second version of the post",
-    "3": "Third version of the post"
+    "1": "First version of the outline",
+    "2": "Second version of the outline",
   }
 }
+  Provide your response in valid JSON format with properly escaped quotes and line breaks.
+`
 
-Provide your response in valid JSON format with properly escaped quotes and line breaks.
-  `.trim();
-
-  console.log('---------------------\nRating and feedback prompt:');
+;
+  console.log('---------------------\nReview prompt:');
   console.log(prompt);
   return prompt;
 }

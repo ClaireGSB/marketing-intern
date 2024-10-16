@@ -93,7 +93,7 @@ const ProjectSetupProperties = computed(() => {
   ];
 
   // Only add the 'content' field if there's no selected content
-  if (!selectedContentOutput.value) {
+  if (!projectSetup.value.selected_content_output_id) {
     properties.push({ key: 'content', label: 'Content', value: projectSetup.value.content });
   }
 

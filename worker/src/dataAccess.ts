@@ -2,7 +2,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { processExamples, processBadExamples, processGoodExamples } from './dataProcessors/exampleProcessor';
+import { processExamples, badExampleSnippet, goodExampleSnippets } from './promptGenerators/SnippetsProcessors/exampleProcessor';
 import * as BackendTypes from '../../types/backendTypes';
 import * as FrontendTypes from '../../types/frontendTypes';
 import { examples } from '../../server/db/examples'
