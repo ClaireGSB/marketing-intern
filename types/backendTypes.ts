@@ -165,6 +165,8 @@ export interface UserInput {
   selected_content_blog_metadata?: BlogMetadata;
   repurpose_instructions?: string;
   expertise?: string;
+  seo_phrase?: string;
+  outline?: string;
 
 }
 

@@ -67,6 +67,22 @@ export const actionInstructionBlogOutlineSnippet = (projectSettings: UserInput, 
 };
 
 
+// specific action instructions for blog post
+export const actionInstructionBlogCopySnippet = (projectSettings: UserInput, contentType: ContentTypeName): string => {
+  const commonInstructions = `Write a blog post based on the outline provided. Ensure that the content is engaging, informative, and follows the outline closely. The post should be well-structured with clear headings in markdown. Only use subheadings if necessary / if the content for that section is long enough. Do not include headings or subheadings for the introduction and conclusion. Do not include a title for the post. Reply with the post only, no comment or explanation needed.`;
+
+  const actionSpecificInstructions = {
+    promote_content: `For context, the blog post needs to promote the piece of content provided below; this should already be taken into account in the outline, so please do not deviate from the outline. I'm only giving this context so that it helps make your copy better to attain the goal.`,
+    repurpose_content: `For context, the blog post needs to promote the piece of content provided below, in a way detailed in the repurposing instructions. This should already be taken into account in the outline, so please do not deviate from the outline. I'm only giving this context so that it helps make your copy better to attain the goal.`,
+    promote_product: `For context, the blog post needs to promote the product provided below; this should already be taken into account in the outline, so please do not deviate from the outline. I'm only giving this context so that it helps make your copy better to attain the goal.`,
+  };
+
+  const actionType = projectSettings.action as keyof typeof actionSpecificInstructions;
+  const specificInstruction = actionSpecificInstructions[actionType] ? `\n\n${actionSpecificInstructions[actionType]}` : '';
+
+  return commonInstructions + specificInstruction;
+};
+
 
 ///////// ACTION FIELDS SNIPPETS //////////
 

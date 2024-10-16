@@ -15,13 +15,6 @@ export function systemPromptSnippet(projectSettings: UserInput, contentType: Con
 const expertiseSnippet = (projectSettings: UserInput): string =>
   projectSettings.expertise ? ` with deep knowledge in ${projectSettings.expertise}` : '';
 
-// const platformSnippet = (contentType: ContentTypeName): string =>
-//   contentType === 'linkedin_post' ? 'LinkedIn' : 'Twitter';
-
-// const contentTypeSnippet = (contentType: ContentTypeName): string =>
-//   contentType === 'linkedin_post' ? 'Linkedin Post' : 'Twitter Post';
-
-
 const roleSnippet = (outputType: string, contentType: ContentTypeName): string => {
   if (outputType === "temp_draftPost") {
     switch (contentType) {

@@ -44,7 +44,7 @@ export const inputFields: Record<string, FieldConfig> = {
     validation: { maxChar: 500 }
   },
   productDescription: {
-    key: 'productDescription',
+    key: 'product_description',
     label: 'Product Description',
     type: 'textarea',
     use: 'action_specific',
@@ -58,7 +58,7 @@ export const inputFields: Record<string, FieldConfig> = {
     validation: { minChar: 20, maxChar: 1000 }
   },
   seoPhrase: {
-    key: 'seoPhrase',
+    key: 'seo_phrase',
     label: 'Primary SEO Phrase',
     type: 'text',
     use: 'content_type_specific',
