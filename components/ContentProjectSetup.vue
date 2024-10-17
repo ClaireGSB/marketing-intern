@@ -77,11 +77,15 @@
     </v-row>
   </v-form>
 
-  <GenerateButton
-    :is-valid="isValid"
-    :step="step"
-    @generate="generateContent"
-  />
+  <v-container class="button-container px-0">
+    <v-row no-gutters justify="center">
+      <v-col cols="auto">
+        <v-btn color="primary" @click="generateContent" :disabled="!isValid || step < 4" class="generate-btn">
+          Generate
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 
   <ContentSettingsDialog
     v-model="showSettingsPanel"
