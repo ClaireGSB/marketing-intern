@@ -2,12 +2,13 @@
 
 export type FieldType = 'text' | 'textarea';
 export type FieldUse = 'action_specific' | 'general' | 'content_type_specific';
-
 export interface FieldConfig {
   key: string;
   label: string;
   type: FieldType;
   use: FieldUse;
+  allowSelection?: boolean;
+  selectionFilters?: Record<string, any>;
   validation?: {
     minChar?: number;
     maxChar?: number;
@@ -34,6 +35,8 @@ export const inputFields: Record<string, FieldConfig> = {
     label: 'Content',
     type: 'textarea',
     use: 'action_specific',
+    allowSelection: true,
+    selectionFilters: { status: 'completed' },
     validation: { maxChar: 1000 }
   },
   repurpose_instructions: {
@@ -55,6 +58,8 @@ export const inputFields: Record<string, FieldConfig> = {
     label: 'Outline',
     type: 'textarea',
     use: 'content_type_specific',
+    allowSelection: true,
+    selectionFilters: { status: 'completed', content_type_id: 8 },
     validation: { minChar: 20, maxChar: 1000 }
   },
   seoPhrase: {

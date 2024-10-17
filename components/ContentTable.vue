@@ -40,6 +40,10 @@ export default {
       type: Array as () => string[],
       // Empty array means all statuses are allowed
       default: () => []
+    },
+    additionalFilters: {
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['select', 'view'],
@@ -65,6 +69,21 @@ export default {
       const userFirstNames = userStore.userFirstNames;
       return contentOutputs.value
         .filter(output => props.allowedStatuses.length === 0 || props.allowedStatuses.includes(output.status))
+        .filter(output => {
+          // Check allowed statuses
+          if (props.allowedStatuses.length > 0 && !props.allowedStatuses.includes(output.status)) {
+            return false;
+          }
+          
+          // Check additional filters
+          for (const [key, value] of Object.entries(props.additionalFilters)) {
+            if (output[key] !== value) {
+              return false;
+            }
+          }
+          
+          return true;
+        })
         .map(output => ({
           ...output,
           content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),

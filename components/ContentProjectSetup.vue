@@ -36,31 +36,13 @@
       <v-col v-if="step >= 4" cols="12">
         <h3 class="mb-4">4. Action Inputs</h3>
         <template v-for="fieldKey in contentFields" :key="fieldKey">
-          <!-- <template v-if="fieldKey === 'content' && isContentSelectable">
+          <template v-if="inputFields[fieldKey].allowSelection">
             <div class="d-flex align-center mb-4">
-              <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
-                Select Existing Content
+              <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
+                Select Existing {{ inputFields[fieldKey].label }}
               </v-btn>
-              <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
-              @remove="clearSelectedContent" />
-            </div>
-          </template> -->
-          <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
-          <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar" :disabled="fieldKey === 'content' && !!selectedContent"
-            auto-grow></v-textarea>
-        </template>
-        <template v-for="fieldKey in actionFields" :key="fieldKey">
-          <template v-if="fieldKey === 'content' && isContentSelectable">
-            <div class="d-flex align-center mb-4">
-              <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
-                Select Existing Content
-              </v-btn>
-              <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
-              @remove="clearSelectedContent" />
+              <SelectedContentTag :content-output-id="selectedContents[fieldKey]?.id" v-if="selectedContents[fieldKey]"
+                :removable="true" @remove="clearSelectedContent(fieldKey)" />
             </div>
           </template>
           <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
@@ -68,8 +50,26 @@
             :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
           <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
             :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar" :disabled="fieldKey === 'content' && !!selectedContent"
-            auto-grow></v-textarea>
+            :counter="inputFields[fieldKey].validation?.maxChar"
+            :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]" auto-grow></v-textarea>
+        </template>
+        <template v-for="fieldKey in actionFields" :key="fieldKey">
+          <template v-if="inputFields[fieldKey].allowSelection">
+            <div class="d-flex align-center mb-4">
+              <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
+                Select Existing {{ inputFields[fieldKey].label }}
+              </v-btn>
+              <SelectedContentTag :content-output-id="selectedContents[fieldKey]?.id" v-if="selectedContents[fieldKey]"
+                :removable="true" @remove="clearSelectedContent(fieldKey)" />
+            </div>
+          </template>
+          <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
+          <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar"
+            :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]" auto-grow></v-textarea>
         </template>
       </v-col>
 
@@ -114,7 +114,9 @@
   </v-container>
   <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
     :content-subtype-id="selectedSubType.id" />
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected" />
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
+    :filters="inputFields[currentSelectingField]?.selectionFilters" />
+
 </template>
 
 <script lang="ts">
@@ -191,7 +193,7 @@ export default {
 
     // --------- Action Selection & Action-Related Required Fields ---------
     const selectedAction = ref<string>('');
-    
+
     const isActionAvailable = (action: string): boolean => {
       return action in actions.value && selectedContentType.value.available_actions.includes(action);
     };
@@ -221,21 +223,26 @@ export default {
       return false;
     };
 
+    const selectedContents = ref<Record<string, any>>({});
     const showContentSelectionModal = ref(false);
-    const selectedContent = ref(null);
+    const currentSelectingField = ref('');
 
-    const openContentSelectionModal = () => {
+
+    const openContentSelectionModal = (fieldKey: string) => {
+      console.log('opening content selection modal for', fieldKey);
+      console.log('with filters:', inputFields[fieldKey].selectionFilters);
+      currentSelectingField.value = fieldKey;
       showContentSelectionModal.value = true;
     };
 
-    const onContentSelected = (content) => {
-      selectedContent.value = content;
-      formFields.content = content.content;
+    const onContentSelected = (content: any) => {
+      selectedContents.value[currentSelectingField.value] = content;
+      formFields[currentSelectingField.value] = content.content;
     };
 
-    const clearSelectedContent = () => {
-      selectedContent.value = null;
-      formFields.content = '';
+    const clearSelectedContent = (fieldKey: string) => {
+      selectedContents.value[fieldKey] = null;
+      formFields[fieldKey] = '';
     };
 
     const isContentSelectable = computed(() => {
@@ -336,11 +343,12 @@ export default {
       inputFields,
       isFieldRequired,
       showContentSelectionModal,
-      selectedContent,
+      selectedContents,
       openContentSelectionModal,
       onContentSelected,
       clearSelectedContent,
       isContentSelectable,
+      currentSelectingField,
     };
   },
 };
