@@ -36,12 +36,7 @@ export default {
       type: Boolean,
       default: false
     },
-    allowedStatuses: {
-      type: Array as () => string[],
-      // Empty array means all statuses are allowed
-      default: () => []
-    },
-    additionalFilters: {
+    filters: {
       type: Object,
       default: () => ({})
     }
@@ -68,20 +63,14 @@ export default {
     const contentOutputsFormatted = computed(() => {
       const userFirstNames = userStore.userFirstNames;
       return contentOutputs.value
-        .filter(output => props.allowedStatuses.length === 0 || props.allowedStatuses.includes(output.status))
         .filter(output => {
-          // Check allowed statuses
-          if (props.allowedStatuses.length > 0 && !props.allowedStatuses.includes(output.status)) {
-            return false;
-          }
-          
-          // Check additional filters
-          for (const [key, value] of Object.entries(props.additionalFilters)) {
-            if (output[key] !== value) {
-              return false;
+          if (props.filters && typeof props.filters === 'object') {
+            for (const [key, value] of Object.entries(props.filters)) {
+              if (output[key] !== value) {
+                return false;
+              }
             }
           }
-          
           return true;
         })
         .map(output => ({
@@ -170,5 +159,4 @@ export default {
 .selected-row td {
   color: red !important;
 }
-
 </style>

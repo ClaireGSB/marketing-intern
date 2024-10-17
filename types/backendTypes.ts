@@ -167,6 +167,7 @@ export interface UserInput {
   expertise?: string;
   seo_phrase?: string;
   outline?: string;
+  selected_outline_id?: string;
 
 }
 

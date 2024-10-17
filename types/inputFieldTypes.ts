@@ -60,7 +60,7 @@ export const inputFields: Record<string, FieldConfig> = {
     use: 'content_type_specific',
     allowSelection: true,
     selectionFilters: { status: 'completed', content_type_id: 8 },
-    validation: { minChar: 20, maxChar: 1000 }
+    validation: { minChar: 20, maxChar: 3000 }
   },
   seoPhrase: {
     key: 'seo_phrase',

@@ -35,6 +35,7 @@
 
       <v-col v-if="step >= 4" cols="12">
         <h3 class="mb-4">4. Action Inputs</h3>
+        <!-- Content-specific fields -->
         <template v-for="fieldKey in contentFields" :key="fieldKey">
           <template v-if="inputFields[fieldKey].allowSelection">
             <div class="d-flex align-center mb-4">
@@ -53,6 +54,7 @@
             :counter="inputFields[fieldKey].validation?.maxChar"
             :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]" auto-grow></v-textarea>
         </template>
+        <!-- Action-specific fields -->
         <template v-for="fieldKey in actionFields" :key="fieldKey">
           <template v-if="inputFields[fieldKey].allowSelection">
             <div class="d-flex align-center mb-4">
@@ -310,8 +312,18 @@ export default {
           content_subtype_id: selectedSubType.value.id,
           action: selectedAction.value,
           ...formFields,
-          selected_content_output_id: selectedContent.value?.id
         };
+
+        // Add selected content IDs for fields that allow selection
+        for (const fieldKey in selectedContents.value) {
+          if (selectedContents.value['content']) {
+            userInput[`selected_content_output_id`] = selectedContents.value['content'].id;
+          }
+          if (selectedContents.value['outline']) {
+            userInput[`selected_outline_id`] = selectedContents.value['outline'].id;
+          }
+        }
+        // To do: also handle outline
         console.log('requesting content generation with:', userInput)
         emit('generate', userInput);
       }

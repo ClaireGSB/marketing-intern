@@ -73,6 +73,7 @@ export interface UserInput {
   repurpose_instructions?: string;
   seo_phrase?: string;
   outline?: string;
+  selected_outline_id?: string;
 }
 
 export interface SettingsInput {

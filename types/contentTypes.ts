@@ -87,7 +87,7 @@ export const contentTypes: ContentType[] = [
     "_status": "mostly good, need to fine tune and change the models to Sonnet",
     "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
     "required_fields": [],
-    "optional_fields": []
+    "optional_fields": ['seoPhrase']
   },
   {
     "id": 9,

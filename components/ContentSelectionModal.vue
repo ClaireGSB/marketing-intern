@@ -8,8 +8,7 @@
         <ContentTable 
           :selectable="true" 
           @select="onSelect" 
-          :allowed-statuses="allowedStatuses"
-          :additional-filters="filters"
+          :filters="filters"
         />
       </v-card-text>
       <v-card-actions class="pt-4">
@@ -33,10 +32,6 @@ export default {
     modelValue: {
       type: Boolean,
       default: false
-    },
-    allowedStatuses: {
-      type: Array as () => string[],
-      default: () => ['completed']
     },
     filters: {
       type: Object,
@@ -80,7 +75,6 @@ export default {
 
     onMounted(() => {
       console.log('ContentSelectionModal mounted');
-      console.log('Allowed statuses:', props.allowedStatuses);
       console.log('Filters:', props.filters);
     });
 
