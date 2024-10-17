@@ -1,306 +1,88 @@
 <template>
   <v-form ref="form" v-model="isValid" @submit.prevent="generateContent">
     <v-row>
-      <!-- Step 1: Select Content Type -->
-      <v-col cols="12">
-        <h3 class="mb-4">1. Select Content Type</h3>
-        <v-row>
-          <v-col v-for="type in contentTypes" :key="type.id" cols="12" sm="6" md="3">
-            <v-card 
-              @click="selectContentType(type.id)" 
-              :color="selectedContentType.id === type.id ? 'primary' : ''"
-              :class="{ 'elevation-8': selectedContentType.id === type.id }" 
-              class="selectable-card"
-            >
-              <v-card-title>{{ type.display_name }}</v-card-title>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-col>
+      <psContentTypeSelection
+        :content-types="contentTypes"
+        :selected-content-type="selectedContentType"
+        @select="selectContentType"
+      />
 
-      <!-- Step 2: Select Sub-Type -->
-      <v-col v-if="step >= 2" cols="12">
-        <h3 class="mb-4">2. Select Sub-Type</h3>
-        <v-select
-          v-model="selectedSubType"
-          :items="possibleSubTypes"
-          item-title="name"
-          label="Select Sub-Type"
-          @update:modelValue="updateStep(3)"
-          required
-          return-object
-        ></v-select>
-      </v-col>
+      <psSubTypeSelection
+        v-if="step >= 2"
+        :possible-sub-types="possibleSubTypes"
+        v-model:selected-sub-type="selectedSubType"
+        @update:modelValue="updateStep(3)"
+      />
 
-      <!-- Step 3 for Blog Post Copy: Choose Outline Option -->
-      <v-col v-if="step >= 3 && selectedContentType.id === 9" cols="12">
-        <h3 class="mb-4">3. Choose Outline Option</h3>
-        <v-btn-toggle v-model="outlineOption" mandatory>
-          <v-btn value="select">Select Existing Outline</v-btn>
-          <v-btn value="provide">Provide New Outline</v-btn>
-        </v-btn-toggle>
-      </v-col>
+      <psOutlineSelection
+        v-if="step >= 3 && selectedContentType.id === 9"
+        v-model:outline-option="outlineOption"
+        :project-setup="projectSetup"
+        @select-outline="selectExistingOutline"
+      />
 
-      <!-- Conditional rendering based on content type and outline option -->
-      <template v-if="selectedContentType.id === 9">
-        <!-- For Blog Post Copy with "Select Existing Outline" -->
-        <template v-if="outlineOption === 'select'">
-          <v-col cols="12">
-            <v-btn @click="selectExistingOutline" color="primary">
-              Select Outline
-            </v-btn>
-          </v-col>
-          <v-col v-if="projectSetup" cols="12">
-            <ProjectSetupHistory :projectSetup="projectSetup" />
-          </v-col>
-        </template>
+      <template v-if="selectedContentType.id === 9 && outlineOption === 'provide'">
+        <psActionSelection
+          v-if="step >= 3"
+          :actions="actions"
+          :is-action-available="isActionAvailable"
+          @update="handleActionSelection"
+        />
 
-        <!-- For Blog Post Copy with "Provide New Outline" -->
-        <template v-else-if="outlineOption === 'provide'">
-          <!-- Step 3: Select Action -->
-          <v-col v-if="step >= 3" cols="12">
-            <h3 class="mb-4">3. Select Action</h3>
-            <v-radio-group v-model="selectedAction" @update:modelValue="updateStep(4)">
-              <v-tooltip
-                v-for="action in Object.keys(actions)"
-                :key="action"
-                :disabled="isActionAvailable(action)"
-                text="Unavailable for this content type"
-                location="top start"
-              >
-                <template v-slot:activator="{ props }">
-                  <div v-bind="props">
-                    <v-radio
-                      :label="action"
-                      :value="action"
-                      :disabled="!isActionAvailable(action)"
-                    ></v-radio>
-                  </div>
-                </template>
-              </v-tooltip>
-            </v-radio-group>
-          </v-col>
-
-          <!-- Step 4: Action Inputs -->
-          <v-col v-if="step >= 4" cols="12">
-            <h3 class="mb-4">4. Action Inputs</h3>
-            <!-- Content-specific fields -->
-            <template v-for="fieldKey in contentFields" :key="fieldKey">
-              <template v-if="inputFields[fieldKey].allowSelection">
-                <div class="d-flex align-center mb-4">
-                  <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
-                    Select Existing {{ inputFields[fieldKey].label }}
-                  </v-btn>
-                  <SelectedContentTag
-                    :content-output-id="selectedContents[fieldKey]?.id"
-                    v-if="selectedContents[fieldKey]"
-                    :removable="true"
-                    @remove="clearSelectedContent(fieldKey)"
-                  />
-                </div>
-              </template>
-              <v-text-field
-                v-if="inputFields[fieldKey].type === 'text'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-              ></v-text-field>
-              <v-textarea
-                v-else-if="inputFields[fieldKey].type === 'textarea'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-                :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]"
-                auto-grow
-              ></v-textarea>
-            </template>
-            <!-- Action-specific fields -->
-            <template v-for="fieldKey in actionFields" :key="fieldKey">
-              <template v-if="inputFields[fieldKey].allowSelection">
-                <div class="d-flex align-center mb-4">
-                  <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
-                    Select Existing {{ inputFields[fieldKey].label }}
-                  </v-btn>
-                  <SelectedContentTag
-                    :content-output-id="selectedContents[fieldKey]?.id"
-                    v-if="selectedContents[fieldKey]"
-                    :removable="true"
-                    @remove="clearSelectedContent(fieldKey)"
-                  />
-                </div>
-              </template>
-              <v-text-field
-                v-if="inputFields[fieldKey].type === 'text'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-              ></v-text-field>
-              <v-textarea
-                v-else-if="inputFields[fieldKey].type === 'textarea'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-                :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]"
-                auto-grow
-              ></v-textarea>
-            </template>
-          </v-col>
-        </template>
+        <psActionInputs
+          v-if="step >= 4"
+          :content-fields="contentFields"
+          :action-fields="actionFields"
+          :input-fields="inputFields"
+          :form-fields="formFields"
+          :selected-contents="selectedContents"
+          @open-content-selection="openContentSelectionModal"
+          @clear-selected-content="clearSelectedContent"
+        />
       </template>
 
-      <!-- For all other content types -->
-      <template v-else>
-        <!-- Step 3: Select Action -->
-        <v-col v-if="step >= 3" cols="12">
-          <h3 class="mb-4">3. Select Action</h3>
-          <v-radio-group v-model="selectedAction" @update:modelValue="updateStep(4)">
-            <v-tooltip
-              v-for="action in Object.keys(actions)"
-              :key="action"
-              :disabled="isActionAvailable(action)"
-              text="Unavailable for this content type"
-              location="top start"
-            >
-              <template v-slot:activator="{ props }">
-                <div v-bind="props">
-                  <v-radio
-                    :label="action"
-                    :value="action"
-                    :disabled="!isActionAvailable(action)"
-                  ></v-radio>
-                </div>
-              </template>
-            </v-tooltip>
-          </v-radio-group>
-        </v-col>
+      <template v-else-if="selectedContentType.id !== 9">
+        <psActionSelection
+          v-if="step >= 3"
+          :actions="actions"
+          :is-action-available="isActionAvailable"
+          @update="handleActionSelection"
+        />
 
-        <!-- Step 4: Action Inputs -->
-        <v-col v-if="step >= 4" cols="12">
-          <h3 class="mb-4">4. Action Inputs</h3>
-          <!-- Content-specific fields -->
-          <template v-for="fieldKey in contentFields" :key="fieldKey">
-            <template v-if="inputFields[fieldKey].allowSelection">
-              <div class="d-flex align-center mb-4">
-                <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
-                  Select Existing {{ inputFields[fieldKey].label }}
-                </v-btn>
-                <SelectedContentTag
-                  :content-output-id="selectedContents[fieldKey]?.id"
-                  v-if="selectedContents[fieldKey]"
-                  :removable="true"
-                  @remove="clearSelectedContent(fieldKey)"
-                />
-              </div>
-            </template>
-            <v-text-field
-              v-if="inputFields[fieldKey].type === 'text'"
-              v-model="formFields[fieldKey]"
-              :label="inputFields[fieldKey].label"
-              :rules="getValidationRules(inputFields[fieldKey])"
-              :counter="inputFields[fieldKey].validation?.maxChar"
-            ></v-text-field>
-            <v-textarea
-              v-else-if="inputFields[fieldKey].type === 'textarea'"
-              v-model="formFields[fieldKey]"
-              :label="inputFields[fieldKey].label"
-              :rules="getValidationRules(inputFields[fieldKey])"
-              :counter="inputFields[fieldKey].validation?.maxChar"
-              :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]"
-              auto-grow
-            ></v-textarea>
-          </template>
-          <!-- Action-specific fields -->
-          <template v-for="fieldKey in actionFields" :key="fieldKey">
-            <template v-if="inputFields[fieldKey].allowSelection">
-              <div class="d-flex align-center mb-4">
-                <v-btn @click="openContentSelectionModal(fieldKey)" color="primary" class="mr-4">
-                  Select Existing {{ inputFields[fieldKey].label }}
-                </v-btn>
-                <SelectedContentTag
-                  :content-output-id="selectedContents[fieldKey]?.id"
-                  v-if="selectedContents[fieldKey]"
-                  :removable="true"
-                  @remove="clearSelectedContent(fieldKey)"
-                />
-              </div>
-            </template>
-            <v-text-field
-              v-if="inputFields[fieldKey].type === 'text'"
-              v-model="formFields[fieldKey]"
-              :label="inputFields[fieldKey].label"
-              :rules="getValidationRules(inputFields[fieldKey])"
-              :counter="inputFields[fieldKey].validation?.maxChar"
-            ></v-text-field>
-            <v-textarea
-              v-else-if="inputFields[fieldKey].type === 'textarea'"
-              v-model="formFields[fieldKey]"
-              :label="inputFields[fieldKey].label"
-              :rules="getValidationRules(inputFields[fieldKey])"
-              :counter="inputFields[fieldKey].validation?.maxChar"
-              :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]"
-              auto-grow
-            ></v-textarea>
-          </template>
-        </v-col>
+        <psActionInputs
+          v-if="step >= 4"
+          :content-fields="contentFields"
+          :action-fields="actionFields"
+          :input-fields="inputFields"
+          :form-fields="formFields"
+          :selected-contents="selectedContents"
+          @open-content-selection="openContentSelectionModal"
+          @clear-selected-content="clearSelectedContent"
+        />
       </template>
 
-      <!-- Step 5: Review Settings (always visible for step >= 4) -->
-      <v-col v-if="step >= 4" cols="12">
-        <h3 class="mb-4">5. Review settings</h3>
-        <p>The following settings for {{ selectedContentType.display_name }} - {{ selectedSubType.name }} will apply</p>
-        <v-btn @click="reviewSubTypeSettings" outlined class="mt-4">
-          <v-icon left>mdi-magnify</v-icon> Review Settings
-        </v-btn>
-      </v-col>
+      <psReviewSettings
+        v-if="step >= 4"
+        :selected-content-type="selectedContentType"
+        :selected-sub-type="selectedSubType"
+        @review="reviewSubTypeSettings"
+      />
 
-      <!-- Step 6: Optional Project Configuration -->
-      <v-col v-if="step >= 4" cols="12">
-        <div class="d-flex align-center cursor-pointer mb-4" @click="toggleOptionalFields">
-          <h3 class="mr-2">6. Optional Project Configuration</h3>
-          <v-icon :icon="showOptionalFields ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="small"></v-icon>
-        </div>
-
-        <v-expand-transition>
-          <div v-if="showOptionalFields">
-            <template v-for="fieldKey in generalOptionalFields" :key="fieldKey">
-              <v-text-field
-                v-if="inputFields[fieldKey].type === 'text'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-              ></v-text-field>
-              <v-textarea
-                v-else-if="inputFields[fieldKey].type === 'textarea'"
-                v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label"
-                :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"
-                auto-grow
-              ></v-textarea>
-            </template>
-          </div>
-        </v-expand-transition>
-      </v-col>
+      <psOptionalProjectConfig
+        v-if="step >= 4"
+        :general-optional-fields="generalOptionalFields"
+        :input-fields="inputFields"
+        :form-fields="formFields"
+      />
     </v-row>
   </v-form>
 
-  <!-- Generate Button -->
-  <v-container class="button-container px-0">
-    <v-row no-gutters justify="center">
-      <v-col cols="auto">
-        <v-btn color="primary" @click="generateContent" :disabled="!isValid || step < 4" class="generate-btn">
-          Generate
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <GenerateButton
+    :is-valid="isValid"
+    :step="step"
+    @generate="generateContent"
+  />
 
-  <!-- Modals and Dialogs -->
   <ContentSettingsDialog
     v-model="showSettingsPanel"
     :content-type-id="selectedContentType.id"
@@ -346,6 +128,9 @@ export default {
 
     const updateStep = (newStep: number) => {
       step.value = Math.max(step.value, newStep);
+      if (step.value === 4) {
+        console.log('selected action:', selectedAction.value);
+      }
     };
 
     // --------- Content types and Subtypes selection ---------
@@ -426,6 +211,12 @@ export default {
       }
       return [];
     });
+
+    const handleActionSelection = (action: string) => {
+      selectedAction.value = action;
+      console.log('selected action: in main compoennt', action);
+      updateStep(4);
+    };
 
     const isFieldRequired = (fieldKey: string): boolean => {
       if (actionFields.value.includes(fieldKey)) {
@@ -583,6 +374,7 @@ export default {
       outlineOption,
       projectSetup,
       selectExistingOutline,
+      handleActionSelection
     };
   },
 };
