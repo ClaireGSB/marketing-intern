@@ -71,6 +71,9 @@ export interface UserInput {
   content?: string;
   selected_content_output_id?: string;
   repurpose_instructions?: string;
+  seo_phrase?: string;
+  outline?: string;
+  selected_outline_id?: string;
 }
 
 export interface SettingsInput {

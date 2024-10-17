@@ -50,6 +50,8 @@ export default defineEventHandler(async (event) => {
       ideas: setup.ideas || '',
       repurpose_instructions: setup.repurpose_instructions || '',
       selected_content_output_id: setup.selected_content_output_id || '',
+      outline: setup.outline || '',
+      seo_phrase: setup.seo_phrase || '',
     }
 
 

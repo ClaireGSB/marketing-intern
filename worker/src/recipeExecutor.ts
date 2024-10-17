@@ -22,8 +22,6 @@ import { executeCLISelectionStep } from './stepExecutors/cliSelectionStepExecuto
 import { executeJSONParseStep } from './stepExecutors/jsonParseStepExecutor';
 import { executeUserValidationStep } from './stepExecutors/userValidationStepExecutor';
 import { dataAccess } from './dataAccess';
-// import { getOutlineContent, getParentOutlineId } from './contentOperations';
-import { isActionAvailable, areRequiredInputsPresent, getRequiredInputsForAction } from './actionConfig';
 
 
 const stepExecutors: StepExecutors = {
@@ -262,32 +260,6 @@ export class recipeExecutor {
 
     // Initialize step reports for all steps in the recipe
     this.initializeStepReports(recipe.steps);
-
-    // const componentType = recipe.componentType || 'full_content';
-    // const parentOutlineId = (componentType === 'full_content' && recipe.contentType === 'blog_post') ? await getParentOutlineId(config) : null;
-
-    // Initialize content output and user input
-    // THIS IS NOW DONE BEFORE THIS METHOD IS CALLED
-    // this.contentOutputId = await dataAccess.saveContentOutput(
-    //   userID,
-    //   subtypeSettings.contentSubType.content_type_id,
-    //   subtypeSettings.contentSubType?.id,
-    //   // componentType,
-    //   // parentOutlineId
-    // );
-
-    // Validate action
-    if (projectSettings.action) {
-      if (!isActionAvailable(projectSettings.action, recipe.contentType)) {
-        throw new Error(`Action ${projectSettings.action} is not available for this content type and component type.`);
-      }
-      if (!areRequiredInputsPresent(projectSettings.action, projectSettings)) {
-        const requiredInputs = getRequiredInputsForAction(projectSettings.action);
-        throw new Error(`Action ${projectSettings.action} requires additional input: ${requiredInputs.join(", ")}`);
-      }
-    }
-
-    // await dataAccess.saveContentGenerationUserInput(this.contentOutputId, projectSettings.userID, projectSettings);
 
     try {
       // Execute each step in order
