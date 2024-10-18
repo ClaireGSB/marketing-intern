@@ -1,3 +1,5 @@
+// psOptionalProjectConfig.vue
+
 <template>
   <v-col cols="12">
     <div class="d-flex align-center cursor-pointer mb-4" @click="toggleOptionalFields">

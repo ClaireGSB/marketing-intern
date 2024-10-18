@@ -58,7 +58,7 @@ export const inputFields: Record<string, FieldConfig> = {
     label: 'Outline',
     type: 'textarea',
     use: 'content_type_specific',
-    allowSelection: true,
+    allowSelection: false,
     selectionFilters: { status: 'completed', content_type_id: 8 },
     validation: { minChar: 20, maxChar: 3000 }
   },

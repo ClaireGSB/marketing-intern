@@ -21,7 +21,9 @@
         v-if="step >= 3 && selectedContentType.id === 9"
         v-model:outline-option="outlineOption"
         :project-setup="projectSetup"
+        :selected-outline="selectedContents['outline']"
         @select-outline="selectExistingOutline"
+        @clear-selected-outline="clearSelectedOutline"
       />
 
       <!-- If NOT Blog Post Copy AND outline selected -->
@@ -119,7 +121,7 @@ export default {
     const projectSetup = ref(null);
 
     const updateStep = (newStep: number) => {
-      step.value = Math.max(step.value, newStep);
+      step.value = newStep;
     };
 
     // --------- Content types and Subtypes selection ---------
@@ -153,7 +155,12 @@ export default {
     const selectExistingOutline = async () => {
       showContentSelectionModal.value = true;
       currentSelectingField.value = 'outline';
-      updateStep(5);
+    };
+
+    const clearSelectedOutline = () => {
+      selectedContents.value['outline'] = null;
+      projectSetup.value = null;
+      updateStep(3);
     };
 
     watch(selectedContentType, (newType) => {
@@ -172,14 +179,6 @@ export default {
       if (!possibleSubTypes.value.some(subType => subType.id === selectedSubType.value.id)) {
         selectedSubType.value = possibleSubTypes.value[0] || { id: '', name: '' };
         step.value = Math.min(step.value, 2);
-      }
-    });
-
-    watch(outlineOption, (newValue) => {
-      if (newValue === 'provide') {
-        step.value = 3;
-      } else if (newValue === 'select') {
-        step.value = 4;
       }
     });
 
@@ -204,7 +203,6 @@ export default {
 
     const handleActionSelection = (action: string) => {
       selectedAction.value = action;
-      console.log('selected action: in main compoennt', action);
       updateStep(5);
     };
 
@@ -227,15 +225,15 @@ export default {
 
 
     const openContentSelectionModal = (fieldKey: string) => {
-      console.log('opening content selection modal for', fieldKey);
-      console.log('with filters:', inputFields[fieldKey].selectionFilters);
       currentSelectingField.value = fieldKey;
       showContentSelectionModal.value = true;
     };
 
     const onContentSelected = async (content: any) => {
       if (currentSelectingField.value === 'outline') {
+        selectedContents.value['outline'] = content;
         projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
+        updateStep(5);
       } else {
         selectedContents.value[currentSelectingField.value] = content;
         formFields[currentSelectingField.value] = content.content;
@@ -364,7 +362,8 @@ export default {
       outlineOption,
       projectSetup,
       selectExistingOutline,
-      handleActionSelection
+      handleActionSelection,
+      clearSelectedOutline
     };
   },
 };

@@ -1,3 +1,5 @@
+// psActionInputs.vue
+
 <template>
   <v-col cols="12">
     <h3 class="mb-4">4. Action Inputs</h3>

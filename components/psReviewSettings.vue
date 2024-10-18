@@ -1,3 +1,5 @@
+// psReviewSettings.vue
+
 <template>
   <v-col cols="12">
     <h3 class="mb-4">5. Review settings</h3>
