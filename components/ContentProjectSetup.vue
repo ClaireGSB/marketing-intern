@@ -1,12 +1,14 @@
 <template>
   <v-form ref="form" v-model="isValid" @submit.prevent="generateContent">
     <v-row>
+    <!-- Select Content Type - Step 1 -->
       <psContentTypeSelection
         :content-types="contentTypes"
         :selected-content-type="selectedContentType"
         @select="selectContentType"
       />
 
+    <!-- Select Content Subtype - Step 2 -->
       <psSubTypeSelection
         v-if="step >= 2"
         :possible-sub-types="possibleSubTypes"
@@ -14,6 +16,7 @@
         @update:modelValue="updateStep(3)"
       />
 
+      <!-- If Blog Post Copy: Select Outline - Step 3 -->
       <psOutlineSelection
         v-if="step >= 3 && selectedContentType.id === 9"
         v-model:outline-option="outlineOption"
@@ -21,7 +24,9 @@
         @select-outline="selectExistingOutline"
       />
 
-      <template v-if="selectedContentType.id === 9 && outlineOption === 'provide'">
+      <!-- If NOT Blog Post Copy AND outline selected -->
+      <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
+        <!-- Select Action - Step 4 -->
         <psActionSelection
           v-if="step >= 3"
           :actions="actions"
@@ -29,8 +34,9 @@
           @update="handleActionSelection"
         />
 
+        <!-- Action fields - Step 5 -->
         <psActionInputs
-          v-if="step >= 4"
+          v-if="step >= 5"
           :content-fields="contentFields"
           :action-fields="actionFields"
           :input-fields="inputFields"
@@ -41,35 +47,17 @@
         />
       </template>
 
-      <template v-else-if="selectedContentType.id !== 9">
-        <psActionSelection
-          v-if="step >= 3"
-          :actions="actions"
-          :is-action-available="isActionAvailable"
-          @update="handleActionSelection"
-        />
-
-        <psActionInputs
-          v-if="step >= 4"
-          :content-fields="contentFields"
-          :action-fields="actionFields"
-          :input-fields="inputFields"
-          :form-fields="formFields"
-          :selected-contents="selectedContents"
-          @open-content-selection="openContentSelectionModal"
-          @clear-selected-content="clearSelectedContent"
-        />
-      </template>
-
+      <!-- Review settings - Step 5 -->
       <psReviewSettings
-        v-if="step >= 4"
+        v-if="step >= 5"
         :selected-content-type="selectedContentType"
         :selected-sub-type="selectedSubType"
         @review="reviewSubTypeSettings"
       />
 
+      <!-- Review settings - Step 5 -->
       <psOptionalProjectConfig
-        v-if="step >= 4"
+        v-if="step >= 5 && !(selectedContentType.id === 9 && outlineOption === 'select')"
         :general-optional-fields="generalOptionalFields"
         :input-fields="inputFields"
         :form-fields="formFields"
@@ -132,9 +120,6 @@ export default {
 
     const updateStep = (newStep: number) => {
       step.value = Math.max(step.value, newStep);
-      if (step.value === 4) {
-        console.log('selected action:', selectedAction.value);
-      }
     };
 
     // --------- Content types and Subtypes selection ---------
@@ -168,6 +153,7 @@ export default {
     const selectExistingOutline = async () => {
       showContentSelectionModal.value = true;
       currentSelectingField.value = 'outline';
+      updateStep(5);
     };
 
     watch(selectedContentType, (newType) => {
@@ -219,7 +205,7 @@ export default {
     const handleActionSelection = (action: string) => {
       selectedAction.value = action;
       console.log('selected action: in main compoennt', action);
-      updateStep(4);
+      updateStep(5);
     };
 
     const isFieldRequired = (fieldKey: string): boolean => {
