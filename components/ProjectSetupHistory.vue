@@ -2,7 +2,7 @@
 <template>
   <v-card v-if="projectSetup">
     <v-card-title>Project Setup</v-card-title>
-    <v-card-subtitle>These are the details provided to generate this content.</v-card-subtitle>
+    <v-card-subtitle>These are the details provided to generate this {{ getContentTypeDisplayName(projectSetup.content_type_id) }}.</v-card-subtitle>
     <v-card-text>
       <p v-for="prop in projectSetupProperties" :key="prop.key">
         <strong>{{ prop.label }}: </strong>
