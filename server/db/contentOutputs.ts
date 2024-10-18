@@ -29,14 +29,19 @@ export const contentOutputs = {
     if (!userInput.content_subtype_id) {
       throw new Error('Content subtype ID is required');
     }
-    if (!userInput.action) {
-      throw new Error('action is required');
-    }
-    if (!isActionAvailable(userInput.action, userInput.content_type_id)) {
-      throw new Error('Action is not available for this content type');
-    }
-    if (!areAllRequiredInputsPresent(userInput.content_type_id, userInput.action, userInput)) {
-      throw new Error('Required inputs are missing: ' + getAllRequiredInputs(userInput.content_type_id, userInput.action).join(', '));
+
+    if (!userInput.selected_outline_id) {
+      // if selected_outline_id is provided, these inputs are not present; they are in the outline project settings
+      // TO DO: refactor this to a separate function and run it when getting project settings for the outline
+      if (!userInput.action) {
+        throw new Error('action is required');
+      }
+      if (!isActionAvailable(userInput.action, userInput.content_type_id)) {
+        throw new Error('Action is not available for this content type');
+      }
+      if (!areAllRequiredInputsPresent(userInput.content_type_id, userInput.action, userInput)) {
+        throw new Error('Required inputs are missing: ' + getAllRequiredInputs(userInput.content_type_id, userInput.action).join(', '));
+      }
     }
 
 
@@ -56,8 +61,15 @@ export const contentOutputs = {
     if (userInput.selected_content_output_id) {
       userInput.content = '';
     }
+
+    // if selected_outline_id is provided, clear the outline field (no need to store it)
+    if (userInput.selected_outline_id) {
+      userInput.outline = '';
+    }
+
     const project_setup_id = await projectSetups.saveProjectSetup(userInput);
     const subtype_settings_history_id = await subtypeSettingsHistory.saveSubtypeSettingsHistory(subtypeSettings);
+
 
     // 3. INSERT NEW CONTENT OUTPUT INTO DB
     const query = `
@@ -100,6 +112,29 @@ export const contentOutputs = {
         const blog_metadata = await blogMetadatas.getBlogMetadataByContentOutputId(selectedContentOutput.id);
         projectSettings.selected_content_blog_metadata = blog_metadata? blog_metadata : undefined;
       }
+    }
+
+    // 4.6 if selected_outline_id is provided, get this outline from database
+    if (userInput.selected_outline_id) {
+      console.log(' ###### Selected outline ID provided:', userInput.selected_outline_id);
+      const selectedOutline = await contentOutputs.getContentOutputById(userInput.selected_outline_id);
+      projectSettings.outline = selectedOutline.content;
+      // also get the project setup of the selected outline
+      const selectedOutlineProjectSetup = await projectSetups.getProjectSetupByContentOutputID(userInput.selected_outline_id);
+      console.log('Selected outline project setup:', selectedOutlineProjectSetup);
+      // use the fields in the selected outline project setup to update the project settings.
+      // because when the user selects an outline, they are selecting the project settings of the outline; they can't add anything else
+      projectSettings.action = selectedOutlineProjectSetup.action;
+      projectSettings.topic = selectedOutlineProjectSetup.topic;
+      projectSettings.target_audience = selectedOutlineProjectSetup.target_audience;
+      projectSettings.guidelines = selectedOutlineProjectSetup.guidelines;
+      projectSettings.context = selectedOutlineProjectSetup.context;
+      projectSettings.ideas = selectedOutlineProjectSetup.ideas;
+      projectSettings.repurpose_instructions = selectedOutlineProjectSetup.repurpose_instructions;
+      projectSettings.content = selectedOutlineProjectSetup.content;
+      projectSettings.expertise = selectedOutlineProjectSetup.expertise;
+      projectSettings.seo_phrase = selectedOutlineProjectSetup.seo_phrase;
+      projectSettings.selected_content_blog_metadata = selectedOutlineProjectSetup.selected_content_blog_metadata;
     }
 
     // 5. ADD JOB TO QUEUE
