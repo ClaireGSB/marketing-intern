@@ -3,16 +3,8 @@
 <template>
   <v-col cols="12">
     <h3 class="mb-4">2. Select Sub-Type</h3>
-    <v-select
-      v-model="localSelectedSubType"
-      :items="possibleSubTypes"
-      item-title="name"
-      item-value="id"
-      label="Select Sub-Type"
-      required
-      return-object
-      @update:modelValue="onSubTypeChange"
-    ></v-select>
+    <v-select v-model="localSelectedSubType" :items="possibleSubTypes" item-title="name" item-value="id"
+      label="Select Sub-Type" required return-object @update:modelValue="onSubTypeChange"></v-select>
   </v-col>
 </template>
 
