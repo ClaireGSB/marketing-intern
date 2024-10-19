@@ -107,7 +107,7 @@ export const validations = {
     return result.rows;
   },
 
-  async confirmValidations(contentOutputId: string): Promise<ContentOutputFrontend> {
+  async confirmValidations(contentOutputId: string, orgID: string): Promise<ContentOutputFrontend> {
     console.log('confirmValidations process started');
     // 1. get all the validations for the content output
     const validations = await this.getValidationsByContentOutputID(contentOutputId);
@@ -146,7 +146,7 @@ export const validations = {
     if (result.rowCount === 0 || result.rowCount === null) {
       throw new Error('Content output not found');
     }
-    const updatedContentOutput = result.rows[0]; 
+    const updatedContentOutput = result.rows[0];
     console.log('Content output updated:', updatedContentOutput);
 
     // 7. if there are validations where step output type starts with "final_BM_", for each of them, Extract the metadata field name - it's everything after the second underscore
@@ -160,8 +160,13 @@ export const validations = {
       const updateData = {
         [metadataFieldName]: metadataValue
       };
+      console.log('validation:', validation);
+      console.log('metadataFieldName:', metadataFieldName);
+      console.log('updateData:', updateData);
 
-      await blogMetadatas.updateOrCreate(contentOutputId, updateData);
+      await blogMetadatas.updateOrCreate(contentOutputId, updateData, orgID);
+
+      console.log('Blog metadata updated:', updateData);
       // TO DO - handle the case where the metadata field name is not found or other errors
       // also handle the fact the we're not telling the frontend that the metadata was updated
     }

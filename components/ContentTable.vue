@@ -36,10 +36,9 @@ export default {
       type: Boolean,
       default: false
     },
-    allowedStatuses: {
-      type: Array as () => string[],
-      // Empty array means all statuses are allowed
-      default: () => []
+    filters: {
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['select', 'view'],
@@ -64,7 +63,16 @@ export default {
     const contentOutputsFormatted = computed(() => {
       const userFirstNames = userStore.userFirstNames;
       return contentOutputs.value
-        .filter(output => props.allowedStatuses.length === 0 || props.allowedStatuses.includes(output.status))
+        .filter(output => {
+          if (props.filters && typeof props.filters === 'object') {
+            for (const [key, value] of Object.entries(props.filters)) {
+              if (output[key] !== value) {
+                return false;
+              }
+            }
+          }
+          return true;
+        })
         .map(output => ({
           ...output,
           content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
@@ -151,5 +159,4 @@ export default {
 .selected-row td {
   color: red !important;
 }
-
 </style>

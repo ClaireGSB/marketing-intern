@@ -46,6 +46,25 @@ export const useUserDataStore = defineStore('userData', {
     getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
     },
+    async getBlogMetadataByContentOutputId(contentOutputID: string) {
+      // check that content output status is completed
+      const contentOutput = this.getContentOutputById(contentOutputID);
+      if (!contentOutput || contentOutput.status !== 'completed') {
+        return null;
+      }
+      // if it is, check if metadata is in the store
+      if (!this.blogMetadata.find((metadata) => metadata.content_output_id === contentOutputID)) {
+        // if not, fetch it from the API
+        console.log('Blog metadata not in store, fetching from API for ID:', contentOutputID);
+        const blogMetadata = await api.getBlogMetadataByContentOutputId(contentOutputID);
+        this.blogMetadata.push(blogMetadata);
+        return blogMetadata;
+      } else {
+        // if it is, return it
+        console.log('Blog metadata already in store');
+        return this.blogMetadata.find((metadata) => metadata.content_output_id === contentOutputID);
+      }
+    },
     async fetchProjectSetupByContentOutput(contentOutputID: string) {
       // If the project setup is not in the store, fetch it from the API
       if (!this.getProjectSetupByContentOutputId(contentOutputID)) {
@@ -205,28 +224,6 @@ export const useUserDataStore = defineStore('userData', {
 
       return generatedResponse;
     },
-    getFinalContentForContentOutput(contentOutputID: string) {
-      // return an array of object with this shape: id: string; title: string; content: string;
-      // one of the object is the final content, the others are blog metadata if contentOutput is blog_post_copy
-      const contentOutput = this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
-      if (!contentOutput) {
-        return [];
-      }
-      const content = contentOutput.content;
-      // if content type is blog_post_copy, then add the blog metadata
-      if (contentOutput.content_type_id === 8) {
-        const blogMetadata = this.blogMetadata.find((metadata) => metadata.content_output_id === contentOutputID);
-        if (!blogMetadata) {
-          return [{ id: 'content', title: 'Content', content: content }];
-        }
-        return [
-          { id: 'content', title: 'Content', content: content },
-          { id: 'title', title: 'Title', content: blogMetadata.title ?? '' },
-          { id: 'meta_description', title: 'Meta Description', content: blogMetadata.meta_description },
-        ];
-      }
-      return [{ id: 'content', title: 'Content', content: content }];
-    }
   },
   getters: {
     userFirstNames(): Record<string, string> {

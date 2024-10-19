@@ -1,7 +1,6 @@
 // src/recipeExecutor.ts
 
 import type {
-  ProjectSettings,
   RecipeStepConfig,
   StepType,
   StepExecutors,
@@ -14,6 +13,7 @@ import type {
   SubtypeSettings,
   Recipe
 } from './recipeTypes';
+import type { UserInput } from '~/types/backendTypes';
 import { executeLLMStep } from './stepExecutors/llmStepExecutor';
 import { executeNativishApiStep } from './stepExecutors/nativishAPIStepExecutor';
 import { executeNativishHtmlRenderStep } from './stepExecutors/nativishHtmlRenderStepExecutor';
@@ -22,8 +22,6 @@ import { executeCLISelectionStep } from './stepExecutors/cliSelectionStepExecuto
 import { executeJSONParseStep } from './stepExecutors/jsonParseStepExecutor';
 import { executeUserValidationStep } from './stepExecutors/userValidationStepExecutor';
 import { dataAccess } from './dataAccess';
-// import { getOutlineContent, getParentOutlineId } from './contentOperations';
-import { isActionAvailable, areRequiredInputsPresent, getRequiredInputsForAction } from './actionConfig';
 
 
 const stepExecutors: StepExecutors = {
@@ -41,7 +39,7 @@ export class recipeExecutor {
   // Store reports for each step
   private stepReports: StepReport[] = [];
   // Store the overall recipe configuration
-  private recipeConfig: ProjectSettings;
+  private recipeConfig: UserInput;
   // Store the content generated throughout the recipe execution
   private content: { [key: string]: string } = {};
   // Store the id of the content output
@@ -53,7 +51,7 @@ export class recipeExecutor {
 
   // Constructor initializes the executor with default empty objects
   // The actual initialization happens in the executeRecipe method
-  constructor(recipeConfig: ProjectSettings, initialContent: { [key: string]: string }) {
+  constructor(recipeConfig: UserInput, initialContent: { [key: string]: string }) {
     this.recipeConfig = recipeConfig;
     this.content = initialContent;
   }
@@ -231,7 +229,7 @@ export class recipeExecutor {
 
   // Main method to execute the entire recipe
   // This method uses generics to allow for flexible typing of configurations and outputs
-  async executeRecipe<T extends ProjectSettings, O extends string>(
+  async executeRecipe<T extends UserInput, O extends string>(
     recipe: Recipe<T, O, SubtypeSettings>,
     contentOutputId: string,
     userID: string,
@@ -262,32 +260,6 @@ export class recipeExecutor {
 
     // Initialize step reports for all steps in the recipe
     this.initializeStepReports(recipe.steps);
-
-    // const componentType = recipe.componentType || 'full_content';
-    // const parentOutlineId = (componentType === 'full_content' && recipe.contentType === 'blog_post') ? await getParentOutlineId(config) : null;
-
-    // Initialize content output and user input
-    // THIS IS NOW DONE BEFORE THIS METHOD IS CALLED
-    // this.contentOutputId = await dataAccess.saveContentOutput(
-    //   userID,
-    //   subtypeSettings.contentSubType.content_type_id,
-    //   subtypeSettings.contentSubType?.id,
-    //   // componentType,
-    //   // parentOutlineId
-    // );
-
-    // Validate action
-    if (projectSettings.action) {
-      if (!isActionAvailable(projectSettings.action, recipe.contentType)) {
-        throw new Error(`Action ${projectSettings.action} is not available for this content type and component type.`);
-      }
-      if (!areRequiredInputsPresent(projectSettings.action, projectSettings)) {
-        const requiredInputs = getRequiredInputsForAction(projectSettings.action);
-        throw new Error(`Action ${projectSettings.action} requires additional input: ${requiredInputs.join(", ")}`);
-      }
-    }
-
-    // await dataAccess.saveContentGenerationUserInput(this.contentOutputId, projectSettings.userID, projectSettings);
 
     try {
       // Execute each step in order

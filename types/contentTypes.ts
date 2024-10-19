@@ -1,4 +1,4 @@
-// shared/contentTypes.ts
+// types/contentTypes.ts
 
 import { get } from "http";
 
@@ -11,9 +11,11 @@ export interface ContentType {
   _status: string;
   available_actions: string[];
   created_at: string;
+  required_fields: string[];
+  optional_fields: string[];
 }
 
-export type ContentTypeName = 'blog_post' | 'twitter_post' | 'linkedin_post' | 'guidelines' | 'nativish_input_text' | 'nativish_screenshot' | 'twitter_post_ideas' | 'blog_outline' | 'blog_post_copy'
+export type ContentTypeName = 'blog_post' | 'twitter_post' | 'linkedin_post' | 'guidelines' | 'nativish_input_text' | 'nativish_screenshot' | 'twitter_post_ideas' | 'blog_outline'
 
 export const contentTypes: ContentType[] = [
   // {
@@ -29,7 +31,9 @@ export const contentTypes: ContentType[] = [
     "display_name": "Twitter Post",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "mostly good",
-    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product']
+    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
+    "required_fields": [],
+    "optional_fields": []
   },
   {
     "id": 3,
@@ -37,7 +41,9 @@ export const contentTypes: ContentType[] = [
     "display_name": "LinkedIn Post",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "mostly good",
-    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product']
+    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
+    "required_fields": [],
+    "optional_fields": []
   },
   // {
   //   "id": 4,
@@ -52,7 +58,9 @@ export const contentTypes: ContentType[] = [
     "display_name": "Nativish Input Text",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "to review",
-    "available_actions": ['write_topic']
+    "available_actions": ['write_topic'],
+    "required_fields": [],
+    "optional_fields": []
   },
   {
     "id": 6,
@@ -60,7 +68,9 @@ export const contentTypes: ContentType[] = [
     "display_name": "Nativish Screenshot",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "to review",
-    "available_actions": ['write_topic']
+    "available_actions": ['write_topic'],
+    "required_fields": [],
+    "optional_fields": []
   },
   // {
   //   "id": 7,
@@ -75,15 +85,19 @@ export const contentTypes: ContentType[] = [
     "display_name": "Blog Post Outline",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "mostly good, need to fine tune and change the models to Sonnet",
-    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product']
+    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
+    "required_fields": [],
+    "optional_fields": ['seo_phrase']
   },
   {
     "id": 9,
-    "name": "blog_post_copy",
+    "name": "blog_post",
     "display_name": "Blog Post Copy",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "to review",
-    "available_actions": ['write_outline']
+    "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
+    "required_fields": ['outline'],
+    "optional_fields": ['seo_phrase']
   }
 
 ]

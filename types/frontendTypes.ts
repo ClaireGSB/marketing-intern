@@ -71,6 +71,9 @@ export interface UserInput {
   content?: string;
   selected_content_output_id?: string;
   repurpose_instructions?: string;
+  seo_phrase?: string;
+  outline?: string;
+  selected_outline_id?: string;
 }
 
 export interface SettingsInput {
@@ -114,9 +117,4 @@ export interface Validations {
 //   3: "This is a fantastic title"
 // }
 
-// 3. Data shape for final content display
-export interface FinalContentItem {
-  id: string;
-  title: string;
-  content: string;
-}
+

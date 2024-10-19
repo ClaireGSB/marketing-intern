@@ -2,26 +2,7 @@
   <v-container>
     <v-row v-if="projectSetup">
       <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Project Setup</v-card-title>
-          <v-card-subtitle>This are the details provided to generate this content.</v-card-subtitle>
-          <v-card-text>
-            <p v-for="prop in ProjectSetupProperties" :key="prop.key">
-              <strong>{{ prop.label }}: </strong>
-              <span v-if="prop.value.length <= maxCharDisplay">{{ prop.value }}</span>
-              <span v-else>
-                {{ showFullText[prop.key] ? prop.value : prop.value.slice(0, maxCharDisplay) + '...' }}
-                <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(prop.key)">
-                  {{ showFullText[prop.key] ? 'See less' : 'See more' }}
-                </a>
-              </span>
-            </p>
-            <template v-if="projectSetup.selected_content_output_id">
-              <p><strong>Content: </strong></p>
-              <SelectedContentTag :content-output-id="projectSetup.selected_content_output_id" />
-            </template>
-          </v-card-text>
-        </v-card>
+        <ProjectSetupHistory :projectSetup="projectSetup" />
       </v-col>
     </v-row>
     <v-container v-else>
@@ -51,8 +32,6 @@ const userStore = useUserDataStore();
 
 const projectSetup = ref<UserInput | null>(null);
 const subtypeSettingsHistory = ref<SettingsInput | null>(null);
-const showFullText = ref<{ [key: string]: boolean }>({});
-const maxCharDisplay = 500;
 
 
 onMounted(async () => {
@@ -65,54 +44,11 @@ onMounted(async () => {
   console.log('subtypeSettingsHistory', subtypeSettingsHistory.value);
 });
 
-const getContentTypeDisplayName = (contentTypeId: number) => {
-  return userStore.getContentTypeDisplayNameById(contentTypeId);
-};
-
-const getContentSubTypeName = (contentSubTypeId: string) => {
-  return userStore.getContentSubTypeNameById(contentSubTypeId);
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString();
-};
-
-
-const ProjectSetupProperties = computed(() => {
-  if (!projectSetup.value) return [];
-
-  const properties = [
-    { key: 'content_type_id', label: 'Content Type', value: getContentTypeDisplayName(projectSetup.value.content_type_id) },
-    { key: 'action', label: 'Action', value: projectSetup.value.action },
-    { key: 'topic', label: 'Topic', value: projectSetup.value.topic },
-    { key: 'ideas', label: 'Ideas', value: projectSetup.value.ideas },
-    { key: 'repurpose_instructions', label: 'Repurpose Instructions', value: projectSetup.value.repurpose_instructions },
-    { key: 'target_audience', label: 'Target Audience', value: projectSetup.value.target_audience },
-    { key: 'guidelines', label: 'Guidelines', value: projectSetup.value.guidelines },
-    { key: 'context', label: 'Context', value: projectSetup.value.context },
-  ];
-
-  // Only add the 'content' field if there's no selected content
-  if (!projectSetup.value.selected_content_output_id) {
-    properties.push({ key: 'content', label: 'Content', value: projectSetup.value.content });
-  }
-
-  return properties.filter(prop => {
-    return prop.value !== undefined &&
-      prop.value !== null &&
-      prop.value !== '' &&
-      (typeof prop.value !== 'string' || prop.value.trim() !== '');
-  });
-});
-
-const toggleShowMore = (key: string) => {
-  showFullText.value[key] = !showFullText.value[key];
-};
 </script>
 
 <style scoped>
 .v-card-text p {
   margin-bottom: 8px;
+  white-space: pre-wrap;
 }
-
 </style>

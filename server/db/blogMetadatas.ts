@@ -5,20 +5,21 @@ import dbclient from '../database';
 import { BlogMetadata } from '../../types/backendTypes';
 
 export const blogMetadatas = {
-  async create(content_output_id: string, blogMetadata: Partial<BlogMetadata>): Promise<BlogMetadata> {
+  async create(content_output_id: string, blogMetadata: Partial<BlogMetadata>, orgId: string): Promise<BlogMetadata> {
     const id = uuidv4();
     const query = `
-      INSERT INTO blog_metadata (id, content_output_id, title_options, title, meta_description, formatted_post)
+      INSERT INTO blog_metadata (id, content_output_id, title, meta_description, formatted_post, org_id)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
     const values = [
       id,
       content_output_id,
-      blogMetadata.title_options ? JSON.stringify(blogMetadata.title_options) : null,
-      blogMetadata.title? blogMetadata.title : '',
+      // blogMetadata.title_options ? JSON.stringify(blogMetadata.title_options) : null,
+      blogMetadata.title ? blogMetadata.title : '',
       blogMetadata.meta_description ? blogMetadata.meta_description : '',
-      blogMetadata.formatted_post? blogMetadata.formatted_post : ''
+      blogMetadata.formatted_post ? blogMetadata.formatted_post : '',
+      orgId
     ];
     const result = await dbclient.query(query, values);
     return result.rows[0];
@@ -27,9 +28,6 @@ export const blogMetadatas = {
   async update(id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata> {
     const setClause = Object.keys(updates)
       .map((key, index) => {
-        if (key === 'title_options') {
-          return `${key} = $${index + 2}::jsonb`;
-        }
         return `${key} = $${index + 2}`;
       })
       .join(', ');
@@ -41,9 +39,7 @@ export const blogMetadatas = {
     `;
     const values = [
       id,
-      ...Object.entries(updates).map(([key, value]) => 
-        key === 'title_options' ? JSON.stringify(value) : value
-      )
+      ...Object.values(updates)
     ];
     const result = await dbclient.query(query, values);
     if (result.rows.length === 0) {
@@ -82,11 +78,11 @@ export const blogMetadatas = {
     return result.rows[0] || null;
   },
 
-  async updateOrCreate(content_output_id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata> {
+  async updateOrCreate(content_output_id: string, updates: Partial<BlogMetadata>, orgId: string): Promise<BlogMetadata> {
     const existingMetadata = await this.getBlogMetadataByContentOutputId(content_output_id);
     if (existingMetadata) {
       return this.update(existingMetadata.id, updates);
     }
-    return this.create(content_output_id, updates);
+    return this.create(content_output_id, updates, orgId);
   }
 };

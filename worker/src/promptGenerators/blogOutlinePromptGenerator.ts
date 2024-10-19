@@ -4,12 +4,13 @@ import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
 import { actionInstructionBlogOutlineSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
-import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
+import { examplesSnippet } from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
 import { targetAudienceSnippet } from './SnippetsProcessors/targetAudienceProcessor';
 import { contextSnippet } from './SnippetsProcessors/contextProcessor';
+import { seoPhraseSnippet } from './SnippetsProcessors/seoPhraseProcessor';
 
 export function generateSystemPrompt(projectSettings: UserInput, contentType: ContentTypeName, outputType: string): string {
   return systemPromptSnippet(projectSettings, contentType, outputType);
@@ -19,12 +20,13 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
   const snippets = [
     // --------- instruction snippets
     actionInstructionBlogOutlineSnippet(projectSettings, contentType),
-    additionalInstructionsSnippet(subtypeSettings, projectSettings),
+    additionalInstructionsSnippet(subtypeSettings, projectSettings, contentType),
     // --------- enclosed fields in xml tags
     actionFieldsSnippet(projectSettings),
     // productDescriptionSnippet(projectSettings),
     targetAudienceSnippet(subtypeSettings, projectSettings),
     // characterLimitSnippet(projectSettings, contentType),
+    seoPhraseSnippet(projectSettings),
     guidelinesSnippet(subtypeSettings, projectSettings),
     contextSnippet(subtypeSettings, projectSettings),
     examplesSnippet(subtypeSettings),
@@ -60,7 +62,7 @@ You should output your response in the following JSON format:
   Provide your response in valid JSON format with properly escaped quotes and line breaks.
 `
 
-;
+    ;
   console.log('---------------------\nReview prompt:');
   console.log(prompt);
   return prompt;

@@ -15,13 +15,6 @@ export function systemPromptSnippet(projectSettings: UserInput, contentType: Con
 const expertiseSnippet = (projectSettings: UserInput): string =>
   projectSettings.expertise ? ` with deep knowledge in ${projectSettings.expertise}` : '';
 
-// const platformSnippet = (contentType: ContentTypeName): string =>
-//   contentType === 'linkedin_post' ? 'LinkedIn' : 'Twitter';
-
-// const contentTypeSnippet = (contentType: ContentTypeName): string =>
-//   contentType === 'linkedin_post' ? 'Linkedin Post' : 'Twitter Post';
-
-
 const roleSnippet = (outputType: string, contentType: ContentTypeName): string => {
   if (outputType === "temp_draftPost") {
     switch (contentType) {
@@ -52,6 +45,20 @@ const roleSnippet = (outputType: string, contentType: ContentTypeName): string =
     switch (contentType) {
       case "blog_outline":
         return "content outliner";
+      default:
+        throw new Error("Unsupported content type");
+    }
+  } else if (outputType === "temp_title") {
+    switch (contentType) {
+      case "blog_post":
+        return "Title writer for blog posts";
+      default:
+        throw new Error("Unsupported content type");
+    }
+  } else if (outputType === "temp_metaDescription") {
+    switch (contentType) {
+      case "blog_post":
+        return "Title writer for blog posts";
       default:
         throw new Error("Unsupported content type");
     }

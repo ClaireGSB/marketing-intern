@@ -1,90 +1,41 @@
 <template>
   <v-form ref="form" v-model="isValid" @submit.prevent="generateContent">
     <v-row>
-      <v-col cols="12">
-        <h3 class="mb-4">1. Select Content Type</h3>
-        <v-row>
-          <v-col v-for="type in contentTypes" :key="type.id" cols="12" sm="6" md="3">
-            <v-card @click="selectContentType(type.id)" :color="selectedContentType.id === type.id ? 'primary' : ''"
-              :class="{ 'elevation-8': selectedContentType.id === type.id }" class="selectable-card">
-              <v-card-title>{{ type.display_name }}</v-card-title>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-col>
+      <!-- Select Content Type - Step 1 -->
+      <psContentTypeSelection :content-types="contentTypes" :selected-content-type="selectedContentType"
+        @select="selectContentType" />
 
-      <v-col v-if="step >= 2" cols="12">
-        <h3 class="mb-4">2. Select Sub-Type</h3>
-        <v-select v-model="selectedSubType" :items="possibleSubTypes" item-title="name" label="Select Sub-Type"
-          @update:modelValue="updateStep(3)" required return-object></v-select>
-      </v-col>
+      <!-- Select Content Subtype - Step 2 -->
+      <psSubTypeSelection v-if="step >= 2" :possible-sub-types="possibleSubTypes"
+        v-model:selected-sub-type="selectedSubType" @update:modelValue="updateStep(3)" />
 
-      <v-col v-if="step >= 2" cols="12">
-        <h3 class="mb-4">3. Select Action</h3>
-        <v-radio-group v-model="selectedAction" @update:modelValue="updateStep(4)">
-          <v-tooltip v-for="action in Object.keys(actions)" :key="action" :disabled="isActionAvailable(action)"
-            text="Unavailable for this content type" location="top start">
-            <template v-slot:activator="{ props }">
-              <div v-bind="props">
-                <v-radio :label="action" :value="action" :disabled="!isActionAvailable(action)"></v-radio>
-              </div>
-            </template>
-          </v-tooltip>
-        </v-radio-group>
-      </v-col>
+      <!-- If Blog Post Copy: Select Outline - Step 3 -->
+      <psOutlineSelection v-if="step >= 3 && selectedContentType.id === 9" v-model:outline-option="outlineOption"
+        :project-setup="projectSetup" :selected-outline="selectedContents['outline']"
+        @select-outline="selectExistingOutline" @clear-selected-outline="clearSelectedOutline" />
 
-      <v-col v-if="step >= 4" cols="12">
-        <h3 class="mb-4">4. Action Inputs</h3>
-        <template v-for="fieldKey in actionFields" :key="fieldKey">
-          <template v-if="fieldKey === 'content' && isContentSelectable">
-            <div class="d-flex align-center mb-4">
-              <v-btn @click="openContentSelectionModal" color="primary" class="mr-4">
-                Select Existing Content
-              </v-btn>
-              <SelectedContentTag :content-output-id="selectedContent.id" v-if="selectedContent" :removable="true"
-              @remove="clearSelectedContent" />
-            </div>
-          </template>
-          <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
-          <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar" :disabled="fieldKey === 'content' && !!selectedContent"
-            auto-grow></v-textarea>
-        </template>
-      </v-col>
+      <!-- If NOT Blog Post Copy AND outline selected -->
+      <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
+        <!-- Select Action - Step 4 -->
+        <psActionSelection v-if="step >= 3" :actions="actions" :is-action-available="isActionAvailable"
+          @update="handleActionSelection" />
 
-      <v-col v-if="step >= 4" cols="12">
-        <h3 class="mb-4">5. Review settings</h3>
-        <p>The following settings for {{ selectedContentType.display_name }} - {{ selectedSubType.name }} will apply</p>
-        <v-btn @click="reviewSubTypeSettings" outlined class="mt-4">
-          <v-icon left>mdi-magnify</v-icon> Review Settings
-        </v-btn>
-      </v-col>
+        <!-- Action fields - Step 5 -->
+        <psActionInputs v-if="step >= 5" :content-fields="contentFields" :action-fields="actionFields"
+          :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
+          @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+      </template>
 
+      <!-- Review settings - Step 5 -->
+      <psReviewSettings v-if="step >= 5" :selected-content-type="selectedContentType"
+        :selected-sub-type="selectedSubType" @review="reviewSubTypeSettings" />
 
-      <v-col v-if="step >= 4" cols="12">
-        <div class="d-flex align-center cursor-pointer mb-4" @click="toggleOptionalFields">
-          <h3 class="mr-2">6. Optional Project Configuration</h3>
-          <v-icon :icon="showOptionalFields ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="small"></v-icon>
-        </div>
-
-        <v-expand-transition>
-          <div v-if="showOptionalFields">
-            <template v-for="fieldKey in generalOptionalFields" :key="fieldKey">
-              <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
-              <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
-                :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
-                :counter="inputFields[fieldKey].validation?.maxChar" auto-grow></v-textarea>
-            </template>
-          </div>
-        </v-expand-transition>
-      </v-col>
+      <!-- Review settings - Step 5 -->
+      <psOptionalProjectConfig v-if="step >= 5 && !(selectedContentType.id === 9 && outlineOption === 'select')"
+        :general-optional-fields="generalOptionalFields" :input-fields="inputFields" :form-fields="formFields" />
     </v-row>
   </v-form>
+
   <v-container class="button-container px-0">
     <v-row no-gutters justify="center">
       <v-col cols="auto">
@@ -94,9 +45,11 @@
       </v-col>
     </v-row>
   </v-container>
+
   <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
     :content-subtype-id="selectedSubType.id" />
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected" />
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
+    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script lang="ts">
@@ -127,9 +80,11 @@ export default {
 
     // --------- Form Progress ---------
     const step = ref(1);
+    const outlineOption = ref<'select' | 'provide' | null>(null);
+    const projectSetup = ref(null);
 
     const updateStep = (newStep: number) => {
-      step.value = Math.max(step.value, newStep);
+      step.value = newStep;
     };
 
     // --------- Content types and Subtypes selection ---------
@@ -160,7 +115,27 @@ export default {
       updateStep(2);
     };
 
+    const selectExistingOutline = async () => {
+      showContentSelectionModal.value = true;
+      currentSelectingField.value = 'outline';
+    };
+
+    const clearSelectedOutline = () => {
+      selectedContents.value['outline'] = null;
+      outlineOption.value = null;
+      projectSetup.value = null;
+      updateStep(3);
+    };
+
     watch(selectedContentType, (newType) => {
+      if (newType.id === 9) {
+        step.value = 3;
+        outlineOption.value = null;
+      } else {
+        // Reset outline-related data when switching away from blog post copy
+        outlineOption.value = null;
+        projectSetup.value = null;
+      }
       if (selectedAction.value && !isActionAvailable(selectedAction.value)) {
         selectedAction.value = '';
         step.value = Math.min(step.value, 3);
@@ -173,10 +148,14 @@ export default {
 
     // --------- Action Selection & Action-Related Required Fields ---------
     const selectedAction = ref<string>('');
-    
+
     const isActionAvailable = (action: string): boolean => {
       return action in actions.value && selectedContentType.value.available_actions.includes(action);
     };
+
+    const contentFields = computed(() => {
+      return [...selectedContentType.value.required_fields, ...selectedContentType.value.optional_fields];
+    });
 
     const actionFields = computed((): string[] => {
       if (selectedAction.value && selectedAction.value in actions.value) {
@@ -186,29 +165,48 @@ export default {
       return [];
     });
 
+    const handleActionSelection = (action: string) => {
+      selectedAction.value = action;
+      updateStep(5);
+    };
+
     const isFieldRequired = (fieldKey: string): boolean => {
-      if (selectedAction.value && selectedAction.value in actions.value) {
-        const action = actions.value[selectedAction.value as keyof typeof actions.value];
-        return action.requiredFields.includes(fieldKey);
+      if (actionFields.value.includes(fieldKey)) {
+        if (selectedAction.value && selectedAction.value in actions.value) {
+          const action = actions.value[selectedAction.value as keyof typeof actions.value];
+          return action.requiredFields.includes(fieldKey);
+        }
+      }
+      if (contentFields.value.includes(fieldKey)) {
+        return selectedContentType.value.required_fields.includes(fieldKey);
       }
       return false;
     };
 
+    const selectedContents = ref<Record<string, any>>({});
     const showContentSelectionModal = ref(false);
-    const selectedContent = ref(null);
+    const currentSelectingField = ref('');
 
-    const openContentSelectionModal = () => {
+
+    const openContentSelectionModal = (fieldKey: string) => {
+      currentSelectingField.value = fieldKey;
       showContentSelectionModal.value = true;
     };
 
-    const onContentSelected = (content) => {
-      selectedContent.value = content;
-      formFields.content = content.content;
+    const onContentSelected = async (content: any) => {
+      if (currentSelectingField.value === 'outline') {
+        selectedContents.value['outline'] = content;
+        projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
+        updateStep(5);
+      } else {
+        selectedContents.value[currentSelectingField.value] = content;
+        formFields[currentSelectingField.value] = content.content;
+      }
     };
 
-    const clearSelectedContent = () => {
-      selectedContent.value = null;
-      formFields.content = '';
+    const clearSelectedContent = (fieldKey: string) => {
+      selectedContents.value[fieldKey] = null;
+      formFields[fieldKey] = '';
     };
 
     const isContentSelectable = computed(() => {
@@ -276,8 +274,18 @@ export default {
           content_subtype_id: selectedSubType.value.id,
           action: selectedAction.value,
           ...formFields,
-          selected_content_output_id: selectedContent.value?.id
         };
+
+        // Add selected content IDs for fields that allow selection
+        for (const fieldKey in selectedContents.value) {
+          if (selectedContents.value['content']) {
+            userInput[`selected_content_output_id`] = selectedContents.value['content'].id;
+          }
+          if (selectedContents.value['outline']) {
+            userInput[`selected_outline_id`] = selectedContents.value['outline'].id;
+          }
+        }
+        // To do: also handle outline
         console.log('requesting content generation with:', userInput)
         emit('generate', userInput);
       }
@@ -303,16 +311,23 @@ export default {
       showSettingsPanel,
       getValidationRules,
       actionFields,
+      contentFields,
       formFields,
       generalOptionalFields,
       inputFields,
       isFieldRequired,
       showContentSelectionModal,
-      selectedContent,
+      selectedContents,
       openContentSelectionModal,
       onContentSelected,
       clearSelectedContent,
       isContentSelectable,
+      currentSelectingField,
+      outlineOption,
+      projectSetup,
+      selectExistingOutline,
+      handleActionSelection,
+      clearSelectedOutline
     };
   },
 };

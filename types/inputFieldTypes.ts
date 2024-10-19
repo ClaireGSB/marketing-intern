@@ -1,13 +1,14 @@
 // shared/inputFieldTypes.ts
 
 export type FieldType = 'text' | 'textarea';
-export type FieldUse = 'action_specific' | 'general';
-
+export type FieldUse = 'action_specific' | 'general' | 'content_type_specific';
 export interface FieldConfig {
   key: string;
   label: string;
   type: FieldType;
   use: FieldUse;
+  allowSelection?: boolean;
+  selectionFilters?: Record<string, any>;
   validation?: {
     minChar?: number;
     maxChar?: number;
@@ -34,6 +35,8 @@ export const inputFields: Record<string, FieldConfig> = {
     label: 'Content',
     type: 'textarea',
     use: 'action_specific',
+    allowSelection: true,
+    selectionFilters: { status: 'completed' },
     validation: { maxChar: 1000 }
   },
   repurpose_instructions: {
@@ -44,7 +47,7 @@ export const inputFields: Record<string, FieldConfig> = {
     validation: { maxChar: 500 }
   },
   productDescription: {
-    key: 'productDescription',
+    key: 'product_description',
     label: 'Product Description',
     type: 'textarea',
     use: 'action_specific',
@@ -52,10 +55,18 @@ export const inputFields: Record<string, FieldConfig> = {
   },
   outline: {
     key: 'outline',
-    label: 'Outline Topics',
+    label: 'Outline',
     type: 'textarea',
-    use: 'action_specific',
-    validation: { maxChar: 500 }
+    use: 'content_type_specific',
+    selectionFilters: { status: 'completed', content_type_id: 8 },
+    validation: { minChar: 20, maxChar: 3000 }
+  },
+  seo_phrase: {
+    key: 'seo_phrase',
+    label: 'Primary SEO Phrase',
+    type: 'text',
+    use: 'content_type_specific',
+    validation: { maxChar: 100 }
   },
   target_audience: {
     key: 'target_audience',

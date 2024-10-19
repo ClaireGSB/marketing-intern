@@ -499,6 +499,32 @@ class apiClient {
     }
   }
 
+  async getBlogMetadataByContentOutputId(contentOutputID: string): Promise<FrontendTypes.BlogMetadata> {
+    try {
+      console.log('Fetching blog metadata by content output ID');
+      const { data, error } = await useFetch<{ body: FrontendTypes.BlogMetadata }>('/api/content-output/' + contentOutputID + '/blog-metadata');
+
+      if (error.value) {
+        console.log('Error in getBlogMetadataByContentOutputId ', error.value);
+        throw createError({
+          statusCode: error.value.statusCode,
+          statusMessage: error.value.statusMessage
+        });
+      }
+
+      if (!data.value) {
+        throw new Error('No data received from the server');
+      }
+
+      console.log('data:', data.value.body);
+      return data.value.body;
+    }
+    catch (error) {
+      console.error('Error fetching blog metadata by content output ID:', error);
+      throw new Error('Error fetching blog metadata by content output ID');
+    }
+  }
+
   // ##############################
   // # Users
   // ##############################

@@ -1,7 +1,7 @@
-// server/api/validation/get-by-co.get.ts
+// server/api/content-output/[id]]/validations.get.ts
 
 import { defineEventHandler } from 'h3'
-import { Validations as ValidationFrontend } from '../../../../types/frontendTypes';
+import { Validations as ValidationFrontend } from '~/types/frontendTypes';
 import { validations } from '~/server/db/validations';
 
 export default defineEventHandler(async (event) => {

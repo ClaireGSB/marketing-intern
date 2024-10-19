@@ -1,6 +1,6 @@
 // src/recipes/blogPostRecipe.ts
 
-import { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
 
 // Config defines the inputs to the recipe
 type Config = ProjectSettings & {

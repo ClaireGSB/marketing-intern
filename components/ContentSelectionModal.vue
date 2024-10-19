@@ -5,7 +5,11 @@
         <span class="text-h5">Select Content</span>
       </v-card-title>
       <v-card-text>
-        <ContentTable :selectable="true" @select="onSelect" :allowed-statuses="allowedStatuses" />
+        <ContentTable 
+          :selectable="true" 
+          @select="onSelect" 
+          :filters="filters"
+        />
       </v-card-text>
       <v-card-actions class="pt-4">
         <v-spacer></v-spacer>
@@ -21,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
 export default {
   props: {
@@ -29,9 +33,9 @@ export default {
       type: Boolean,
       default: false
     },
-    allowedStatuses: {
-      type: Array as () => string[],
-      default: () => ['completed']
+    filters: {
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['update:modelValue', 'select'],
@@ -68,6 +72,11 @@ export default {
     const truncateContent = (content: string) => {
       return content.length > 50 ? content.slice(0, 50) + '...' : content;
     };
+
+    onMounted(() => {
+      console.log('ContentSelectionModal mounted');
+      console.log('Filters:', props.filters);
+    });
 
     return {
       dialog,
