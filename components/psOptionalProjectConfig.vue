@@ -10,21 +10,12 @@
     <v-expand-transition>
       <div v-if="showOptionalFields">
         <template v-for="fieldKey in generalOptionalFields" :key="fieldKey">
-          <v-text-field
-            v-if="inputFields[fieldKey].type === 'text'"
-            v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label"
-            :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar"
-          ></v-text-field>
-          <v-textarea
-            v-else-if="inputFields[fieldKey].type === 'textarea'"
-            v-model="formFields[fieldKey]"
-            :label="inputFields[fieldKey].label"
-            :rules="getValidationRules(inputFields[fieldKey])"
-            :counter="inputFields[fieldKey].validation?.maxChar"
-            auto-grow
-          ></v-textarea>
+          <v-text-field v-if="inputFields[fieldKey].type === 'text'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar"></v-text-field>
+          <v-textarea v-else-if="inputFields[fieldKey].type === 'textarea'" v-model="formFields[fieldKey]"
+            :label="inputFields[fieldKey].label" :rules="getValidationRules(inputFields[fieldKey])"
+            :counter="inputFields[fieldKey].validation?.maxChar" auto-grow></v-textarea>
         </template>
       </div>
     </v-expand-transition>

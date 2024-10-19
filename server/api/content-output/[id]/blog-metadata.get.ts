@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const contentOutputID = event.context.params?.id;
-    
+
     if (!contentOutputID) {
       throw createError({
         statusCode: 400,
@@ -40,10 +40,10 @@ export default defineEventHandler(async (event) => {
     const formattedMetadata: BlogMetadataFrontend = {
       id: metaData.id,
       content_output_id: metaData.content_output_id,
-      title_options: metaData.title_options? metaData.title_options : [],
-      title: metaData.title? metaData.title : '',
-      meta_description: metaData.meta_description? metaData.meta_description : '',
-      formatted_post: metaData.formatted_post? metaData.formatted_post : '',
+      title_options: metaData.title_options ? metaData.title_options : [],
+      title: metaData.title ? metaData.title : '',
+      meta_description: metaData.meta_description ? metaData.meta_description : '',
+      formatted_post: metaData.formatted_post ? metaData.formatted_post : '',
     }
 
     return {

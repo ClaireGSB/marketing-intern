@@ -4,7 +4,7 @@ import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
 import { actionInstructionBlogOutlineSnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
-import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
+import { examplesSnippet } from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
@@ -62,7 +62,7 @@ You should output your response in the following JSON format:
   Provide your response in valid JSON format with properly escaped quotes and line breaks.
 `
 
-;
+    ;
   console.log('---------------------\nReview prompt:');
   console.log(prompt);
   return prompt;

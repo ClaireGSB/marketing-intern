@@ -51,5 +51,4 @@ onMounted(async () => {
   margin-bottom: 8px;
   white-space: pre-wrap;
 }
-
 </style>

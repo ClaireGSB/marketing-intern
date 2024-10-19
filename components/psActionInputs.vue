@@ -51,9 +51,9 @@ export default {
     contentFields: Array as () => string[],
     actionFields: Array as () => string[],
     inputFields: {
-    type: Object,
-    default: () => ({})
-  },
+      type: Object,
+      default: () => ({})
+    },
     formFields: Object,
     selectedContents: Object,
   },

@@ -146,7 +146,7 @@ export const validations = {
     if (result.rowCount === 0 || result.rowCount === null) {
       throw new Error('Content output not found');
     }
-    const updatedContentOutput = result.rows[0]; 
+    const updatedContentOutput = result.rows[0];
     console.log('Content output updated:', updatedContentOutput);
 
     // 7. if there are validations where step output type starts with "final_BM_", for each of them, Extract the metadata field name - it's everything after the second underscore

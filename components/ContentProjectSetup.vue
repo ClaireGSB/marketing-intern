@@ -1,69 +1,38 @@
 <template>
   <v-form ref="form" v-model="isValid" @submit.prevent="generateContent">
     <v-row>
-    <!-- Select Content Type - Step 1 -->
-      <psContentTypeSelection
-        :content-types="contentTypes"
-        :selected-content-type="selectedContentType"
-        @select="selectContentType"
-      />
+      <!-- Select Content Type - Step 1 -->
+      <psContentTypeSelection :content-types="contentTypes" :selected-content-type="selectedContentType"
+        @select="selectContentType" />
 
-    <!-- Select Content Subtype - Step 2 -->
-      <psSubTypeSelection
-        v-if="step >= 2"
-        :possible-sub-types="possibleSubTypes"
-        v-model:selected-sub-type="selectedSubType"
-        @update:modelValue="updateStep(3)"
-      />
+      <!-- Select Content Subtype - Step 2 -->
+      <psSubTypeSelection v-if="step >= 2" :possible-sub-types="possibleSubTypes"
+        v-model:selected-sub-type="selectedSubType" @update:modelValue="updateStep(3)" />
 
       <!-- If Blog Post Copy: Select Outline - Step 3 -->
-      <psOutlineSelection
-        v-if="step >= 3 && selectedContentType.id === 9"
-        v-model:outline-option="outlineOption"
-        :project-setup="projectSetup"
-        :selected-outline="selectedContents['outline']"
-        @select-outline="selectExistingOutline"
-        @clear-selected-outline="clearSelectedOutline"
-      />
+      <psOutlineSelection v-if="step >= 3 && selectedContentType.id === 9" v-model:outline-option="outlineOption"
+        :project-setup="projectSetup" :selected-outline="selectedContents['outline']"
+        @select-outline="selectExistingOutline" @clear-selected-outline="clearSelectedOutline" />
 
       <!-- If NOT Blog Post Copy AND outline selected -->
       <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
         <!-- Select Action - Step 4 -->
-        <psActionSelection
-          v-if="step >= 3"
-          :actions="actions"
-          :is-action-available="isActionAvailable"
-          @update="handleActionSelection"
-        />
+        <psActionSelection v-if="step >= 3" :actions="actions" :is-action-available="isActionAvailable"
+          @update="handleActionSelection" />
 
         <!-- Action fields - Step 5 -->
-        <psActionInputs
-          v-if="step >= 5"
-          :content-fields="contentFields"
-          :action-fields="actionFields"
-          :input-fields="inputFields"
-          :form-fields="formFields"
-          :selected-contents="selectedContents"
-          @open-content-selection="openContentSelectionModal"
-          @clear-selected-content="clearSelectedContent"
-        />
+        <psActionInputs v-if="step >= 5" :content-fields="contentFields" :action-fields="actionFields"
+          :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
+          @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
       </template>
 
       <!-- Review settings - Step 5 -->
-      <psReviewSettings
-        v-if="step >= 5"
-        :selected-content-type="selectedContentType"
-        :selected-sub-type="selectedSubType"
-        @review="reviewSubTypeSettings"
-      />
+      <psReviewSettings v-if="step >= 5" :selected-content-type="selectedContentType"
+        :selected-sub-type="selectedSubType" @review="reviewSubTypeSettings" />
 
       <!-- Review settings - Step 5 -->
-      <psOptionalProjectConfig
-        v-if="step >= 5 && !(selectedContentType.id === 9 && outlineOption === 'select')"
-        :general-optional-fields="generalOptionalFields"
-        :input-fields="inputFields"
-        :form-fields="formFields"
-      />
+      <psOptionalProjectConfig v-if="step >= 5 && !(selectedContentType.id === 9 && outlineOption === 'select')"
+        :general-optional-fields="generalOptionalFields" :input-fields="inputFields" :form-fields="formFields" />
     </v-row>
   </v-form>
 
@@ -77,16 +46,10 @@
     </v-row>
   </v-container>
 
-  <ContentSettingsDialog
-    v-model="showSettingsPanel"
-    :content-type-id="selectedContentType.id"
-    :content-subtype-id="selectedSubType.id"
-  />
-  <ContentSelectionModal
-    v-model="showContentSelectionModal"
-    @select="onContentSelected"
-    :filters="inputFields[currentSelectingField]?.selectionFilters"
-  />
+  <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
+    :content-subtype-id="selectedSubType.id" />
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
+    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script lang="ts">

@@ -93,7 +93,7 @@ export function generateTitlePrompt(projectSettings: UserInput, subTypeSettings:
 export function generateMetadescriptionPrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
   // TO DO: make it better to take examples & SEO phrase & all the contextinto account
   const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
-  
+
   const prompt = `Write 2 options for the meta description of the blog post below. 
   I'm also adding the whole content brief for your reference ; please leverage it to create the best meta descriptions possible.
 

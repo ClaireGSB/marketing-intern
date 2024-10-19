@@ -21,7 +21,8 @@
                     <strong>Content:</strong>
                     <span v-if="example.content.length <= maxCharDisplay">{{ example.content }}</span>
                     <span v-else>
-                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0, maxCharDisplay) + '...' }}
+                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0,
+                      maxCharDisplay) + '...' }}
                       <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-content`)">
                         {{ showFullText[`good-${index}-content`] ? 'See less' : 'See more' }}
                       </a>
@@ -31,8 +32,10 @@
                     <strong>Explanation:</strong>
                     <span v-if="example.explanation.length <= maxCharDisplay">{{ example.explanation }}</span>
                     <span v-else>
-                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0, maxCharDisplay) + '...' }}
-                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-explanation`)">
+                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0,
+                      maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#"
+                        @click.prevent="toggleShowMore(`good-${index}-explanation`)">
                         {{ showFullText[`good-${index}-explanation`] ? 'See less' : 'See more' }}
                       </a>
                     </span>
@@ -53,7 +56,8 @@
                     <strong>Content:</strong>
                     <span v-if="example.content.length <= maxCharDisplay">{{ example.content }}</span>
                     <span v-else>
-                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0, maxCharDisplay) + '...' }}
+                      {{ showFullText[`good-${index}-content`] ? example.content : example.content.slice(0,
+                      maxCharDisplay) + '...' }}
                       <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-content`)">
                         {{ showFullText[`good-${index}-content`] ? 'See less' : 'See more' }}
                       </a>
@@ -63,8 +67,10 @@
                     <strong>Explanation:</strong>
                     <span v-if="example.explanation.length <= maxCharDisplay">{{ example.explanation }}</span>
                     <span v-else>
-                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0, maxCharDisplay) + '...' }}
-                      <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(`good-${index}-explanation`)">
+                      {{ showFullText[`good-${index}-explanation`] ? example.explanation : example.explanation.slice(0,
+                      maxCharDisplay) + '...' }}
+                      <a class="text-grey-darken-2" href="#"
+                        @click.prevent="toggleShowMore(`good-${index}-explanation`)">
                         {{ showFullText[`good-${index}-explanation`] ? 'See less' : 'See more' }}
                       </a>
                     </span>
@@ -138,5 +144,4 @@ const toggleShowMore = (key: string) => {
 .v-card-text p {
   margin-bottom: 8px;
 }
-
 </style>

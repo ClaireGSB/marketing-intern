@@ -7,7 +7,7 @@ import { UserInput as UserInputBackend } from '../../types/backendTypes';
 import { myQueue } from '../../queues/queue';
 import { contentSubtypes } from './contentSubtypes';
 import { examples } from './examples';
-import { Example} from '../../types/backendTypes';
+import { Example } from '../../types/backendTypes';
 import { SettingsInputWithoutExamples, SettingsInput } from '../../types/backendTypes'
 import { getContentTypeNameByID } from '../../types/contentTypes';
 import { projectSetups } from './projectSetups';
@@ -56,7 +56,7 @@ export const contentOutputs = {
     };
 
     // 2. SAVE PROJECT SETUP AND SUBTYPE SETTINGS HISTORY
-    
+
     // if selected_content_output_id is provided, clear the content field (no need to store it)
     if (userInput.selected_content_output_id) {
       userInput.content = '';
@@ -100,7 +100,7 @@ export const contentOutputs = {
     }
 
     // 4.5 if selected_content_output_id is provided, get this content output from database
-    const projectSettings: UserInputBackend = {...userInput}
+    const projectSettings: UserInputBackend = { ...userInput }
 
     if (userInput.selected_content_output_id) {
       console.log(' ###### Selected content output ID provided:', userInput.selected_content_output_id);
@@ -108,9 +108,9 @@ export const contentOutputs = {
       projectSettings.content = selectedContentOutput.content;
       projectSettings.selected_content_type = getContentTypeNameByID(selectedContentOutput.content_type_id);
       // if content_type is blog_post, get blog metadata
-      if ( projectSettings.selected_content_type === 'blog_post') {
+      if (projectSettings.selected_content_type === 'blog_post') {
         const blog_metadata = await blogMetadatas.getBlogMetadataByContentOutputId(selectedContentOutput.id);
-        projectSettings.selected_content_blog_metadata = blog_metadata? blog_metadata : undefined;
+        projectSettings.selected_content_blog_metadata = blog_metadata ? blog_metadata : undefined;
       }
     }
 
@@ -153,7 +153,7 @@ export const contentOutputs = {
 
     // add job to queue
     try {
-      const job = await myQueue.add('InitializeRecipe', { 
+      const job = await myQueue.add('InitializeRecipe', {
         ...jobData,
       });
       console.log('Job added to queue:', job.id);

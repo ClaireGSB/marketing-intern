@@ -16,9 +16,9 @@ export const blogMetadatas = {
       id,
       content_output_id,
       // blogMetadata.title_options ? JSON.stringify(blogMetadata.title_options) : null,
-      blogMetadata.title? blogMetadata.title : '',
+      blogMetadata.title ? blogMetadata.title : '',
       blogMetadata.meta_description ? blogMetadata.meta_description : '',
-      blogMetadata.formatted_post? blogMetadata.formatted_post : '',
+      blogMetadata.formatted_post ? blogMetadata.formatted_post : '',
       orgId
     ];
     const result = await dbclient.query(query, values);

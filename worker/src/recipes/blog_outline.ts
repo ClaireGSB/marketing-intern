@@ -25,7 +25,7 @@ const recipe: Recipe<UserInput, OutputType, SubtypeSettings> = {
       model: "claude-3-haiku-20240307",
       stepType: 'llm',
       outputType: 'temp_outline',
-      systemPromptTemplate: (config) =>generateSystemPrompt(config, contentType, 'temp_outline'),
+      systemPromptTemplate: (config) => generateSystemPrompt(config, contentType, 'temp_outline'),
       userContentTemplate: (_, config, subTypeSettings) => generateUserContentPrompt(config, subTypeSettings, contentType)
     },
     {
@@ -33,7 +33,7 @@ const recipe: Recipe<UserInput, OutputType, SubtypeSettings> = {
       model: "claude-3-haiku-20240307",
       stepType: 'llm',
       outputType: 'temp_postOptions',
-      systemPromptTemplate: (config) =>generateSystemPrompt(config, contentType, 'temp_postOptions'),
+      systemPromptTemplate: (config) => generateSystemPrompt(config, contentType, 'temp_postOptions'),
       userContentTemplate: (content, config, subTypeSettings) => generateReviewPrompt(
         config,
         subTypeSettings,

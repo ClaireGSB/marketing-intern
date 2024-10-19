@@ -3,19 +3,19 @@
     <v-card v-if="metadata && metadata.title" class="mb-4">
       <v-card-title> Title </v-card-title>
       <v-card-text>
-        <pre>{{metadata.title}}</pre>
+        <pre>{{ metadata.title }}</pre>
       </v-card-text>
     </v-card>
     <v-card v-if="metadata && metadata.meta_description" class="mb-4">
       <v-card-title> Meta Description </v-card-title>
       <v-card-text>
-        <pre>{{metadata.meta_description}}</pre>
+        <pre>{{ metadata.meta_description }}</pre>
       </v-card-text>
     </v-card>
     <v-card class="mb-4">
       <v-card-title> {{ contentTypeName }}</v-card-title>
       <v-card-text>
-        <pre>{{contentOutput.content}}</pre>
+        <pre>{{ contentOutput.content }}</pre>
       </v-card-text>
     </v-card>
   </v-container>
