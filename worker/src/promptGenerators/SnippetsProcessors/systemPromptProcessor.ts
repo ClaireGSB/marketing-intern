@@ -54,14 +54,14 @@ const roleSnippet = (outputType: string, contentType: ContentTypeName): string =
         return "Title writer for blog posts";
       default:
         throw new Error("Unsupported content type");
-  }
-} else if (outputType === "temp_metaDescription") {
-  switch (contentType) {
-    case "blog_post":
-      return "Title writer for blog posts";
-    default:
-      throw new Error("Unsupported content type");
-}
+    }
+  } else if (outputType === "temp_metaDescription") {
+    switch (contentType) {
+      case "blog_post":
+        return "Title writer for blog posts";
+      default:
+        throw new Error("Unsupported content type");
+    }
   } else {
     throw new Error("Unsupported output type");
   }

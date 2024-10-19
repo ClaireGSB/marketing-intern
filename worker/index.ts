@@ -52,7 +52,7 @@ import { loadRecipeByName } from "./src/recipeLoader";
 
 export async function executeRecipe(jobData: any) {
   // const baseDir = path.join(__dirname, '..');
-  const executor = new recipeExecutor({}, {});
+  const executor = new recipeExecutor(jobData.recipe_name, {});
   // const fileService = new FileService(baseDir);
 
   console.log('executeRecipe Starting in Index. Job data:', jobData);
