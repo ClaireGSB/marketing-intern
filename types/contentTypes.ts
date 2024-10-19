@@ -92,7 +92,7 @@ export const contentTypes: ContentType[] = [
   {
     "id": 9,
     "name": "blog_post",
-    "display_name": "Blog Post Copy!",
+    "display_name": "Blog Post Copy",
     "created_at": "2024-09-20T10:00:00Z",
     "_status": "to review",
     "available_actions": ['write_topic', 'repurpose_content', 'promote_content', 'promote_product'],
