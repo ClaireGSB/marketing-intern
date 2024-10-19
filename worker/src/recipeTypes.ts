@@ -1,11 +1,12 @@
 // src/recipeTypes.ts
-import type { ContentSubType, Example } from '../../types/backendTypes';
+import type { ContentSubType, Example, UserInput } from '../../types/backendTypes';
 
-export interface ProjectSettings {
-  [key: string]: any;
-  // componentType?: 'outline' | 'full_content';
-  // TODO: Standardize the project settings here so we don't have to do it in the Recipe
-}
+
+// export interface ProjectSettings {
+//   [key: string]: any;
+//   // componentType?: 'outline' | 'full_content';
+//   // TODO: Standardize the project settings here so we don't have to do it in the Recipe
+// }
 
 export interface SubtypeSettings {
   // contentType: ContentType | undefined;
@@ -31,8 +32,8 @@ export type StepType = 'llm' | 'nativishAPI' | 'nativishHtmlRender' | 'screensho
 export type BaseStepConfig = {
   stepName: string;
   outputType: string;
-  condition?: (config: ProjectSettings) => boolean;
-  fallbackValue?: (config: ProjectSettings) => string;
+  condition?: (config: UserInput) => boolean;
+  fallbackValue?: (config: UserInput) => string;
 };
 
 // additional configuration for each step type
@@ -41,14 +42,14 @@ export type LLMStepConfig = BaseStepConfig & {
   model: string;
   temperature?: number;
   outputJSON?: boolean;
-  systemPromptTemplate: (projectSettings: ProjectSettings, subTypeSettings: SubtypeSettings) => string;
-  userContentTemplate: (content: Record<string, any>, projectSettings: ProjectSettings, subTypeSettings: SubtypeSettings) => string;
+  systemPromptTemplate: (projectSettings: UserInput, subTypeSettings: SubtypeSettings) => string;
+  userContentTemplate: (content: Record<string, any>, projectSettings: UserInput, subTypeSettings: SubtypeSettings) => string;
   handleTokenUsage?: (tokenUsage: TokenUsage) => void;
 };
 
 export type NativishAPIStepConfig = BaseStepConfig & {
   stepType: 'nativishAPI';
-  inputText: (projectSettings: ProjectSettings) => string;
+  inputText: (projectSettings: UserInput) => string;
 };
 
 export type NativishHtmlRenderStepConfig = BaseStepConfig & {
@@ -104,7 +105,7 @@ export type StepResponse = {
 export type StepExecutor<T extends RecipeStepConfig> = (
   stepConfig: T,
   content: Record<string, any>,
-  recipeConfig: ProjectSettings,
+  recipeConfig: UserInput,
   subtypeSettings: SubtypeSettings
 ) => Promise<StepResponse>;
 
@@ -121,13 +122,13 @@ export type StepReport = {
   output?: string;
 };
 
-export interface Recipe<T extends ProjectSettings, O extends string, D extends SubtypeSettings> {
+export interface Recipe<T extends UserInput, O extends string, D extends SubtypeSettings> {
   contentType: string;
   componentType?: 'outline' | 'full_content';
   steps: RecipeStepConfig[];
   outputTypes: readonly O[];
 }
 
-export interface UserInput<T extends ProjectSettings> {
-  config: T;
-}
+// export interface UserInput<T extends ProjectSettings> {
+//   config: T;
+// }

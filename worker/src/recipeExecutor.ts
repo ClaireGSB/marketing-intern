@@ -1,7 +1,6 @@
 // src/recipeExecutor.ts
 
 import type {
-  ProjectSettings,
   RecipeStepConfig,
   StepType,
   StepExecutors,
@@ -14,6 +13,7 @@ import type {
   SubtypeSettings,
   Recipe
 } from './recipeTypes';
+import type { UserInput } from '~/types/backendTypes';
 import { executeLLMStep } from './stepExecutors/llmStepExecutor';
 import { executeNativishApiStep } from './stepExecutors/nativishAPIStepExecutor';
 import { executeNativishHtmlRenderStep } from './stepExecutors/nativishHtmlRenderStepExecutor';
@@ -39,7 +39,7 @@ export class recipeExecutor {
   // Store reports for each step
   private stepReports: StepReport[] = [];
   // Store the overall recipe configuration
-  private recipeConfig: ProjectSettings;
+  private recipeConfig: UserInput;
   // Store the content generated throughout the recipe execution
   private content: { [key: string]: string } = {};
   // Store the id of the content output
@@ -51,7 +51,7 @@ export class recipeExecutor {
 
   // Constructor initializes the executor with default empty objects
   // The actual initialization happens in the executeRecipe method
-  constructor(recipeConfig: ProjectSettings, initialContent: { [key: string]: string }) {
+  constructor(recipeConfig: UserInput, initialContent: { [key: string]: string }) {
     this.recipeConfig = recipeConfig;
     this.content = initialContent;
   }
@@ -229,7 +229,7 @@ export class recipeExecutor {
 
   // Main method to execute the entire recipe
   // This method uses generics to allow for flexible typing of configurations and outputs
-  async executeRecipe<T extends ProjectSettings, O extends string>(
+  async executeRecipe<T extends UserInput, O extends string>(
     recipe: Recipe<T, O, SubtypeSettings>,
     contentOutputId: string,
     userID: string,
