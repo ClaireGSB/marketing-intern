@@ -11,9 +11,9 @@
       <span v-else>-</span>
     </template>
     <template v-slot:item.actions="{ item }">
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn variant="plain" v-bind="attrs" v-on="on" @click="handleItemAction(item)" class="pa-0">
+      <v-tooltip location="bottom">
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" variant="plain" @click="handleItemAction(item)" class="pa-0">
             <v-icon :color="getIconColor(item)">
               {{ getActionIcon(item) }}
             </v-icon>
