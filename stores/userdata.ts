@@ -46,6 +46,9 @@ export const useUserDataStore = defineStore('userData', {
     getContentOutputById(contentOutputID: string) {
       return this.contentOutputs.find((contentOutput) => contentOutput.id === contentOutputID);
     },
+    getBlogMetadataByContentOutputId(contentOutputID: string) {
+      return this.blogMetadata.find((metadata) => metadata.content_output_id === contentOutputID);
+    },
     async fetchProjectSetupByContentOutput(contentOutputID: string) {
       // If the project setup is not in the store, fetch it from the API
       if (!this.getProjectSetupByContentOutputId(contentOutputID)) {

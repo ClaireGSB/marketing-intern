@@ -22,7 +22,7 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
   const snippets = [
     // --------- instruction snippets
     actionInstructionBlogCopySnippet(projectSettings, contentType),
-    additionalInstructionsSnippet(subtypeSettings, projectSettings),
+    additionalInstructionsSnippet(subtypeSettings, projectSettings, contentType),
     // --------- enclosed fields in xml tags
     outlineSnippet(projectSettings),
     actionFieldsSnippet(projectSettings),

@@ -58,11 +58,10 @@ export const inputFields: Record<string, FieldConfig> = {
     label: 'Outline',
     type: 'textarea',
     use: 'content_type_specific',
-    allowSelection: false,
     selectionFilters: { status: 'completed', content_type_id: 8 },
     validation: { minChar: 20, maxChar: 3000 }
   },
-  seoPhrase: {
+  seo_phrase: {
     key: 'seo_phrase',
     label: 'Primary SEO Phrase',
     type: 'text',

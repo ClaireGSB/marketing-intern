@@ -159,6 +159,7 @@ export default {
 
     const clearSelectedOutline = () => {
       selectedContents.value['outline'] = null;
+      outlineOption.value = null;
       projectSetup.value = null;
       updateStep(3);
     };

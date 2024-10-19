@@ -50,7 +50,10 @@ export default {
   props: {
     contentFields: Array as () => string[],
     actionFields: Array as () => string[],
-    inputFields: Object,
+    inputFields: {
+    type: Object,
+    default: () => ({})
+  },
     formFields: Object,
     selectedContents: Object,
   },

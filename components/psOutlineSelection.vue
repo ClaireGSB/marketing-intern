@@ -55,7 +55,7 @@ export default {
   props: {
     outlineOption: {
       type: String as () => 'select' | 'provide' | null,
-      required: true,
+      default: null,
     },
     projectSetup: {
       type: Object,

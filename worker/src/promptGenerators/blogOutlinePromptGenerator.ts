@@ -10,6 +10,7 @@ import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor'
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
 import { targetAudienceSnippet } from './SnippetsProcessors/targetAudienceProcessor';
 import { contextSnippet } from './SnippetsProcessors/contextProcessor';
+import { seoPhraseSnippet } from './SnippetsProcessors/seoPhraseProcessor';
 
 export function generateSystemPrompt(projectSettings: UserInput, contentType: ContentTypeName, outputType: string): string {
   return systemPromptSnippet(projectSettings, contentType, outputType);
@@ -19,12 +20,13 @@ export function generateUserContentPrompt(projectSettings: UserInput, subtypeSet
   const snippets = [
     // --------- instruction snippets
     actionInstructionBlogOutlineSnippet(projectSettings, contentType),
-    additionalInstructionsSnippet(subtypeSettings, projectSettings),
+    additionalInstructionsSnippet(subtypeSettings, projectSettings, contentType),
     // --------- enclosed fields in xml tags
     actionFieldsSnippet(projectSettings),
     // productDescriptionSnippet(projectSettings),
     targetAudienceSnippet(subtypeSettings, projectSettings),
     // characterLimitSnippet(projectSettings, contentType),
+    seoPhraseSnippet(projectSettings),
     guidelinesSnippet(subtypeSettings, projectSettings),
     contextSnippet(subtypeSettings, projectSettings),
     examplesSnippet(subtypeSettings),
