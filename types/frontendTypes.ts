@@ -117,9 +117,4 @@ export interface Validations {
 //   3: "This is a fantastic title"
 // }
 
-// 3. Data shape for final content display
-export interface FinalContentItem {
-  id: string;
-  title: string;
-  content: string;
-}
+

@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { FinalContentItem, ContentOutput, BlogMetadata } from '../types/frontendTypes';
+import { ContentOutput, BlogMetadata } from '../types/frontendTypes';
 import { ref, onMounted, watch } from 'vue';
 import { useUserDataStore } from '~/stores/userdata';
 
@@ -36,13 +36,11 @@ export default {
   setup(props) {
     const userStore = useUserDataStore();
     const contentLoaded = ref(false);
-    const content = ref<FinalContentItem[]>([]);
     const contentOutput = ref<ContentOutput | null>(null);
     const metadata = ref<BlogMetadata | null>(null);
     const contentTypeName = ref('');
 
     const loadContent = async () => {
-      content.value = userStore.getFinalContentForContentOutput(props.contentOutputID);
       contentOutput.value = userStore.getSelectedContentOutput(props.contentOutputID);
       if (contentOutput.value.content_type_id === 9) {
         // it a blog post. Also get meta data
@@ -57,7 +55,6 @@ export default {
     watch(() => props.contentOutputID, loadContent);
 
     return {
-      content,
       contentOutput,
       metadata,
       contentTypeName,
