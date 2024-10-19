@@ -41,12 +41,12 @@ export default {
     const metadata = ref<BlogMetadata | null>(null);
     const contentTypeName = ref('');
 
-    const loadContent = () => {
+    const loadContent = async () => {
       content.value = userStore.getFinalContentForContentOutput(props.contentOutputID);
       contentOutput.value = userStore.getSelectedContentOutput(props.contentOutputID);
       if (contentOutput.value.content_type_id === 9) {
         // it a blog post. Also get meta data
-        metadata.value = userStore.getBlogMetadataByContentOutputId(props.contentOutputID);
+        metadata.value = await userStore.getBlogMetadataByContentOutputId(props.contentOutputID);
       }
       contentTypeName.value = userStore.getContentTypeDisplayNameById(contentOutput.value.content_type_id);
       contentLoaded.value = true;
