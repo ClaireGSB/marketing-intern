@@ -2,7 +2,20 @@
   <v-container class="fill-height pa-0">
     <v-row no-gutters class="fill-height justify-center">
       <v-col cols="12" class="d-flex flex-column relative-container pa-0">
-        <h1 class="text-h4 px-4 py-10">{{ pageTitle }}</h1>
+        <div class="d-flex align-center px-4 py-10">
+          <h1 class="text-h4 flex-grow-1">{{ pageTitle }}</h1>
+          <v-tooltip v-if="contentOutputID" text="Create new content" location="left">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                color="primary"
+                @click="createNewContent"
+                v-bind="props"
+              >
+                New
+              </v-btn>
+            </template>
+          </v-tooltip>
+        </div>
         <v-container fluid class="flex-grow-1 overflow-y-auto pb-16">
           <v-tabs v-model="tab" grow color="primary" class="mb-10">
             <v-tab value="setup" text="Project setup"></v-tab>
@@ -55,12 +68,11 @@ const userStore = useUserDataStore();
 const tab = ref('setup');
 const isLoading = ref(false);
 const validations = ref<Validations[] | null>(null);
-// const finalContent = ref<FinalContentItem[] | null>(null);
 const contentOutputID = ref('');
 const contentOutput = ref<ContentOutput | null>(null);
 
 const pageTitle = computed(() => {
-  if (!props.id) return 'Create Content';
+  if (!contentOutputID.value) return 'Create Content';
   if (contentOutput.value?.status === 'completed') return 'View Content';
   return 'Edit Content';
 });
@@ -139,6 +151,17 @@ function handleRegeneration(itemsToRegenerate: Validations[]) {
     items: itemsToRegenerate
   });
 }
+
+const router = useRouter()
+
+function createNewContent() {
+  router.push({ path: '/content' });
+  contentOutputID.value = '';
+  contentOutput.value = null;
+  validations.value = null;
+  tab.value = 'setup';
+}
+
 </script>
 
 <style scoped>
