@@ -1,14 +1,9 @@
 // src/recipes/blogPostOutlineRecipe.ts
 
-import type { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, SubtypeSettings } from '../recipeTypes';
 import { generateSystemPrompt, generateUserContentPrompt, generateReviewPrompt } from '../promptGenerators/blogOutlinePromptGenerator';
+import type { UserInput } from '~/types/backendTypes';
 
-type Config = ProjectSettings & {
-  topic: string;
-  targetAudience: string;
-  outlineGuidelines: string;
-  expertise?: string;
-};
 
 const OutputTypes = [
   'temp_topics',
@@ -20,7 +15,7 @@ type OutputType = typeof OutputTypes[number];
 
 const contentType = "blog_outline";
 
-const recipe: Recipe<Config, OutputType, SubtypeSettings> = {
+const recipe: Recipe<UserInput, OutputType, SubtypeSettings> = {
   contentType: contentType,
   // componentType: "outline",
   outputTypes: OutputTypes,

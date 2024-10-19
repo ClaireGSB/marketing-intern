@@ -2,18 +2,10 @@
 
 // this is just a draft example, the actual implementation may vary
 
-import { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, SubtypeSettings } from '../recipeTypes';
 import { generateSystemPrompt, generateUserContentPrompt, generateRatingAndFeedbackPrompt } from '../promptGenerators/socialMediaPromptGenerator';
+import type { UserInput } from '~/types/backendTypes';
 
-
-// Config defines the inputs to the recipe
-type Config = ProjectSettings & {
-  topic: string;
-  ideas: string;
-  targetAudience: string;
-  tone: string;
-  expertise?: string;
-};
 
 // OutputTypes define the possible output types for each steps, this is where the output of each step is stored
 const OutputTypes = [
@@ -27,7 +19,7 @@ type OutputType = typeof OutputTypes[number];
 
 const contentType = "linkedin_post";
 
-const recipe: Recipe<Config, OutputType, SubtypeSettings> = {
+const recipe: Recipe<UserInput, OutputType, SubtypeSettings> = {
   contentType: contentType,
   outputTypes: OutputTypes,
   steps: [

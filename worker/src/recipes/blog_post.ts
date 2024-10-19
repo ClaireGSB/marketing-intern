@@ -1,17 +1,9 @@
 // src/recipes/blogPostFullContentRecipe.ts
 
-import type { Recipe, ProjectSettings, SubtypeSettings } from '../recipeTypes';
+import type { Recipe, SubtypeSettings } from '../recipeTypes';
 import { generateSystemPrompt, generateUserContentPrompt, generateReviewPrompt } from '../promptGenerators/blogPostPromptGenerator';
+import type { UserInput } from '~/types/backendTypes';
 
-
-type Config = ProjectSettings & {
-  topic: string;
-  targetAudience: string;
-  copyGuidelines: string;
-  formattingGuidelines?: string;
-  expertise?: string;
-  outline: string | number;
-};
 
 const OutputTypes = [
   'temp_draftPost',
@@ -27,7 +19,7 @@ type OutputType = typeof OutputTypes[number];
 
 const contentType = "blog_post";
 
-const recipe: Recipe<Config, OutputType, SubtypeSettings> = {
+const recipe: Recipe<UserInput, OutputType, SubtypeSettings> = {
   contentType: "blog_post",
   // componentType: "full_content",
   outputTypes: OutputTypes,

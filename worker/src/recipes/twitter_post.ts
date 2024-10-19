@@ -6,15 +6,6 @@ import type { Recipe, SubtypeSettings } from '../recipeTypes';
 import { generateSystemPrompt, generateUserContentPrompt, generateRatingAndFeedbackPrompt } from '../promptGenerators/socialMediaPromptGenerator';
 import type { UserInput } from '~/types/backendTypes';
 
-// Config defines the inputs to the recipe
-// type Config = ProjectSettings & {
-//   topic: string;
-//   targetAudience: string;
-//   tone: string;
-//   characterLimit: number;
-//   expertise?: string;
-// };
-
 // OutputTypes define the possible output types for each steps, this is where the output of each step is stored
 const OutputTypes = [
   'temp_draftPost',
