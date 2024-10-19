@@ -1,10 +1,25 @@
 // services/apiClient.ts
 
 import * as FrontendTypes from '../types/frontendTypes';
-
+import { FetchError } from 'ofetch';
 
 class apiClient {
 
+  private handleErrors(error: unknown, context: string): never {
+    if (error instanceof FetchError) {
+      console.error(`API Error in ${context}:`, error.data);
+      if (error.status === 400) {
+        throw new Error(error.data?.statusMessage || `Bad Request in ${context}`);
+      } else if (error.status === 500) {
+        throw new Error(error.data?.statusMessage || `Internal Server Error in ${context}`);
+      } else {
+        throw new Error(error.data?.statusMessage || `HTTP error in ${context}! status: ${error.status}`);
+      }
+    } else {
+      console.error(`Error in ${context}:`, error);
+      throw error instanceof Error ? error : new Error(`Unknown error in ${context}`);
+    }
+  }
 
   // ##############################
   // # Content Outputs
@@ -13,82 +28,88 @@ class apiClient {
   async fetchContentOutputs(): Promise<FrontendTypes.ContentOutput[]> {
     try {
       console.log('Fetching content outputs');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput[] }>('/api/content-output/get-by-org', {
+      const response = await $fetch('/api/content-output/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentOutput[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching content outputs:', error);
-      throw new Error('Error fetching content outputs');
+      this.handleErrors(error, 'fetchContentOutputs');
     }
   }
 
   async initializeContentOutput(user_input: FrontendTypes.UserInput): Promise<FrontendTypes.ContentOutput> {
     try {
       console.log('Creating content output in api client');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/initialize', {
+      const response = await $fetch('/api/content-output/initialize', {
         method: 'POST',
-        body: {
-          ...user_input
-        }
+        body: user_input
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentOutput };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Created content output:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error creating content output:', error);
-      throw new Error('Error creating content output');
+      this.handleErrors(error, 'initializeContentOutput');
     }
   }
 
   async getContentOutputById(id: string): Promise<FrontendTypes.ContentOutput> {
     try {
       console.log('Fetching content output by ID');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/' + id);
+      const response = await $fetch(`/api/content-output/${id}`);
 
-      if (error.value) {
-        console.log('Error in getContentOutputById ', error.value);
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentOutput };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching content output by ID:', error);
-      throw new Error('Error fetching content output by ID');
+      this.handleErrors(error, 'getContentOutputById');
     }
   }
 
@@ -135,27 +156,30 @@ class apiClient {
   async fetchValidations(): Promise<FrontendTypes.Validations[]> {
     try {
       console.log('Fetching validations');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/validation/get-by-org', {
+      const response = await $fetch('/api/validation/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Validations[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching validations:', error);
-      throw new Error('Error fetching validations');
+      this.handleErrors(error, 'fetchValidations');
     }
   }
 
@@ -163,85 +187,87 @@ class apiClient {
   async getValidationsByContentOutput(contentOutputID: string): Promise<FrontendTypes.Validations[]> {
     try {
       console.log('Fetching validations');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Validations[] }>('/api/content-output/' + contentOutputID + '/validations');
+      const response = await $fetch(`/api/content-output/${contentOutputID}/validations`);
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
-        throw new Error('No data received from the server');
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Validations[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
       }
 
-      console.log('data:', data.value.body);
-
-      if (data.value.body.length === 0) {
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No validations found');
       }
 
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching validations:', error);
-      throw new Error('Error fetching validations');
+      this.handleErrors(error, 'getValidationsByContentOutput');
     }
   }
 
   async updateValidation(id: string, updates: Partial<FrontendTypes.Validations>): Promise<FrontendTypes.Validations> {
     try {
       console.log('Updating validation');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Validations }>('/api/validation/' + id + '/update', {
+      const response = await $fetch(`/api/validation/${id}/update`, {
         method: 'POST',
         body: { ...updates }
       });
 
-      if (error.value) {
-        console.log('Error in updateValidation ', error.value);
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Validations };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Updated validation:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error updating validation:', error);
-      throw new Error('Error updating validation');
+      this.handleErrors(error, 'updateValidation');
     }
   }
 
   async confirmValidations(contentOutputID: string): Promise<FrontendTypes.ContentOutput> {
     try {
       console.log('Confirming validations');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentOutput }>('/api/content-output/' + contentOutputID + '/confirm-validations', {
+      const response = await $fetch(`/api/content-output/${contentOutputID}/confirm-validations`, {
         method: 'POST'
       });
 
-      if (error.value) {
-        console.log('Error in confirmValidations ', error.value);
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentOutput };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('updated Content Output:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error confirming validations:', error);
-      throw new Error('Error confirming validations');
+      this.handleErrors(error, 'confirmValidations');
     }
   }
 
@@ -252,28 +278,31 @@ class apiClient {
 
   async fetchContentSubtypes(): Promise<FrontendTypes.ContentSubType[]> {
     try {
-      console.log('Fetching content outputs');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentSubType[] }>('/api/content-subtype/get-by-org', {
+      console.log('Fetching content subtypes');
+      const response = await $fetch('/api/content-subtype/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentSubType[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching content outputs:', error);
-      throw new Error('Error fetching content outputs');
+      this.handleErrors(error, 'fetchContentSubtypes');
     }
   }
 
@@ -288,76 +317,86 @@ class apiClient {
         target_audience: null,
       };
 
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentSubType }>('/api/content-subtype/create', {
+      const response = await $fetch('/api/content-subtype/create', {
         method: 'POST',
         body: contentSubtype
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentSubType };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Created content subtype:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error creating content subtype:', error);
-      throw new Error('Error creating content subtype');
+      this.handleErrors(error, 'createContentSubtype');
     }
   }
 
   async updateContentSubtype(id: string, updates: Partial<FrontendTypes.ContentSubType>): Promise<FrontendTypes.ContentSubType> {
     try {
       console.log('Updating content subtype');
-      const { data, error } = await useFetch<{ body: FrontendTypes.ContentSubType }>('/api/content-subtype/update', {
+      const response = await $fetch('/api/content-subtype/update', {
         method: 'POST',
         body: { id, ...updates }
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.ContentSubType };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Updated content subtype:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error updating content subtype:', error);
-      throw new Error('Error updating content subtype');
+      this.handleErrors(error, 'updateContentSubtype');
     }
   }
 
   async deleteContentSubtype(id: string): Promise<void> {
     try {
       console.log('Deleting content subtype');
-      const { error } = await useFetch('/api/content-subtype/delete', {
+      const response = await $fetch('/api/content-subtype/delete', {
         method: 'POST',
         body: { id }
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response)) {
+        throw new Error('Unexpected response structure from API');
+      }
+
+      const typedResponse = response as { statusCode: number };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
       }
 
       console.log('Content subtype deleted successfully');
     } catch (error) {
-      console.error('Error deleting content subtype:', error);
-      throw new Error('Error deleting content subtype');
+      this.handleErrors(error, 'deleteContentSubtype');
     }
   }
 
@@ -368,103 +407,116 @@ class apiClient {
   async fetchExamples(): Promise<FrontendTypes.Example[]> {
     try {
       console.log('Fetching examples');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Example[] }>('/api/example/get-by-org', {
+      const response = await $fetch('/api/example/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Example[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching examples:', error);
-      throw new Error('Error fetching examples');
+      this.handleErrors(error, 'fetchExamples');
     }
   }
 
   async createExample(example: Omit<FrontendTypes.Example, 'id'>): Promise<FrontendTypes.Example> {
     try {
       console.log('Creating example');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Example }>('/api/example/create', {
+      const response = await $fetch('/api/example/create', {
         method: 'POST',
         body: example
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Example };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Created example:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error creating example:', error);
-      throw new Error('Error creating example');
+      this.handleErrors(error, 'createExample');
     }
   }
 
   async updateExample(id: string, updates: Partial<FrontendTypes.Example>): Promise<FrontendTypes.Example> {
     try {
       console.log('Updating example');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Example }>('/api/example/update', {
+      const response = await $fetch('/api/example/update', {
         method: 'POST',
         body: { id, ...updates }
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Example };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('Updated example:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     } catch (error) {
-      console.error('Error updating example:', error);
-      throw new Error('Error updating example');
+      this.handleErrors(error, 'updateExample');
     }
   }
 
   async deleteExample(id: string): Promise<void> {
     try {
       console.log('Deleting example');
-      const { error } = await useFetch('/api/example/delete', {
+      const response = await $fetch('/api/example/delete', {
         method: 'POST',
         body: { id }
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response)) {
+        throw new Error('Unexpected response structure from API');
+      }
+
+      const typedResponse = response as { statusCode: number };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
       }
 
       console.log('Example deleted successfully');
     } catch (error) {
-      console.error('Error deleting example:', error);
-      throw new Error('Error deleting example');
+      this.handleErrors(error, 'deleteExample');
     }
   }
 
@@ -475,53 +527,58 @@ class apiClient {
   async fetchBlogMetadatas(): Promise<FrontendTypes.BlogMetadata[]> {
     try {
       console.log('Fetching blog metadatas');
-      const { data, error } = await useFetch<{ body: FrontendTypes.BlogMetadata[] }>('/api/blog-metadata/get-by-org', {
+      const response = await $fetch('/api/blog-metadata/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.BlogMetadata[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching blog metadatas:', error);
-      throw new Error('Error fetching blog metadatas');
+      this.handleErrors(error, 'fetchBlogMetadatas');
     }
   }
 
   async getBlogMetadataByContentOutputId(contentOutputID: string): Promise<FrontendTypes.BlogMetadata> {
     try {
       console.log('Fetching blog metadata by content output ID');
-      const { data, error } = await useFetch<{ body: FrontendTypes.BlogMetadata }>('/api/content-output/' + contentOutputID + '/blog-metadata');
+      const response = await $fetch(`/api/content-output/${contentOutputID}/blog-metadata`);
 
-      if (error.value) {
-        console.log('Error in getBlogMetadataByContentOutputId ', error.value);
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.BlogMetadata };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching blog metadata by content output ID:', error);
-      throw new Error('Error fetching blog metadata by content output ID');
+      this.handleErrors(error, 'getBlogMetadataByContentOutputId');
     }
   }
 
@@ -532,54 +589,60 @@ class apiClient {
   async fetchUsers(): Promise<FrontendTypes.Users[]> {
     try {
       console.log('Fetching users');
-      const { data, error } = await useFetch<{ body: FrontendTypes.Users[] }>('/api/user/get-by-org', {
+      const response = await $fetch('/api/user/get-by-org', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Users[] };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!Array.isArray(typedResponse.body)) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching users:', error);
-      throw new Error('Error fetching users');
+      this.handleErrors(error, 'fetchUsers');
     }
   }
 
   async fetchUserID(): Promise<string> {
     try {
       console.log('Fetching userID');
-      const { data, error } = await useFetch<{ body: string }>('/api/user/get-id', {
+      const response = await $fetch('/api/user/get-id', {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: string };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (typeof typedResponse.body !== 'string') {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching userID:', error);
-      throw new Error('Error fetching userID');
+      this.handleErrors(error, 'fetchUserID');
     }
   }
 
@@ -590,27 +653,30 @@ class apiClient {
   async fetchProjectSetup(contentOutputID: string): Promise<FrontendTypes.UserInput> {
     try {
       console.log('Fetching project setup');
-      const { data, error } = await useFetch<{ body: FrontendTypes.UserInput }>('/api/content-output/' + contentOutputID + '/project-setup', {
+      const response = await $fetch(`/api/content-output/${contentOutputID}/project-setup`, {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.UserInput };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching project setup:', error);
-      throw new Error('Error fetching project setup');
+      this.handleErrors(error, 'fetchProjectSetup');
     }
   }
 
@@ -621,29 +687,33 @@ class apiClient {
   async fetchSubtypeSettingsHistory(contentOutputID: string): Promise<FrontendTypes.SettingsInput> {
     try {
       console.log('Fetching subtype settings history');
-      const { data, error } = await useFetch<{ body: FrontendTypes.SettingsInput }>('/api/content-output/' + contentOutputID + '/subtype-settings-history', {
+      const response = await $fetch(`/api/content-output/${contentOutputID}/subtype-settings-history`, {
         method: 'GET'
       });
 
-      if (error.value) {
-        throw createError({
-          statusCode: error.value.statusCode,
-          statusMessage: error.value.statusMessage
-        });
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
       }
 
-      if (!data.value) {
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.SettingsInput };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
         throw new Error('No data received from the server');
       }
 
-      console.log('data:', data.value.body);
-      return data.value.body;
+      return typedResponse.body;
     }
     catch (error) {
-      console.error('Error fetching subtype settings history:', error);
-      throw new Error('Error fetching subtype settings history');
+      this.handleErrors(error, 'fetchSubtypeSettingsHistory');
     }
   }
+
 
 }
 
