@@ -8,38 +8,37 @@
   </v-col>
 </template>
 
-<script lang="ts">
-import { ref, watch } from 'vue';
+<script setup lang="ts">
+  import { ref, watch } from 'vue';
 
-export default {
-  props: {
-    possibleSubTypes: {
-      type: Array as () => { id: string; name: string }[],
-      required: true,
-    },
-    selectedSubType: {
-      type: Object as () => { id: string; name: string },
-      required: true,
-    },
-  },
-  emits: ['update:modelValue', 'update'],
-  setup(props, { emit }) {
-    const localSelectedSubType = ref(props.selectedSubType);
+  interface SubType {
+    id: string;
+    name: string;
+  }
 
-    watch(() => props.selectedSubType, (newValue) => {
-      localSelectedSubType.value = newValue;
-    });
+  // Define props
+  interface Props {
+    possibleSubTypes: SubType[];
+    selectedSubType: SubType;
+  }
 
-    const onSubTypeChange = (newSubType: { id: string; name: string }) => {
-      localSelectedSubType.value = newSubType;
-      emit('update:modelValue', newSubType);
-      emit('update', newSubType);
-    };
+  const props = defineProps<Props>();
 
-    return {
-      localSelectedSubType,
-      onSubTypeChange,
-    };
-  },
-};
+  // Define emits
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: SubType): void;
+    (e: 'update', value: SubType): void;
+  }>();
+
+  const localSelectedSubType = ref(props.selectedSubType);
+
+  watch(() => props.selectedSubType, (newValue) => {
+    localSelectedSubType.value = newValue;
+  });
+
+  const onSubTypeChange = (newSubType: SubType) => {
+    localSelectedSubType.value = newSubType;
+    emit('update:modelValue', newSubType);
+    emit('update', newSubType);
+  };
 </script>

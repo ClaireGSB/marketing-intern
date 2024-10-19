@@ -31,53 +31,53 @@
 </template>
 
 
-<script lang="ts">
-import ProjectSetupHistory from './ProjectSetupHistory.vue';
+<script setup lang="ts">
+  import { computed } from 'vue';
+  import ProjectSetupHistory from './ProjectSetupHistory.vue';
 
-export default {
-  props: {
-    outlineOption: {
-      type: String as () => 'select' | 'provide' | null,
-      default: null,
-    },
-    projectSetup: {
-      type: Object,
-      default: null,
-    },
-    selectedOutline: {
-      type: Object,
-      default: null,
-    },
-  },
-  emits: ['update:outlineOption', 'selectOutline', 'clearSelectedOutline'],
-  setup(props, { emit }) {
-    const selectedOutlineContent = computed(() => {
-      if (props.selectedOutline && props.selectedOutline.content) {
-        return props.selectedOutline.content;
-      }
-      return '';
-    });
-    const handleSelectOutline = () => {
-      emit('update:outlineOption', 'select');
-      emit('selectOutline');
-    };
+  interface Outline {
+    id: string;
+    title?: string;
+    content?: string;
+  }
 
-    const handleProvideOutline = () => {
-      emit('clearSelectedOutline');
-      emit('update:outlineOption', 'provide');
-    };
+  interface Props {
+    outlineOption: 'select' | 'provide' | null;
+    projectSetup: object | null;
+    selectedOutline: Outline | null;
+  }
 
-    const handleClearOutline = () => {
-      emit('clearSelectedOutline');
-      emit('update:outlineOption', null);
-    };
+  const props = withDefaults(defineProps<Props>(), {
+    outlineOption: null,
+    projectSetup: null,
+    selectedOutline: null,
+  });
 
-    return {
-      handleSelectOutline,
-      handleProvideOutline,
-      handleClearOutline,
-      selectedOutlineContent,
-    };
-  },
-};
+  const emit = defineEmits<{
+    (e: 'update:outlineOption', value: 'select' | 'provide' | null): void;
+    (e: 'selectOutline'): void;
+    (e: 'clearSelectedOutline'): void;
+  }>();
+
+  const selectedOutlineContent = computed(() => {
+    if (props.selectedOutline && props.selectedOutline.content) {
+      return props.selectedOutline.content;
+    }
+    return '';
+  });
+
+  const handleSelectOutline = () => {
+    emit('update:outlineOption', 'select');
+    emit('selectOutline');
+  };
+
+  const handleProvideOutline = () => {
+    emit('clearSelectedOutline');
+    emit('update:outlineOption', 'provide');
+  };
+
+  const handleClearOutline = () => {
+    emit('clearSelectedOutline');
+    emit('update:outlineOption', null);
+  };
 </script>

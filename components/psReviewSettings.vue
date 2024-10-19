@@ -10,19 +10,28 @@
   </v-col>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+  // Define the shape of the content type and sub-type objects
+  interface ContentType {
+    display_name: string;
+    // Add other properties if needed
+  }
 
-export default {
-  props: {
-    selectedContentType: {
-      type: Object,
-      required: true,
-    },
-    selectedSubType: {
-      type: Object,
-      required: true,
-    },
-  },
-  emits: ['review'],
-};
+  interface SubType {
+    name: string;
+    // Add other properties if needed
+  }
+
+  // Define props
+  interface Props {
+    selectedContentType: ContentType;
+    selectedSubType: SubType;
+  }
+
+  defineProps<Props>();
+
+  // Define emits
+  defineEmits<{
+    (e: 'review'): void;
+  }>();
 </script>

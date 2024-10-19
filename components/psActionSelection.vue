@@ -16,33 +16,24 @@
   </v-col>
 </template>
 
-<script lang="ts">
-import { watch, ref } from 'vue';
+<script setup lang="ts">
+  import { ref } from 'vue';
 
-export default {
-  props: {
-    actions: {
-      type: Object,
-      required: true,
-    },
-    isActionAvailable: {
-      type: Function as () => (action: string) => boolean,
-      required: true,
-    },
-  },
-  emits: ['update'],
-  setup(props, { emit }) {
-    const localSelectedAction = ref('');
+  interface Props {
+    actions: Record<string, any>;
+    isActionAvailable: (action: string) => boolean;
+  }
 
-    const onActionChange = (newAction: string) => {
-      localSelectedAction.value = newAction;
-      emit('update', localSelectedAction.value);
-    };
+  const props = defineProps<Props>();
 
-    return {
-      onActionChange,
-      localSelectedAction
-    };
-  },
-};
+  const emit = defineEmits<{
+    (e: 'update', action: string): void;
+  }>();
+
+  const localSelectedAction = ref('');
+
+  const onActionChange = (newAction: string) => {
+    localSelectedAction.value = newAction;
+    emit('update', localSelectedAction.value);
+  };
 </script>

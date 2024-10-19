@@ -40,104 +40,83 @@
 </template>
 
 
-<script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-// import { LocalExample } from '../../services/mockApiClient';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import ConfirmDialog from './ConfirmDialog.vue';
+import { Example } from '../types/frontendTypes';
 
 
-export default defineComponent({
-  name: 'ContentSettingsExampleCard',
-  props: {
-    example: {
-      type: Object as () => LocalExample,
-      required: true,
-    },
-  },
-  emits: ['save', 'remove'],
-  setup(props, { emit }) {
+interface Props {
+  example: Example;
+}
 
-    const isEditing = ref(false);
-    const form = ref<any>(null);
+const props = defineProps<Props>();
 
-    const localExample = ref({ ...props.example });
-    const contentForDisplay = computed(() => truncateText(localExample.value.content || ''));
-    const explanationForDisplay = computed(() => truncateText(localExample.value.explanation || ''));
-    const isNewExample = ref(false);
+const emit = defineEmits<{
+  (e: 'save', example: LocalExample): void;
+  (e: 'remove', id: string): void;
+}>();
 
-    const isFormValid = computed(() => {
-      return !!localExample.value.name && !!localExample.value.content;
-    });
+const isEditing = ref(false);
+const form = ref<any>(null);
+const localExample = ref({ ...props.example });
+const isNewExample = ref(false);
+const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
 
-    const saveExample = async () => {
-      console.log('Saving example:', localExample.value);
-      isEditing.value = false;
-      const valuesToSave = { ...localExample.value };
+const contentForDisplay = computed(() => truncateText(localExample.value.content || ''));
+const explanationForDisplay = computed(() => truncateText(localExample.value.explanation || ''));
 
-      emit('save', valuesToSave);
-    };
+const isFormValid = computed(() => {
+  return !!localExample.value.name && !!localExample.value.content;
+});
 
-    const confirmDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null);
+const saveExample = async () => {
+  console.log('Saving example:', localExample.value);
+  isEditing.value = false;
+  const valuesToSave = { ...localExample.value };
+  emit('save', valuesToSave);
+};
 
-    const openDeleteConfirmDialog = () => {
-      confirmDialog.value?.open();
-    };
+const openDeleteConfirmDialog = () => {
+  confirmDialog.value?.open();
+};
 
-    const removeExample = () => {
-      console.log('Removing example:', localExample.value);
-      emit('remove', localExample.value.id);
-    };
+const removeExample = () => {
+  console.log('Removing example:', localExample.value);
+  emit('remove', localExample.value.id);
+};
 
-    const cancelEditing = () => {
-      console.log('Cancelling editing');
-      isEditing.value = false;
-      if (isNewExample.value) {
-        // Clear the form for new examples
-        localExample.value = { id: localExample.value.id, name: '', content: '', explanation: '', example_type: localExample.value.example_type };
-      } else {
-        // Reset to original values for existing examples
-        localExample.value = { ...props.example };
-        console.log('Resetting example:', localExample.value);
-      }
-    };
+const cancelEditing = () => {
+  console.log('Cancelling editing');
+  isEditing.value = false;
+  if (isNewExample.value) {
+    // Clear the form for new examples
+    localExample.value = { id: localExample.value.id, name: '', content: '', explanation: '', example_type: localExample.value.example_type };
+  } else {
+    // Reset to original values for existing examples
+    localExample.value = { ...props.example };
+    console.log('Resetting example:', localExample.value);
+  }
+};
 
-    const truncateText = (text: string) => {
-      return text.length > 100 ? text.slice(0, 97) + '...' : text;
-    };
+const truncateText = (text: string) => {
+  return text.length > 100 ? text.slice(0, 97) + '...' : text;
+};
 
-    const formatDate = (date: Date) => {
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }).format(date);
-    };
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(date);
+};
 
-    onMounted(() => {
-      console.log('Example card mounted');
-      // if the example doesn't have content, it's a new example
-      // set isEditing to true and IsNewExample to true
-      isEditing.value = !props.example.content;
-      isNewExample.value = !props.example.content;
-    });
-
-    return {
-      isEditing,
-      saveExample,
-      removeExample,
-      truncateText,
-      formatDate,
-      contentForDisplay,
-      explanationForDisplay,
-      form,
-      isFormValid,
-      cancelEditing,
-      isNewExample,
-      localExample,
-      openDeleteConfirmDialog,
-      confirmDialog,
-    };
-  },
+onMounted(() => {
+  console.log('Example card mounted');
+  // if the example doesn't have content, it's a new example
+  // set isEditing to true and IsNewExample to true
+  isEditing.value = !props.example.content;
+  isNewExample.value = !props.example.content;
 });
 </script>
 

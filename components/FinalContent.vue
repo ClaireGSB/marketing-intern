@@ -21,47 +21,36 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import { ContentOutput, BlogMetadata } from '../types/frontendTypes';
-import { ref, onMounted, watch } from 'vue';
-import { useUserDataStore } from '~/stores/userdata';
+<script setup lang="ts">
+  import { ContentOutput, BlogMetadata } from '../types/frontendTypes';
+  import { ref, onMounted, watch } from 'vue';
+  import { useUserDataStore } from '~/stores/userdata';
 
-export default {
-  props: {
-    contentOutputID: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props) {
-    const userStore = useUserDataStore();
-    const contentLoaded = ref(false);
-    const contentOutput = ref<ContentOutput | null>(null);
-    const metadata = ref<BlogMetadata | null>(null);
-    const contentTypeName = ref('');
+  interface Props {
+    contentOutputID: string;
+  }
 
-    const loadContent = async () => {
-      contentOutput.value = userStore.getSelectedContentOutput(props.contentOutputID);
-      if (contentOutput.value.content_type_id === 9) {
-        // it a blog post. Also get meta data
-        metadata.value = await userStore.getBlogMetadataByContentOutputId(props.contentOutputID);
-      }
-      contentTypeName.value = userStore.getContentTypeDisplayNameById(contentOutput.value.content_type_id);
-      contentLoaded.value = true;
-      console.log('metadata', metadata.value);
-    };
+  const props = defineProps<Props>();
 
-    onMounted(loadContent);
-    watch(() => props.contentOutputID, loadContent);
+  const userStore = useUserDataStore();
+  const contentLoaded = ref(false);
+  const contentOutput = ref<ContentOutput | null>(null);
+  const metadata = ref<BlogMetadata | null>(null);
+  const contentTypeName = ref('');
 
-    return {
-      contentOutput,
-      metadata,
-      contentTypeName,
-      contentLoaded,
-    };
-  },
-};
+  const loadContent = async () => {
+    contentOutput.value = userStore.getSelectedContentOutput(props.contentOutputID);
+    if (contentOutput.value?.content_type_id === 9) {
+      // it's a blog post. Also get meta data
+      metadata.value = await userStore.getBlogMetadataByContentOutputId(props.contentOutputID);
+    }
+    contentTypeName.value = userStore.getContentTypeDisplayNameById(contentOutput.value?.content_type_id);
+    contentLoaded.value = true;
+    console.log('metadata', metadata.value);
+  };
+
+  onMounted(loadContent);
+  watch(() => props.contentOutputID, loadContent);
 </script>
 
 <style scoped>

@@ -44,24 +44,28 @@
   </v-col>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { InputField } from '~/types/inputFieldTypes';
 
-export default {
-  props: {
-    contentFields: Array as () => string[],
-    actionFields: Array as () => string[],
-    inputFields: {
-      type: Object,
-      default: () => ({})
-    },
-    formFields: Object,
-    selectedContents: Object,
-  },
-  emits: ['openContentSelection', 'clearSelectedContent'],
-  methods: {
-    getValidationRules(field: any) {
-      // Implement validation rules logic
-    },
-  },
+interface Props {
+  contentFields: string[];
+  actionFields: string[];
+  inputFields: Record<string, InputField>;
+  formFields: Record<string, any>;
+  selectedContents: Record<string, any>;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  inputFields: () => ({})
+});
+
+const emit = defineEmits<{
+  (e: 'openContentSelection'): void;
+  (e: 'clearSelectedContent'): void;
+}>();
+
+const getValidationRules = (field: InputField) => {
+  // Implement validation rules logic
+
 };
 </script>

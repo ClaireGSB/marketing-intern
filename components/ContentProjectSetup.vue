@@ -52,7 +52,7 @@
     :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, computed, reactive, watch } from 'vue';
 import { useUserDataStore } from '../stores/userdata';
 import { storeToRefs } from 'pinia';
@@ -60,282 +60,238 @@ import { VForm } from 'vuetify/components';
 import type { ContentType } from '../types/contentTypes';
 import { type FieldConfig, inputFields, generalOptionalFields } from '../types/inputFieldTypes';
 
-export default {
-  props: {
-    isEditable: {
-      type: Boolean,
-      default: false,
-    },
-    initialData: {
-      type: Object as () => Record<string, string>,
-      default: () => ({}),
-    },
-  },
-  emits: ['generate'],
-  setup(props, { emit }) {
-    const userStore = useUserDataStore();
-    const form = ref<InstanceType<typeof VForm> | null>(null);
-    const formFields = reactive<Record<string, string>>({});
-    const isValid = ref(false);
+const props = withDefaults(defineProps<{
+  isEditable?: boolean;
+  initialData?: Record<string, string>;
+}>(), {
+  isEditable: false,
+  initialData: () => ({}),
+});
 
-    // --------- Form Progress ---------
-    const step = ref(1);
-    const outlineOption = ref<'select' | 'provide' | null>(null);
-    const projectSetup = ref(null);
+const emit = defineEmits<{
+  (e: 'generate', userInput: Record<string, any>): void;
+}>();
 
-    const updateStep = (newStep: number) => {
-      step.value = newStep;
-    };
+const userStore = useUserDataStore();
+const form = ref<InstanceType<typeof VForm> | null>(null);
+const formFields = reactive<Record<string, string>>({});
+const isValid = ref(false);
 
-    // --------- Content types and Subtypes selection ---------
-    const { contentTypes, actions } = storeToRefs(userStore);
-    const selectedContentType = ref<ContentType>({
-      id: -1,
-      name: '',
-      display_name: '',
-      available_actions: [],
-      created_at: '',
-      _status: ''
+// --------- Form Progress ---------
+const step = ref(1);
+const outlineOption = ref<'select' | 'provide' | null>(null);
+const projectSetup = ref(null);
+
+const updateStep = (newStep: number) => {
+  step.value = newStep;
+};
+
+// --------- Content types and Subtypes selection ---------
+const { contentTypes, actions } = storeToRefs(userStore);
+const selectedContentType = ref<ContentType>({
+  id: -1,
+  name: '',
+  display_name: '',
+  available_actions: [],
+  created_at: '',
+  _status: ''
+});
+const selectedSubType = ref<{ id: string; name: string }>({ id: '', name: '' });
+const possibleSubTypes = ref([] as { id: string; name: string; }[])
+
+const selectContentType = (id: number) => {
+  const foundType = contentTypes.value.find(type => type.id === id);
+  selectedContentType.value = foundType || {
+    id: -1,
+    name: '',
+    display_name: '',
+    available_actions: [],
+    created_at: '',
+    _status: ''
+  };
+  possibleSubTypes.value = userStore.getSubtypesIDsAndNamesForContentType(id);
+  selectedSubType.value = possibleSubTypes.value[0] || { id: -1, name: '' };
+  updateStep(2);
+};
+
+const handleSubTypeSelection = (newSubType: { id: string; name: string }) => {
+  selectedSubType.value = newSubType;
+  updateStep(3);
+};
+
+const selectExistingOutline = async () => {
+  showContentSelectionModal.value = true;
+  currentSelectingField.value = 'outline';
+};
+
+const clearSelectedOutline = () => {
+  selectedContents.value['outline'] = null;
+  outlineOption.value = null;
+  projectSetup.value = null;
+  updateStep(3);
+};
+
+watch(selectedContentType, (newType) => {
+  if (newType.id === 9) {
+    step.value = 3;
+    outlineOption.value = null;
+  } else {
+    // Reset outline-related data when switching away from blog post copy
+    outlineOption.value = null;
+    projectSetup.value = null;
+  }
+  if (selectedAction.value && !isActionAvailable(selectedAction.value)) {
+    selectedAction.value = '';
+    step.value = Math.min(step.value, 3);
+  }
+  if (!possibleSubTypes.value.some(subType => subType.id === selectedSubType.value.id)) {
+    selectedSubType.value = possibleSubTypes.value[0] || { id: '', name: '' };
+    step.value = Math.min(step.value, 2);
+  }
+});
+
+// --------- Action Selection & Action-Related Required Fields ---------
+const selectedAction = ref<string>('');
+
+const isActionAvailable = (action: string): boolean => {
+  return action in actions.value && selectedContentType.value.available_actions.includes(action);
+};
+
+const contentFields = computed(() => {
+  return [...selectedContentType.value.required_fields, ...selectedContentType.value.optional_fields];
+});
+
+const actionFields = computed((): string[] => {
+  if (selectedAction.value && selectedAction.value in actions.value) {
+    const action = actions.value[selectedAction.value as keyof typeof actions.value];
+    return [...action.requiredFields, ...action.optionalFields];
+  }
+  return [];
+});
+
+const handleActionSelection = (action: string) => {
+  selectedAction.value = action;
+  updateStep(5);
+};
+
+const isFieldRequired = (fieldKey: string): boolean => {
+  if (actionFields.value.includes(fieldKey)) {
+    if (selectedAction.value && selectedAction.value in actions.value) {
+      const action = actions.value[selectedAction.value as keyof typeof actions.value];
+      return action.requiredFields.includes(fieldKey);
+    }
+  }
+  if (contentFields.value.includes(fieldKey)) {
+    return selectedContentType.value.required_fields.includes(fieldKey);
+  }
+  return false;
+};
+
+const selectedContents = ref<Record<string, any>>({});
+const showContentSelectionModal = ref(false);
+const currentSelectingField = ref('');
+
+const openContentSelectionModal = (fieldKey: string) => {
+  currentSelectingField.value = fieldKey;
+  showContentSelectionModal.value = true;
+};
+
+const onContentSelected = async (content: any) => {
+  if (currentSelectingField.value === 'outline') {
+    selectedContents.value['outline'] = content;
+    projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
+    updateStep(5);
+  } else {
+    selectedContents.value[currentSelectingField.value] = content;
+    formFields[currentSelectingField.value] = content.content;
+  }
+};
+
+const clearSelectedContent = (fieldKey: string) => {
+  selectedContents.value[fieldKey] = null;
+  formFields[fieldKey] = '';
+};
+
+const isContentSelectable = computed(() => {
+  return actionFields.value.includes('content') &&
+    selectedAction.value &&
+    actions.value[selectedAction.value].allowContentSelection;
+});
+
+// ---------- Review SubType Settings ----------
+const showSettingsPanel = ref(false);
+
+const reviewSubTypeSettings = () => {
+  showSettingsPanel.value = true;
+};
+
+// ---------- General Optional Fields ----------
+
+const showOptionalFields = ref(false);
+
+const toggleOptionalFields = () => {
+  showOptionalFields.value = !showOptionalFields.value;
+};
+
+// ---------- Validation ----------
+
+const getValidationRules = (field: FieldConfig) => {
+  const rules: ((v: string) => true | string)[] = [];
+
+  const isRequired = isFieldRequired(field.key);
+
+  if (isRequired) {
+    rules.push((v: string) => !!v || `${field.label} is required`);
+  }
+
+  if (field.validation) {
+    const { minChar, maxChar } = field.validation;
+
+    rules.push((v: string) => {
+      if (!v || v.trim().length === 0) {
+        return isRequired ? `${field.label} is required` : true;
+      }
+      if (minChar && v.length < minChar) {
+        return isRequired
+          ? `Minimum ${minChar} characters required`
+          : `This field is optional, but if using, minimum ${minChar} characters required`;
+      }
+      if (maxChar && v.length > maxChar) {
+        return `Maximum ${maxChar} characters allowed`;
+      }
+      return true;
     });
-    const selectedSubType = ref<{ id: string; name: string }>({ id: '', name: '' });
-    const possibleSubTypes = ref([] as { id: string; name: string; }[])
+  }
 
-    const selectContentType = (id: number) => {
-      const foundType = contentTypes.value.find(type => type.id === id);
-      selectedContentType.value = foundType || {
-        id: -1,
-        name: '',
-        display_name: '',
-        available_actions: [],
-        created_at: '',
-        _status: ''
-      };
-      possibleSubTypes.value = userStore.getSubtypesIDsAndNamesForContentType(id);
-      selectedSubType.value = possibleSubTypes.value[0] || { id: -1, name: '' };
-      updateStep(2);
+  return rules;
+};
+
+// ---------- Content Generation ----------
+const generateContent = async () => {
+  if (!form.value) return;
+  const { valid } = await form.value.validate();
+
+  if (valid) {
+    const userInput = {
+      content_type_id: selectedContentType.value.id,
+      content_subtype_id: selectedSubType.value.id,
+      action: selectedAction.value,
+      ...formFields,
     };
 
-    const handleSubTypeSelection = (newSubType: { id: string; name: string }) => {
-      selectedSubType.value = newSubType;
-      updateStep(3);
-    };
-
-    const selectExistingOutline = async () => {
-      showContentSelectionModal.value = true;
-      currentSelectingField.value = 'outline';
-    };
-
-    const clearSelectedOutline = () => {
-      selectedContents.value['outline'] = null;
-      outlineOption.value = null;
-      projectSetup.value = null;
-      updateStep(3);
-    };
-
-    watch(selectedContentType, (newType) => {
-      if (newType.id === 9) {
-        step.value = 3;
-        outlineOption.value = null;
-      } else {
-        // Reset outline-related data when switching away from blog post copy
-        outlineOption.value = null;
-        projectSetup.value = null;
+    // Add selected content IDs for fields that allow selection
+    for (const fieldKey in selectedContents.value) {
+      if (selectedContents.value['content']) {
+        userInput[`selected_content_output_id`] = selectedContents.value['content'].id;
       }
-      if (selectedAction.value && !isActionAvailable(selectedAction.value)) {
-        selectedAction.value = '';
-        step.value = Math.min(step.value, 3);
+      if (selectedContents.value['outline']) {
+        userInput[`selected_outline_id`] = selectedContents.value['outline'].id;
       }
-      if (!possibleSubTypes.value.some(subType => subType.id === selectedSubType.value.id)) {
-        selectedSubType.value = possibleSubTypes.value[0] || { id: '', name: '' };
-        step.value = Math.min(step.value, 2);
-      }
-    });
-
-    // --------- Action Selection & Action-Related Required Fields ---------
-    const selectedAction = ref<string>('');
-
-    const isActionAvailable = (action: string): boolean => {
-      return action in actions.value && selectedContentType.value.available_actions.includes(action);
-    };
-
-    const contentFields = computed(() => {
-      return [...selectedContentType.value.required_fields, ...selectedContentType.value.optional_fields];
-    });
-
-    const actionFields = computed((): string[] => {
-      if (selectedAction.value && selectedAction.value in actions.value) {
-        const action = actions.value[selectedAction.value as keyof typeof actions.value];
-        return [...action.requiredFields, ...action.optionalFields];
-      }
-      return [];
-    });
-
-    const handleActionSelection = (action: string) => {
-      selectedAction.value = action;
-      updateStep(5);
-    };
-
-    const isFieldRequired = (fieldKey: string): boolean => {
-      if (actionFields.value.includes(fieldKey)) {
-        if (selectedAction.value && selectedAction.value in actions.value) {
-          const action = actions.value[selectedAction.value as keyof typeof actions.value];
-          return action.requiredFields.includes(fieldKey);
-        }
-      }
-      if (contentFields.value.includes(fieldKey)) {
-        return selectedContentType.value.required_fields.includes(fieldKey);
-      }
-      return false;
-    };
-
-    const selectedContents = ref<Record<string, any>>({});
-    const showContentSelectionModal = ref(false);
-    const currentSelectingField = ref('');
-
-
-    const openContentSelectionModal = (fieldKey: string) => {
-      currentSelectingField.value = fieldKey;
-      showContentSelectionModal.value = true;
-    };
-
-    const onContentSelected = async (content: any) => {
-      if (currentSelectingField.value === 'outline') {
-        selectedContents.value['outline'] = content;
-        projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
-        updateStep(5);
-      } else {
-        selectedContents.value[currentSelectingField.value] = content;
-        formFields[currentSelectingField.value] = content.content;
-      }
-    };
-
-    const clearSelectedContent = (fieldKey: string) => {
-      selectedContents.value[fieldKey] = null;
-      formFields[fieldKey] = '';
-    };
-
-    const isContentSelectable = computed(() => {
-      return actionFields.value.includes('content') &&
-        selectedAction.value &&
-        actions.value[selectedAction.value].allowContentSelection;
-    });
-
-    // ---------- Review SubType Settings ----------
-    const showSettingsPanel = ref(false);
-
-    const reviewSubTypeSettings = () => {
-      showSettingsPanel.value = true;
-    };
-
-    // ---------- General Optional Fields ----------
-
-    const showOptionalFields = ref(false);
-
-    const toggleOptionalFields = () => {
-      showOptionalFields.value = !showOptionalFields.value;
-    };
-
-    // ---------- Validation ----------
-
-    const getValidationRules = (field: FieldConfig) => {
-      const rules: ((v: string) => true | string)[] = [];
-
-      const isRequired = isFieldRequired(field.key);
-
-      if (isRequired) {
-        rules.push((v: string) => !!v || `${field.label} is required`);
-      }
-
-      if (field.validation) {
-        const { minChar, maxChar } = field.validation;
-
-        rules.push((v: string) => {
-          if (!v || v.trim().length === 0) {
-            return isRequired ? `${field.label} is required` : true;
-          }
-          if (minChar && v.length < minChar) {
-            return isRequired
-              ? `Minimum ${minChar} characters required`
-              : `This field is optional, but if using, minimum ${minChar} characters required`;
-          }
-          if (maxChar && v.length > maxChar) {
-            return `Maximum ${maxChar} characters allowed`;
-          }
-          return true;
-        });
-      }
-
-      return rules;
-    };
-
-    // ---------- Content Generation ----------
-    const generateContent = async () => {
-      if (!form.value) return;
-      const { valid } = await form.value.validate();
-
-      if (valid) {
-        const userInput = {
-          content_type_id: selectedContentType.value.id,
-          content_subtype_id: selectedSubType.value.id,
-          action: selectedAction.value,
-          ...formFields,
-        };
-
-        // Add selected content IDs for fields that allow selection
-        for (const fieldKey in selectedContents.value) {
-          if (selectedContents.value['content']) {
-            userInput[`selected_content_output_id`] = selectedContents.value['content'].id;
-          }
-          if (selectedContents.value['outline']) {
-            userInput[`selected_outline_id`] = selectedContents.value['outline'].id;
-          }
-        }
-        // To do: also handle outline
-        console.log('requesting content generation with:', userInput)
-        emit('generate', userInput);
-      }
-    };
-
-    return {
-      step,
-      isValid,
-      form,
-      selectedContentType,
-      selectedSubType,
-      selectedAction,
-      possibleSubTypes,
-      contentTypes,
-      actions,
-      isActionAvailable,
-      selectContentType,
-      updateStep,
-      generateContent,
-      showOptionalFields,
-      toggleOptionalFields,
-      reviewSubTypeSettings,
-      showSettingsPanel,
-      getValidationRules,
-      actionFields,
-      contentFields,
-      formFields,
-      generalOptionalFields,
-      inputFields,
-      isFieldRequired,
-      showContentSelectionModal,
-      selectedContents,
-      openContentSelectionModal,
-      onContentSelected,
-      clearSelectedContent,
-      isContentSelectable,
-      currentSelectingField,
-      outlineOption,
-      projectSetup,
-      selectExistingOutline,
-      handleActionSelection,
-      clearSelectedOutline,
-      handleSubTypeSelection
-    };
-  },
+    }
+    // To do: also handle outline
+    console.log('requesting content generation with:', userInput)
+    emit('generate', userInput);
+  }
 };
 </script>
 
