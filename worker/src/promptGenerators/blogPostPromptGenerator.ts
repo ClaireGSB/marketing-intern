@@ -4,7 +4,7 @@ import type { SubtypeSettings } from '../recipeTypes';
 import type { UserInput } from '~/types/backendTypes';
 import type { ContentTypeName } from '../../../types/contentTypes';
 import { actionInstructionBlogCopySnippet, actionFieldsSnippet, contentTypeSnippet } from './SnippetsProcessors/actionProcessor';
-import { examplesSnippet} from './SnippetsProcessors/exampleProcessor';
+import { examplesSnippet } from './SnippetsProcessors/exampleProcessor';
 import { additionalInstructionsSnippet } from './SnippetsProcessors/additionalInstructionsProcessor';
 import { systemPromptSnippet } from './SnippetsProcessors/systemPromptProcessor';
 import { guidelinesSnippet } from './SnippetsProcessors/guidelineProcessor';
@@ -63,8 +63,52 @@ You should output your response in the following JSON format:
   Provide your response in valid JSON format with properly escaped quotes and line breaks. ONLY respond with the JSON, not your analysis.
 `
 
-;
+    ;
   console.log('---------------------\nReview prompt:');
+  console.log(prompt);
+  return prompt;
+}
+
+export function generateTitlePrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
+  // TO DO: make it better to take examples & SEO phrase into account
+  const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
+
+  const prompt = `Write 2 options for the title of the blog post below. 
+  I'm also adding the whole content brief for your reference ; please leverage it to create the best titles possible.
+  <blog post>${draftPost}</blog post>
+  <content brief>${initialPrompt}</content brief>
+  You should output your response in the following JSON format:
+      {
+        options: {
+          "1": "First version",
+          "2": "Second version"
+        }
+      }
+      Provide your response in valid JSON format with properly escaped quotes and line breaks.`;
+  console.log('---------------------\nTitle prompt:');
+  console.log(prompt);
+  return prompt;
+}
+
+export function generateMetadescriptionPrompt(projectSettings: UserInput, subTypeSettings: SubtypeSettings, contentType: ContentTypeName, draftPost: string): string {
+  // TO DO: make it better to take examples & SEO phrase & all the contextinto account
+  const initialPrompt = generateUserContentPrompt(projectSettings, subTypeSettings, contentType);
+  
+  const prompt = `Write 2 options for the meta description of the blog post below. 
+  I'm also adding the whole content brief for your reference ; please leverage it to create the best meta descriptions possible.
+
+  <blog post>${draftPost}</blog post>
+  <content brief>${initialPrompt}</content brief>
+  You should output your response in the following JSON format:
+      {
+        options: {
+          "1": "First version",
+          "2": "Second version"
+        }
+      }
+      Provide your response in valid JSON format with properly escaped quotes and line breaks.`;
+
+  console.log('---------------------\nMeta description prompt:');
   console.log(prompt);
   return prompt;
 }
