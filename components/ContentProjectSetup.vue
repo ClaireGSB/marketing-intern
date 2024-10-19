@@ -6,8 +6,8 @@
         @select="selectContentType" />
 
       <!-- Select Content Subtype - Step 2 -->
-      <psSubTypeSelection v-if="step >= 2" :possible-sub-types="possibleSubTypes"
-        v-model:selected-sub-type="selectedSubType" @update:modelValue="updateStep(3)" />
+      <psSubTypeSelection v-if="step >= 2" :possible-sub-types="possibleSubTypes" :selected-sub-type="selectedSubType"
+        @update="handleSubTypeSelection" />
 
       <!-- If Blog Post Copy: Select Outline - Step 3 -->
       <psOutlineSelection v-if="step >= 3 && selectedContentType.id === 9" v-model:outline-option="outlineOption"
@@ -113,6 +113,11 @@ export default {
       possibleSubTypes.value = userStore.getSubtypesIDsAndNamesForContentType(id);
       selectedSubType.value = possibleSubTypes.value[0] || { id: -1, name: '' };
       updateStep(2);
+    };
+
+    const handleSubTypeSelection = (newSubType: { id: string; name: string }) => {
+      selectedSubType.value = newSubType;
+      updateStep(3);
     };
 
     const selectExistingOutline = async () => {
@@ -327,7 +332,8 @@ export default {
       projectSetup,
       selectExistingOutline,
       handleActionSelection,
-      clearSelectedOutline
+      clearSelectedOutline,
+      handleSubTypeSelection
     };
   },
 };
