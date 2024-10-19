@@ -3,12 +3,21 @@
 <template>
   <v-col cols="12">
     <h3 class="mb-4">2. Select Sub-Type</h3>
-    <v-select :modelValue="selectedSubType" @update:modelValue="$emit('update:modelValue', $event)"
-      :items="possibleSubTypes" item-title="name" label="Select Sub-Type" required return-object></v-select>
+    <v-select
+      v-model="localSelectedSubType"
+      :items="possibleSubTypes"
+      item-title="name"
+      item-value="id"
+      label="Select Sub-Type"
+      required
+      return-object
+      @update:modelValue="onSubTypeChange"
+    ></v-select>
   </v-col>
 </template>
 
 <script lang="ts">
+import { ref, watch } from 'vue';
 
 export default {
   props: {
@@ -21,6 +30,24 @@ export default {
       required: true,
     },
   },
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'update'],
+  setup(props, { emit }) {
+    const localSelectedSubType = ref(props.selectedSubType);
+
+    watch(() => props.selectedSubType, (newValue) => {
+      localSelectedSubType.value = newValue;
+    });
+
+    const onSubTypeChange = (newSubType: { id: string; name: string }) => {
+      localSelectedSubType.value = newSubType;
+      emit('update:modelValue', newSubType);
+      emit('update', newSubType);
+    };
+
+    return {
+      localSelectedSubType,
+      onSubTypeChange,
+    };
+  },
 };
 </script>
