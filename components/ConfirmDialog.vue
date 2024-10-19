@@ -12,49 +12,44 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 
-export default defineComponent({
+defineOptions({
   name: 'ConfirmDialog',
-  props: {
-    title: {
-      type: String,
-      default: 'Confirm Action',
-    },
-    message: {
-      type: String,
-      required: true,
-    },
-    confirmText: {
-      type: String,
-      default: 'Confirm',
-    },
-  },
-  emits: ['confirm', 'cancel'],
-  setup(props, { emit }) {
-    const dialog = ref(false);
+});
 
-    const open = () => {
-      dialog.value = true;
-    };
+const props = withDefaults(defineProps<{
+  title?: string;
+  message: string;
+  confirmText?: string;
+}>(), {
+  title: 'Confirm Action',
+  confirmText: 'Confirm',
+});
 
-    const confirm = () => {
-      dialog.value = false;
-      emit('confirm');
-    };
+const emit = defineEmits<{
+  (e: 'confirm'): void;
+  (e: 'cancel'): void;
+}>();
 
-    const cancel = () => {
-      dialog.value = false;
-      emit('cancel');
-    };
+const dialog = ref(false);
 
-    return {
-      dialog,
-      open,
-      confirm,
-      cancel,
-    };
-  },
+const open = () => {
+  dialog.value = true;
+};
+
+const confirm = () => {
+  dialog.value = false;
+  emit('confirm');
+};
+
+const cancel = () => {
+  dialog.value = false;
+  emit('cancel');
+};
+
+defineExpose({
+  open,
 });
 </script>

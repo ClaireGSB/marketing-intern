@@ -93,6 +93,10 @@ export const useUserDataStore = defineStore('userData', {
         return this.getSubtypeSettingsHistoryByContentOutputId(contentSubtypeID);
       }
     },
+    async addExample(example: FrontendTypes.Example) {
+      const newExample = await api.createExample(example);
+      this.examples.push(newExample);
+    },
     async updateExample(exampleID: string, data: Partial<FrontendTypes.Example>) {
       // remove id from data (we have it separately anyway)
       const { id, ...dataWithoutId } = data;

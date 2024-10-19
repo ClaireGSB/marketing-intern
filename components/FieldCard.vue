@@ -41,82 +41,61 @@
   </v-card>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue';
-import TooltipButton from './TooltipButton.vue';
+<script setup lang="ts">
+  import { ref, computed, watch } from 'vue';
+  import TooltipButton from './TooltipButton.vue';
 
-export default defineComponent({
-  name: 'FieldCard',
-  components: {
-    TooltipButton,
-  },
-  props: {
-    value: {
-      type: String,
-      default: '',
-    },
-    fieldName: {
-      type: String,
-      required: true,
-    },
-    maxChars: {
-      type: Number,
-      default: 100,
-    },
-    isMultiline: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['update:value'],
-  setup(props, { emit }) {
-    const isEditing = ref(false);
-    const localContent = ref(props.value || '');
-    const editedContent = ref(localContent.value);
+  interface Props {
+    value?: string;
+    fieldName: string;
+    maxChars?: number;
+    isMultiline?: boolean;
+  }
 
-    watch(() => props.value, (newValue) => {
-      localContent.value = newValue || '';
-      if (!isEditing.value) {
-        editedContent.value = localContent.value;
-      }
-    });
+  const props = withDefaults(defineProps<Props>(), {
+    value: '',
+    maxChars: 100,
+    isMultiline: false,
+  });
 
-    const contentForDisplay = computed(() => localContent.value);
-    
-    const isValid = computed(() => {
-      return editedContent.value.length <= props.maxChars;
-    });
+  const emit = defineEmits<{
+    (e: 'update:value', value: string): void;
+  }>();
 
-    const startEditing = () => {
+  const isEditing = ref(false);
+  const localContent = ref(props.value);
+  const editedContent = ref(localContent.value);
+
+  watch(() => props.value, (newValue) => {
+    localContent.value = newValue || '';
+    if (!isEditing.value) {
       editedContent.value = localContent.value;
-      isEditing.value = true;
-    };
+    }
+  });
 
-    const saveChanges = () => {
-      if (isValid.value) {
-        localContent.value = editedContent.value;
-        isEditing.value = false;
-        emit('update:value', editedContent.value);
-      }
-    };
+  const contentForDisplay = computed(() => localContent.value);
 
-    const cancelEditing = () => {
-      editedContent.value = localContent.value;
+  const isValid = computed(() => {
+    return editedContent.value.length <= props.maxChars;
+  });
+
+  const startEditing = () => {
+    editedContent.value = localContent.value;
+    isEditing.value = true;
+  };
+
+  const saveChanges = () => {
+    if (isValid.value) {
+      localContent.value = editedContent.value;
       isEditing.value = false;
-    };
+      emit('update:value', editedContent.value);
+    }
+  };
 
-    return {
-      isEditing,
-      editedContent,
-      contentForDisplay,
-      isValid,
-      startEditing,
-      saveChanges,
-      cancelEditing,
-      // toolbarTitle,
-    };
-  },
-});
+  const cancelEditing = () => {
+    editedContent.value = localContent.value;
+    isEditing.value = false;
+  };
 </script>
 
 <style scoped>

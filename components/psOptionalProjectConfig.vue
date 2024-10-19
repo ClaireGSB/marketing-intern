@@ -22,57 +22,42 @@
   </v-col>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref } from 'vue';
 import type { FieldConfig } from '../types/inputFieldTypes';
 
-export default {
-  props: {
-    generalOptionalFields: {
-      type: Array as () => string[],
-      required: true,
-    },
-    inputFields: {
-      type: Object as () => Record<string, FieldConfig>,
-      required: true,
-    },
-    formFields: {
-      type: Object as () => Record<string, string>,
-      required: true,
-    },
-  },
-  setup() {
-    const showOptionalFields = ref(false);
+interface Props {
+  generalOptionalFields: string[];
+  inputFields: Record<string, FieldConfig>;
+  formFields: Record<string, string>;
+}
 
-    const toggleOptionalFields = () => {
-      showOptionalFields.value = !showOptionalFields.value;
-    };
+defineProps<Props>();
 
-    const getValidationRules = (field: FieldConfig) => {
-      const rules: ((v: string) => true | string)[] = [];
+const showOptionalFields = ref(false);
 
-      if (field.validation) {
-        const { minChar, maxChar } = field.validation;
+const toggleOptionalFields = () => {
+  showOptionalFields.value = !showOptionalFields.value;
+};
 
-        rules.push((v: string) => {
-          if (!v || v.trim().length === 0) return true; // Optional fields can be empty
-          if (minChar && v.length < minChar) {
-            return `Minimum ${minChar} characters required`;
-          }
-          if (maxChar && v.length > maxChar) {
-            return `Maximum ${maxChar} characters allowed`;
-          }
-          return true;
-        });
+const getValidationRules = (field: FieldConfig) => {
+  const rules: ((v: string) => true | string)[] = [];
+
+  if (field.validation) {
+    const { minChar, maxChar } = field.validation;
+
+    rules.push((v: string) => {
+      if (!v || v.trim().length === 0) return true; // Optional fields can be empty
+      if (minChar && v.length < minChar) {
+        return `Minimum ${minChar} characters required`;
       }
+      if (maxChar && v.length > maxChar) {
+        return `Maximum ${maxChar} characters allowed`;
+      }
+      return true;
+    });
+  }
 
-      return rules;
-    };
-
-    return {
-      showOptionalFields,
-      toggleOptionalFields,
-      getValidationRules,
-    };
-  },
+  return rules;
 };
 </script>

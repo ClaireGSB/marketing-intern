@@ -25,113 +25,98 @@
   </v-data-table>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useUserDataStore } from '~/stores/userdata';
 import { storeToRefs } from 'pinia';
 
-export default {
-  props: {
-    selectable: {
-      type: Boolean,
-      default: false
-    },
-    filters: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  emits: ['select', 'view'],
-  setup(props, { emit }) {
-    const userStore = useUserDataStore();
-    const { contentOutputs } = storeToRefs(userStore);
-    const selectedItemId = ref(null);
+const props = withDefaults(defineProps<{
+  selectable?: boolean
+  filters?: Record<string, any>
+}>(), {
+  selectable: false,
+  filters: () => ({})
+});
 
-    const headers = [
-      { title: 'Date Created', key: 'created_at', sortable: true },
-      { title: 'Created By', key: 'created_by', sortable: true },
-      { title: 'Content Type', key: 'content_type', sortable: true },
-      { title: 'Content Subtype', key: 'content_subtype', sortable: true },
-      { title: 'Status', key: 'status', sortable: true },
-      { title: 'Content', key: 'content', sortable: false },
-      { title: props.selectable ? 'Select' : 'Actions', key: 'actions', sortable: false },
-    ];
+const emit = defineEmits<{
+  (e: 'select', item: any | null): void
+  (e: 'view', id: string): void
+}>();
 
-    const sortBy = ref('created_at');
-    const sortDesc = ref(true);
+const userStore = useUserDataStore();
+const { contentOutputs } = storeToRefs(userStore);
+const selectedItemId = ref<string | null>(null);
 
-    const contentOutputsFormatted = computed(() => {
-      const userFirstNames = userStore.userFirstNames;
-      return contentOutputs.value
-        .filter(output => {
-          if (props.filters && typeof props.filters === 'object') {
-            for (const [key, value] of Object.entries(props.filters)) {
-              if (output[key] !== value) {
-                return false;
-              }
-            }
+const headers = [
+  { title: 'Date Created', key: 'created_at', sortable: true },
+  { title: 'Created By', key: 'created_by', sortable: true },
+  { title: 'Content Type', key: 'content_type', sortable: true },
+  { title: 'Content Subtype', key: 'content_subtype', sortable: true },
+  { title: 'Status', key: 'status', sortable: true },
+  { title: 'Content', key: 'content', sortable: false },
+  { title: props.selectable ? 'Select' : 'Actions', key: 'actions', sortable: false },
+];
+
+const sortBy = ref('created_at');
+const sortDesc = ref(true);
+
+const contentOutputsFormatted = computed(() => {
+  const userFirstNames = userStore.userFirstNames;
+  return contentOutputs.value
+    .filter(output => {
+      if (props.filters && typeof props.filters === 'object') {
+        for (const [key, value] of Object.entries(props.filters)) {
+          if (output[key] !== value) {
+            return false;
           }
-          return true;
-        })
-        .map(output => ({
-          ...output,
-          content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
-          content_subtype: userStore.getContentSubTypeNameById(output.content_subtype_id || ''),
-          created_by: userFirstNames[output.created_by] || 'Unknown',
-        }))
-        .sort((a, b) => {
-          const modifier = sortDesc.value ? -1 : 1;
-          if (a[sortBy.value] < b[sortBy.value]) return -1 * modifier;
-          if (a[sortBy.value] > b[sortBy.value]) return 1 * modifier;
-          return 0;
-        });
-    });
-
-    const formatDate = (dateString: string) => {
-      return new Date(dateString).toLocaleString();
-    };
-
-    const truncateContent = (content: string) => {
-      return content.length > 50 ? content.slice(0, 50) + '...' : content;
-    };
-
-    const handleItemAction = (item) => {
-      if (props.selectable) {
-        selectedItemId.value = selectedItemId.value === item.id ? null : item.id;
-        emit('select', selectedItemId.value ? item : null);
-      } else {
-        emit('view', item.id);
+        }
       }
-    };
+      return true;
+    })
+    .map(output => ({
+      ...output,
+      content_type: userStore.getContentTypeDisplayNameById(output.content_type_id),
+      content_subtype: userStore.getContentSubTypeNameById(output.content_subtype_id || ''),
+      created_by: userFirstNames[output.created_by] || 'Unknown',
+    }))
+    .sort((a, b) => {
+      const modifier = sortDesc.value ? -1 : 1;
+      if (a[sortBy.value] < b[sortBy.value]) return -1 * modifier;
+      if (a[sortBy.value] > b[sortBy.value]) return 1 * modifier;
+      return 0;
+    });
+});
 
-    const getIconColor = (item) => {
-      if (!props.selectable) return 'primary';
-      return selectedItemId.value === item.id ? 'primary' : 'grey-darken-2';
-    };
-
-    const getActionIcon = (item) => {
-      if (!props.selectable) return 'mdi-eye';
-      return selectedItemId.value === item.id
-        ? 'mdi-checkbox-marked-circle-outline'
-        : 'mdi-checkbox-blank-circle-outline';
-    };
-
-    const actionTooltip = computed(() => props.selectable ? 'Select Content' : 'View Content');
-
-    return {
-      headers,
-      contentOutputsFormatted,
-      sortBy,
-      sortDesc,
-      formatDate,
-      truncateContent,
-      handleItemAction,
-      getActionIcon,
-      actionTooltip,
-      getIconColor,
-    };
-  },
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleString();
 };
+
+const truncateContent = (content: string) => {
+  return content.length > 50 ? content.slice(0, 50) + '...' : content;
+};
+
+const handleItemAction = (item: any) => {
+  if (props.selectable) {
+    selectedItemId.value = selectedItemId.value === item.id ? null : item.id;
+    emit('select', selectedItemId.value ? item : null);
+  } else {
+    emit('view', item.id);
+  }
+};
+
+const getIconColor = (item: any) => {
+  if (!props.selectable) return 'primary';
+  return selectedItemId.value === item.id ? 'primary' : 'grey-darken-2';
+};
+
+const getActionIcon = (item: any) => {
+  if (!props.selectable) return 'mdi-eye';
+  return selectedItemId.value === item.id
+    ? 'mdi-checkbox-marked-circle-outline'
+    : 'mdi-checkbox-blank-circle-outline';
+};
+
+const actionTooltip = computed(() => props.selectable ? 'Select Content' : 'View Content');
 </script>
 
 <style scoped>

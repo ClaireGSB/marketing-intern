@@ -83,225 +83,188 @@
 </template>
 
 
-<script lang="ts">
-import { defineComponent, ref, watch, computed } from 'vue';
-import { useDisplay } from 'vuetify';
-import { Example } from '../types/frontendTypes';
-import { useUserDataStore } from '../stores/userdata';
-const userStore = useUserDataStore();
+<script setup lang="ts">
+  import { ref, watch, computed } from 'vue';
+  import { useDisplay } from 'vuetify';
+  import { Example } from '../types/frontendTypes';
+  import { useUserDataStore } from '../stores/userdata';
 
+  const props = defineProps<{
+    modelValue: boolean;
+    contentTypeId: number;
+    contentSubtypeId?: string | null;
+  }>();
 
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'saved'): void;
+    (e: 'deleted'): void;
+  }>();
 
-export default defineComponent({
-  name: 'ContentSettingsDialog',
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    contentTypeId: {
-      type: Number,
-      required: true,
-    },
-    contentSubtypeId: {
-      type: String,
-      default: null,
-    },
-  },
-  emits: ['update:modelValue', 'saved'],
-  setup(props, { emit }) {
+  const userStore = useUserDataStore();
 
-    // --------- Dialog component settings ---------
+  // --------- Dialog component settings ---------
 
-    const showDialog = ref(props.modelValue);
-    const maxChars = 500;
-    const { smAndDown, width } = useDisplay();
-    const isSmallScreen = computed(() => smAndDown.value);
-    const dialogWidth = computed(() => {
-      return width.value >= 1000 ? '1000px' : '100%';
-    });
+  const showDialog = ref(props.modelValue);
+  const maxChars = 500;
+  const { smAndDown, width } = useDisplay();
+  const isSmallScreen = computed(() => smAndDown.value);
+  const dialogWidth = computed(() => {
+    return width.value >= 1000 ? '1000px' : '100%';
+  });
 
-    const panelTitle = computed(() => {
-      if (isNewSubtype.value) {
-        return `Create new Content Subtype for ${contentTypeDisplayName.value}`;
-      } else {
-        return `Settings for ${contentTypeDisplayName.value} - ${localContentSubtypeName.value}`;
-      }
-    });
+  const panelTitle = computed(() => {
+    if (isNewSubtype.value) {
+      return `Create new Content Subtype for ${contentTypeDisplayName.value}`;
+    } else {
+      return `Settings for ${contentTypeDisplayName.value} - ${localContentSubtypeName.value}`;
+    }
+  });
 
-    // --------- Initialize and Reset State ---------
+  // --------- Initialize and Reset State ---------
 
-    const isNewSubtype = ref(false);
-    const examples = ref<Example[]>([]);
-    const guidelines = ref('');
-    const context = ref('');
-    const targetAudience = ref('');
-    const localContentSubtypeID = ref('');
-    const localContentSubtypeName = ref('');
-    const contentTypeDisplayName = ref('');
+  const isNewSubtype = ref(false);
+  const examples = ref<Example[]>([]);
+  const guidelines = ref('');
+  const context = ref('');
+  const targetAudience = ref('');
+  const localContentSubtypeID = ref('');
+  const localContentSubtypeName = ref('');
+  const contentTypeDisplayName = ref('');
 
-    watch(() => props.modelValue, (newValue) => {
-      showDialog.value = newValue;
-      if (newValue) {
-        // initialize / reset all values when dialog is opened
-        resetDialogState()
-      }
-    });
+  watch(() => props.modelValue, (newValue) => {
+    showDialog.value = newValue;
+    if (newValue) {
+      // initialize / reset all values when dialog is opened
+      resetDialogState()
+    }
+  });
 
-    const resetDialogState = () => {
-      isNewSubtype.value = !props.contentSubtypeId;
-      contentTypeDisplayName.value = userStore.getContentTypeDisplayNameById(props.contentTypeId);
-      localContentSubtypeID.value = props.contentSubtypeId || '';
-      localContentSubtypeName.value = userStore.getContentSubTypeNameById(localContentSubtypeID.value);
-      guidelines.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).guidelines
-      context.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).context
-      targetAudience.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).target_audience
-      name.value = '';
-      getExamplesFromStore();
+  const resetDialogState = () => {
+    isNewSubtype.value = !props.contentSubtypeId;
+    contentTypeDisplayName.value = userStore.getContentTypeDisplayNameById(props.contentTypeId);
+    localContentSubtypeID.value = props.contentSubtypeId || '';
+    localContentSubtypeName.value = userStore.getContentSubTypeNameById(localContentSubtypeID.value);
+    guidelines.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).guidelines
+    context.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).context
+    targetAudience.value = userStore.getFieldsForContentSubType(localContentSubtypeID.value).target_audience
+    name.value = '';
+    getExamplesFromStore();
+  };
+
+  watch(showDialog, (newValue) => {
+    emit('update:modelValue', newValue);
+  });
+
+  const getExamplesFromStore = () => {
+    if (props.contentSubtypeId) {
+      // We're editing a content subtype, may be examples to fetch
+      examples.value = userStore.getExamplesByContentSubTypeID(props.contentSubtypeId);
+    } else {
+      // We're creating a new content subtype
+    }
+  };
+
+  const goodExamples = computed(() => {
+    return examples.value.filter(e => e.example_type === 'good');
+  });
+
+  const badExamples = computed(() => {
+    return examples.value.filter(e => e.example_type === 'bad');
+  });
+
+  const close = () => {
+    emit('update:modelValue', false);
+    // clear data
+    isNewSubtype.value = false;
+    name.value = '';
+    guidelines.value = '';
+    context.value = '';
+    examples.value = [];
+    localContentSubtypeID.value = '';
+    localContentSubtypeName.value = '';
+  };
+
+  // --------- Create new Subtype by Saving its Name ---------
+
+  const name = ref('');
+
+  const saveName = async () => {
+    if (props.contentSubtypeId || !name) return;
+    if (!name.value) return;
+    // save new content subtype to database
+    console.log('Saving new content subtype:', name.value);
+    const newSubtype = await userStore.createContentSubType(props.contentTypeId, name.value);
+    localContentSubtypeID.value = newSubtype.id;
+    localContentSubtypeName.value = newSubtype.name;
+    isNewSubtype.value = false;
+    emit('saved');
+    // reset fields
+    guidelines.value = '';
+    context.value = '';
+    targetAudience.value = '';
+  };
+
+  // --------- Example Operations ---------
+
+  const addExample = (type: 'good' | 'bad') => {
+    const newExample: Example = {
+      content: '',
+      example_type: type,
+      explanation: '',
+      name: '',
+      id: '',
+      content_subtype_id: localContentSubtypeID.value,
     };
+    examples.value.push(newExample);
+  };
 
-    watch(showDialog, (newValue) => {
-      emit('update:modelValue', newValue);
-    });
+  const saveExample = async (example: Example) => {
+    if (example.id === '') {
+      // New example
+      console.log('Saving new example:', example);
+      const newEx = await userStore.addExample(example, localContentSubtypeID.value);
+      console.log('New example in dialog:', newEx);
+    } else {
+      // Existing example
+      console.log('Updating example:', example);
+      await userStore.updateExample(example.id, example);
+    }
+    // Update the local examples array
+    getExamplesFromStore();
+  };
 
-    const getExamplesFromStore = () => {
-      if (props.contentSubtypeId) {
-        // We're editing a content subtype, may be examples to fetch
-        examples.value = userStore.getExamplesByContentSubTypeID(props.contentSubtypeId);
-      } else {
-        // We're creating a new content subtype
-      }
-    };
+  const removeExample = async (exampleID: string) => {
+    await userStore.deleteExample(exampleID);
+    examples.value = examples.value.filter(e => e.id !== exampleID);
+    // Update the local examples array
+    getExamplesFromStore();
+  };
 
-    const goodExamples = computed(() => {
-      return examples.value.filter(e => e.example_type === 'good');
-    });
+  // --------- Update Other Fields ---------
 
-    const badExamples = computed(() => {
-      return examples.value.filter(e => e.example_type === 'bad');
-    });
+  const updateField = async (field: 'guidelines' | 'context' | 'target_audience' | 'name', value: string) => {
+    userStore.updateContentSubType(localContentSubtypeID.value, field, value);
+  };
 
-    const close = () => {
-      emit('update:modelValue', false);
-      // clear data
-      isNewSubtype.value = false;
-      name.value = '';
-      guidelines.value = '';
-      context.value = '';
-      examples.value = [];
-      localContentSubtypeID.value = '';
-      localContentSubtypeName.value = '';
-    };
+  // --------- Delete Subtype ---------
 
-    // --------- Create new Subtype by Saving its Name ---------
+  const confirmDialog = ref(null);
 
-    const name = ref('');
+  const confirmDelete = () => {
+    confirmDialog.value.open();
+  };
 
-    const saveName = async () => {
-      if (props.contentSubtypeId || !name) return;
-      if (!name.value) return;
-      // save new content subtype to database
-      console.log('Saving new content subtype:', name.value);
-      const newSubtype = await userStore.createContentSubType(props.contentTypeId, name.value);
-      localContentSubtypeID.value = newSubtype.id;
-      localContentSubtypeName.value = newSubtype.name;
-      isNewSubtype.value = false;
-      emit('saved');
-      // reset fields
-      guidelines.value = '';
-      context.value = '';
-      targetAudience.value = '';
-    };
-
-    // --------- Example Operations ---------
-
-    const addExample = (type: 'good' | 'bad') => {
-      const newExample: Example = {
-        content: '',
-        example_type: type,
-        explanation: '',
-        name: '',
-        id: '',
-        content_subtype_id: localContentSubtypeID.value,
-      };
-      examples.value.push(newExample);
-    };
-
-    const saveExample = async (example: Example) => {
-      if (example.id === '') {
-        // New example
-        console.log('Saving new example:', example);
-        const newEx = await userStore.addExample(example, localContentSubtypeID.value);
-        console.log('New example in dialog:', newEx);
-      } else {
-        // Existing example
-        console.log('Updating example:', example);
-        await userStore.updateExample(example.id, example);
-      }
-      // Update the local examples array
-      getExamplesFromStore();
-
-    };
-
-    const removeExample = async (exampleID: string) => {
-      await userStore.deleteExample(exampleID);
-      examples.value = examples.value.filter(e => e.id !== exampleID);
-      // Update the local examples array
-      getExamplesFromStore();
-    };
-
-    // --------- Update Other Fields ---------
-
-    const updateField = async (field: 'guidelines' | 'context' | 'target_audience' | 'name', value: string) => {
-      userStore.updateContentSubType(localContentSubtypeID.value, field, value);
-    };
-
-    // --------- Delete Subtype ---------
-
-    const confirmDialog = ref(null);
-
-    const confirmDelete = () => {
-      confirmDialog.value.open();
-    };
-
-    const deleteContentSubtype = async () => {
-      try {
-        await userStore.deleteContentSubType(localContentSubtypeID.value);
-        emit('update:modelValue', false); // Close the dialog
-        emit('deleted'); // Emit an event to notify the parent component
-      } catch (error) {
-        console.error('Failed to delete content subtype:', error);
-        // You might want to show an error message to the user here
-      }
-    };
-
-    return {
-      showDialog,
-      dialogWidth,
-      maxChars,
-      close,
-      addExample,
-      saveExample,
-      removeExample,
-      isSmallScreen,
-      goodExamples,
-      badExamples,
-      guidelines,
-      context,
-      targetAudience,
-      updateField,
-      name,
-      isNewSubtype,
-      saveName,
-      panelTitle,
-      localContentSubtypeID,
-      localContentSubtypeName,
-      confirmDialog,
-      confirmDelete,
-      deleteContentSubtype,
-    };
-  },
-});
+  const deleteContentSubtype = async () => {
+    try {
+      await userStore.deleteContentSubType(localContentSubtypeID.value);
+      emit('update:modelValue', false); // Close the dialog
+      emit('deleted'); // Emit an event to notify the parent component
+    } catch (error) {
+      console.error('Failed to delete content subtype:', error);
+      // You might want to show an error message to the user here
+    }
+  };
 </script>
 
 <style scoped>

@@ -24,70 +24,59 @@
   </v-dialog>
 </template>
 
-<script lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+<script setup lang="ts">
+  import { ref, computed, watch, onMounted } from 'vue';
 
-export default {
-  props: {
-    modelValue: {
-      type: Boolean,
-      default: false
-    },
-    filters: {
-      type: Object,
-      default: () => ({})
+  const props = withDefaults(defineProps<{
+    modelValue?: boolean;
+    filters?: Record<string, any>;
+  }>(), {
+    modelValue: false,
+    filters: () => ({})
+  });
+
+  const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'select', content: any): void;
+  }>();
+
+  const dialog = ref(false);
+  const selectedContent = ref(null);
+
+  watch(() => props.modelValue, (newValue) => {
+    dialog.value = newValue;
+  });
+
+  watch(dialog, (newValue) => {
+    emit('update:modelValue', newValue);
+    if (!newValue) {
+      selectedContent.value = null;
     }
-  },
-  emits: ['update:modelValue', 'select'],
-  setup(props, { emit }) {
-    const dialog = ref(false);
-    const selectedContent = ref(null);
+  });
 
-    watch(() => props.modelValue, (newValue) => {
-      dialog.value = newValue;
-    });
+  const onSelect = (content: any) => {
+    selectedContent.value = content;
+  };
 
-    watch(dialog, (newValue) => {
-      emit('update:modelValue', newValue);
-      if (!newValue) {
-        selectedContent.value = null;
-      }
-    });
+  const confirmSelection = () => {
+    if (selectedContent.value) {
+      emit('select', selectedContent.value);
+      closeModal();
+    }
+  };
 
-    const onSelect = (content) => {
-      selectedContent.value = content;
-    };
+  const closeModal = () => {
+    dialog.value = false;
+  };
 
-    const confirmSelection = () => {
-      if (selectedContent.value) {
-        emit('select', selectedContent.value);
-        closeModal();
-      }
-    };
+  const truncateContent = (content: string) => {
+    return content.length > 50 ? content.slice(0, 50) + '...' : content;
+  };
 
-    const closeModal = () => {
-      dialog.value = false;
-    };
-
-    const truncateContent = (content: string) => {
-      return content.length > 50 ? content.slice(0, 50) + '...' : content;
-    };
-
-    onMounted(() => {
-      console.log('ContentSelectionModal mounted');
-      console.log('Filters:', props.filters);
-    });
-
-    return {
-      dialog,
-      selectedContent,
-      onSelect,
-      confirmSelection,
-      closeModal,
-      truncateContent
-    };
-  }
-};
+  onMounted(() => {
+    console.log('ContentSelectionModal mounted');
+    console.log('Filters:', props.filters);
+  });
 </script>
 
 <style scoped>

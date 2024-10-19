@@ -14,20 +14,17 @@
   </v-col>
 </template>
 
-<script lang="ts">
-import type { ContentType } from '../types/contentTypes';
+<script setup lang="ts">
+  import type { ContentType } from '../types/contentTypes';
 
-export default {
-  props: {
-    contentTypes: {
-      type: Array as () => ContentType[],
-      required: true,
-    },
-    selectedContentType: {
-      type: Object as () => ContentType,
-      required: true,
-    },
-  },
-  emits: ['select'],
-};
+  interface Props {
+    contentTypes: ContentType[];
+    selectedContentType: ContentType;
+  }
+
+  defineProps<Props>();
+
+  defineEmits<{
+    (e: 'select', contentType: ContentType): void;
+  }>();
 </script>

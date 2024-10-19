@@ -77,135 +77,114 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import { ref, computed, watch } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
+import { useUserDataStore } from '../stores/userdata'; // Assuming this is the correct import
 import { Validations } from '../types/frontendTypes';
 
-export default {
-  emits: ['confirm', 'regenerate'],
-  props: {
-    contentOutputID: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
-    const userStore = useUserDataStore();
-    const validations = ref<Validations[]>([]);
-    const openPanels = ref<number[]>([0]);
-    const showFeedback = ref<Record<number, Record<string, boolean>>>({});
+const props = defineProps<{
+  contentOutputID: string
+}>();
 
-    const isEditable = computed(() => {
-      const contentOutput = userStore.getContentOutputById(props.contentOutputID);
-      return !contentOutput || contentOutput.status !== 'completed';
-    });
+const emit = defineEmits<{
+  (e: 'confirm', validations: Validations[]): void
+  (e: 'regenerate', itemsToRegenerate: Validations[]): void
+}>();
 
-    const loadValidations = async () => {
-      validations.value = await userStore.fetchValidations(props.contentOutputID);
-    };
+const userStore = useUserDataStore();
+const validations = ref<Validations[]>([]);
+const openPanels = ref<number[]>([0]);
+const showFeedback = ref<Record<number, Record<string, boolean>>>({});
 
-    onMounted(loadValidations);
-    watch(() => props.contentOutputID, loadValidations);
+const isEditable = computed(() => {
+  const contentOutput = userStore.getContentOutputById(props.contentOutputID);
+  return !contentOutput || contentOutput.status !== 'completed';
+});
 
-    const toggleFeedback = (itemIndex: number, versionNum: string) => {
-      if (!showFeedback.value[itemIndex]) {
-        showFeedback.value[itemIndex] = {};
-      }
-      showFeedback.value[itemIndex][versionNum] = !showFeedback.value[itemIndex][versionNum];
-    };
+const loadValidations = async () => {
+  validations.value = await userStore.fetchValidations(props.contentOutputID);
+};
 
-    const toggleSelection = (itemIndex: number, optionKey: string) => {
-      if (validations.value[itemIndex].selected_option === optionKey) {
-        validations.value[itemIndex].selected_option = "";
-      } else {
-        validations.value[itemIndex].selected_option = optionKey;
-        validations.value[itemIndex].validation_status = 'completed';
-      }
-    };
+onMounted(loadValidations);
+watch(() => props.contentOutputID, loadValidations);
 
-    const isItemSelected = (itemIndex: number) => validations.value[itemIndex].selected_option !== "";
+const toggleFeedback = (itemIndex: number, versionNum: string) => {
+  if (!showFeedback.value[itemIndex]) {
+    showFeedback.value[itemIndex] = {};
+  }
+  showFeedback.value[itemIndex][versionNum] = !showFeedback.value[itemIndex][versionNum];
+};
 
-    const isItemFullyReviewed = (itemIndex: number) => {
-      return Object.values(validations.value[itemIndex].feedback).some(feedback => feedback.trim() !== '');
-    };
+const toggleSelection = (itemIndex: number, optionKey: string) => {
+  if (validations.value[itemIndex].selected_option === optionKey) {
+    validations.value[itemIndex].selected_option = "";
+  } else {
+    validations.value[itemIndex].selected_option = optionKey;
+    validations.value[itemIndex].validation_status = 'completed';
+  }
+};
 
-    const canConfirmSelection = computed(() => validations.value.every(v => v.selected_option !== ""));
+const isItemSelected = (itemIndex: number) => validations.value[itemIndex].selected_option !== "";
 
-    const canRegenerate = computed(() => {
-      return validations.value.some(v => v.selected_option === "") &&
-        validations.value.some(v => Object.values(v.feedback).some(f => f.trim() !== ''));
-    });
+const isItemFullyReviewed = (itemIndex: number) => {
+  return Object.values(validations.value[itemIndex].feedback).some(feedback => feedback.trim() !== '');
+};
 
-    const regenerateButtonText = computed(() => {
-      const itemsToRegenerate = validations.value
-        .filter(v => v.selected_option === "")
-        .map(item => item.step_output_type);
-      return itemsToRegenerate.join(', ');
-    });
+const canConfirmSelection = computed(() => validations.value.every(v => v.selected_option !== ""));
 
-    const regenerateTooltip = computed(() => {
-      if (!canRegenerate.value) {
-        return "Please provide feedback for at least one version of an unselected item to regenerate";
-      }
-      return "Regenerate versions based on your feedback for unselected items";
-    });
+const canRegenerate = computed(() => {
+  return validations.value.some(v => v.selected_option === "") &&
+    validations.value.some(v => Object.values(v.feedback).some(f => f.trim() !== ''));
+});
 
-    const generateTooltip = computed(() => {
-      if (!canConfirmSelection.value) {
-        return "Please select a version for all items to confirm your selection";
-      }
-      return "Confirm your selection and proceed to the final content";
-    });
+const regenerateButtonText = computed(() => {
+  const itemsToRegenerate = validations.value
+    .filter(v => v.selected_option === "")
+    .map(item => item.step_output_type);
+  return itemsToRegenerate.join(', ');
+});
 
-    const confirmSelection = () => {
-      if (canConfirmSelection.value) {
-        console.log("confirm");
-        emit('confirm', validations.value);
-      }
-    };
+const regenerateTooltip = computed(() => {
+  if (!canRegenerate.value) {
+    return "Please provide feedback for at least one version of an unselected item to regenerate";
+  }
+  return "Regenerate versions based on your feedback for unselected items";
+});
 
-    const regenerate = () => {
-      if (canRegenerate.value) {
-        console.log("regenerate");
-        const itemsToRegenerate = validations.value
-          .filter(v => v.selected_option === "");
-        emit('regenerate', itemsToRegenerate);
-      }
-    };
+const generateTooltip = computed(() => {
+  if (!canConfirmSelection.value) {
+    return "Please select a version for all items to confirm your selection";
+  }
+  return "Confirm your selection and proceed to the final content";
+});
 
-    const getIconColor = (itemIndex: number) => {
-      if (isItemSelected(itemIndex)) return 'success';
-      if (isItemFullyReviewed(itemIndex)) return 'info';
-      return 'warning';
-    };
+const confirmSelection = () => {
+  if (canConfirmSelection.value) {
+    console.log("confirm");
+    emit('confirm', validations.value);
+  }
+};
 
-    const getIconName = (itemIndex: number, expanded: boolean) => {
-      if (isItemSelected(itemIndex)) return 'mdi-check-circle';
-      if (isItemFullyReviewed(itemIndex)) return 'mdi-eye-check';
-      if (expanded) return 'mdi-chevron-up';
-      return 'mdi-chevron-down';
-    };
+const regenerate = () => {
+  if (canRegenerate.value) {
+    console.log("regenerate");
+    const itemsToRegenerate = validations.value
+      .filter(v => v.selected_option === "");
+    emit('regenerate', itemsToRegenerate);
+  }
+};
 
-    return {
-      validations,
-      isEditable,
-      openPanels,
-      showFeedback,
-      toggleFeedback,
-      toggleSelection,
-      isItemSelected,
-      isItemFullyReviewed,
-      canConfirmSelection,
-      canRegenerate,
-      regenerateButtonText,
-      regenerateTooltip,
-      generateTooltip,
-      confirmSelection,
-      regenerate,
-      getIconColor,
-      getIconName,
-    };
-  },
+const getIconColor = (itemIndex: number) => {
+  if (isItemSelected(itemIndex)) return 'success';
+  if (isItemFullyReviewed(itemIndex)) return 'info';
+  return 'warning';
+};
+
+const getIconName = (itemIndex: number, expanded: boolean) => {
+  if (isItemSelected(itemIndex)) return 'mdi-check-circle';
+  if (isItemFullyReviewed(itemIndex)) return 'mdi-eye-check';
+  if (expanded) return 'mdi-chevron-up';
+  return 'mdi-chevron-down';
 };
 </script>
 

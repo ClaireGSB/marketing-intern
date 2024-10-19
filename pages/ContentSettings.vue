@@ -52,71 +52,52 @@
   </v-container>
 </template>
 
-<script lang="ts">
-import { ref, computed } from 'vue';
-import { useUserDataStore } from '../stores/userdata';
-import { storeToRefs } from 'pinia';
-const userStore = useUserDataStore();
-
-
-export default {
-  setup() {
-    const generalSettings = ref({
-      companyDescription: '',
-      contentStrategy: '',
-    });
-
-    // Use storeToRefs to make store properties reactive
-    const { contentTypes, contentSubTypes } = storeToRefs(userStore);
-
-    // Use computed properties to access store data
-    const getSubtypesForContentType = computed(() => (contentTypeId: number) => {
-      return contentSubTypes.value.filter(subtype => subtype.content_type_id === contentTypeId);
-    });
-
-    const showSettingsPanel = ref(false);
-    const selectedContentTypeID = ref<number | null>(null);
-    const selectedSubtypeId = ref<string | null>(null);
-    const maxChars = 500;  // Maximum characters for guidelines
-    const isDataFetched = ref(false);
-
-    const openSubtypePanel = (contentTypeID: number, subtypeId: string) => {
-      selectedContentTypeID.value = contentTypeID;
-      selectedSubtypeId.value = subtypeId;
-      showSettingsPanel.value = true;
-    };
-
-    const openNewSubtypePanel = (contentTypeID: number) => {
-      selectedContentTypeID.value = contentTypeID;
-      selectedSubtypeId.value = null;
-      showSettingsPanel.value = true;
-    };
-
-    const handleSaved = () => {
-
-    };
-
-    const updateField = (field: 'companyDescription' | 'contentStrategy', value: string) => {
-      console.log('Updating field:', field, value);
-    };
-
-    return {
-      getSubtypesForContentType,
-      isDataFetched,
-      generalSettings,
-      contentTypes,
-      showSettingsPanel,
-      selectedContentTypeID,
-      selectedSubtypeId,
-      maxChars,
-      openSubtypePanel,
-      openNewSubtypePanel,
-      handleSaved,
-      updateField,
-    };
-  },
-};
-</script>
+<script setup lang="ts">
+  import { ref, computed } from 'vue';
+  import { useUserDataStore } from '../stores/userdata';
+  import { storeToRefs } from 'pinia';
+  
+  const userStore = useUserDataStore();
+  
+  const generalSettings = ref({
+    companyDescription: '',
+    contentStrategy: '',
+  });
+  
+  // Use storeToRefs to make store properties reactive
+  const { contentTypes, contentSubTypes } = storeToRefs(userStore);
+  
+  // Use computed properties to access store data
+  const getSubtypesForContentType = computed(() => (contentTypeId: number) => {
+    return contentSubTypes.value.filter(subtype => subtype.content_type_id === contentTypeId);
+  });
+  
+  const showSettingsPanel = ref(false);
+  const selectedContentTypeID = ref<number | null>(null);
+  const selectedSubtypeId = ref<string | null>(null);
+  const maxChars = 500;  // Maximum characters for guidelines
+  const isDataFetched = ref(false);
+  
+  const openSubtypePanel = (contentTypeID: number, subtypeId: string) => {
+    selectedContentTypeID.value = contentTypeID;
+    selectedSubtypeId.value = subtypeId;
+    showSettingsPanel.value = true;
+  };
+  
+  const openNewSubtypePanel = (contentTypeID: number) => {
+    selectedContentTypeID.value = contentTypeID;
+    selectedSubtypeId.value = null;
+    showSettingsPanel.value = true;
+  };
+  
+  const handleSaved = () => {
+    // Implementation remains empty as in the original
+  };
+  
+  const updateField = (field: 'companyDescription' | 'contentStrategy', value: string) => {
+    console.log('Updating field:', field, value);
+  };
+  </script>
 
 <style scoped>
 .relative-container {

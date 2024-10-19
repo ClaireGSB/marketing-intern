@@ -8,43 +8,36 @@
   </v-tooltip>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { VTooltip } from 'vuetify/components' 
+<script setup lang="ts">
+import { VTooltip } from 'vuetify/components'
 
 // Extract the type of the location prop from VTooltip so we can use it in our props to not trigger a TypeError
 type UnwrapReadonlyArray<A> = A extends Readonly<Array<infer I>> ? I : A;
 type Anchor = UnwrapReadonlyArray<VTooltip['location']>
 
+// Define props
+interface Props {
+  tooltipText: string;
+  tooltipLocation?: Anchor;
+  icon: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
 
-export default defineComponent({
-  name: 'TooltipButton',
-  props: {
-    tooltipText: {
-      type: String,
-      required: true
-    },
-    tooltipLocation: {
-      type: String as () => Anchor,
-      default: 'top',
-      validator: (value: string): boolean => {
-        return ['top', 'bottom', 'left', 'right'].includes(value);
-      }
-    },
-    icon: {
-      type: String,
-      required: true
-    },
-    onClick: {
-      type: Function,
-      required: true
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    }
-  }
-});
+const props = withDefaults(defineProps<Props>(), {
+  tooltipLocation: 'top',
+  disabled: false
+})
+
+// Validator for tooltipLocation
+const isValidLocation = (value: string): boolean => {
+  return ['top', 'bottom', 'left', 'right'].includes(value);
+}
+
+// Runtime prop validation
+if (props.tooltipLocation && !isValidLocation(props.tooltipLocation)) {
+  console.warn(`Invalid tooltipLocation: ${props.tooltipLocation}. Must be one of: top, bottom, left, right.`);
+}
 </script>
 
 <style scoped>
