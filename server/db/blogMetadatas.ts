@@ -28,9 +28,6 @@ export const blogMetadatas = {
   async update(id: string, updates: Partial<BlogMetadata>): Promise<BlogMetadata> {
     const setClause = Object.keys(updates)
       .map((key, index) => {
-        // if (key === 'title_options') {
-        //   return `${key} = $${index + 2}::jsonb`;
-        // }
         return `${key} = $${index + 2}`;
       })
       .join(', ');
@@ -42,9 +39,7 @@ export const blogMetadatas = {
     `;
     const values = [
       id,
-      ...Object.entries(updates).map(([key, value]) => 
-        key === value
-      )
+      ...Object.values(updates)
     ];
     const result = await dbclient.query(query, values);
     if (result.rows.length === 0) {

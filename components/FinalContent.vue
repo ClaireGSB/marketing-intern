@@ -50,6 +50,7 @@ export default {
       }
       contentTypeName.value = userStore.getContentTypeDisplayNameById(contentOutput.value.content_type_id);
       contentLoaded.value = true;
+      console.log('metadata', metadata.value);
     };
 
     onMounted(loadContent);
