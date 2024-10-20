@@ -25,8 +25,8 @@
         <v-row>
           <v-col cols="12" >
             <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
-              :form-fields="formFields" :selected-contents="selectedContents"
-              @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+              :form-fields="formFields" :selected-contents="selectedContents" :selected-options="selectedOptions"
+              @select-content="selectExistingContent" @clear-selected-content="clearSelectedContent" />
           </v-col>
         </v-row>
 
@@ -133,11 +133,19 @@ const actionFields = computed((): string[] => {
 const selectedContents = ref<Record<string, any>>({});
 const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
+const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
 
-const openContentSelectionModal = (fieldKey: string) => {
-  currentSelectingField.value = fieldKey;
+
+// const openContentSelectionModal = (fieldKey: string) => {
+//   currentSelectingField.value = fieldKey;
+//   showContentSelectionModal.value = true;
+// };
+
+const selectExistingContent = (fieldKey: string) => {
   showContentSelectionModal.value = true;
+  currentSelectingField.value = fieldKey;
 };
+
 
 const onContentSelected = async (content: any) => {
   selectedContents.value[currentSelectingField.value] = content;

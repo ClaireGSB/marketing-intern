@@ -220,9 +220,9 @@ const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
 const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
 
-const selectExistingContent = async () => {
+const selectExistingContent = (fieldKey: string) => {
   showContentSelectionModal.value = true;
-  currentSelectingField.value = 'content';
+  currentSelectingField.value = fieldKey;
 };
 
 const onContentSelected = async (content: any) => {
