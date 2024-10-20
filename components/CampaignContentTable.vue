@@ -17,27 +17,34 @@
             <v-card-text>
               <v-container>
                 <v-row>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col>
                     <v-select v-model="editedItem.content_type_id" :items="contentTypes" item-title="display_name"
                       item-value="id" label="Content Type" @update:model-value="updateContentSubtypes"
                       :rules="[v => !!v || 'Content Type is required']"></v-select>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col>
                     <v-select v-model="editedItem.content_subtype_id"
                       :items="getContentSubtypes(editedItem.content_type_id)" item-title="name" item-value="id"
                       label="Content Subtype" :disabled="!editedItem.content_type_id"
                       :rules="[v => !!v || 'Content Subtype is required']"></v-select>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                </v-row>
+                <v-row>
+                  <v-col>
                     <v-text-field v-model="editedItem.action" label="Action" disabled></v-text-field>
                   </v-col>
-                  <v-col v-for="field in requiredFields" :key="field" cols="12" sm="6" md="4">
+                  <v-col v-for="field in requiredFields" :key="field">
                     <v-text-field v-if="!(field === 'content' && editedItem.selected_content_output_id)"
                       v-model="editedItem[field]"
                       :label="field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')" disabled></v-text-field>
                   </v-col>
                   <v-col v-if="editedItem.selected_content_output_id" cols="12">
                     <SelectedContentTag :contentOutputId="editedItem.selected_content_output_id" :short="false" />
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col>
+                    <v-textarea v-model="editedItem.guidelines" label="Instructions" rows="3"></v-textarea>
                   </v-col>
                 </v-row>
               </v-container>
@@ -123,6 +130,7 @@ const defaultItem = computed(() => {
     content_subtype_id: '',
     action: props.campaignAction,
     selected_content_output_id: null,
+    guidelines: '',
   };
 
   requiredFields.value.forEach(field => {
@@ -143,15 +151,17 @@ const editedItem = ref<UserInput>({} as UserInput);
 const formTitle = computed(() => editedIndex.value === -1 ? 'New Item' : 'Edit Item');
 
 const headers = computed(() => [
-  { title: 'Content Type', key: 'content_type_id', sortable: false },
-  { title: 'Content Subtype', key: 'content_subtype_id', sortable: false },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Content Type', key: 'content_type_id', sortable: false, maxWidth: '50px' },
+  { title: 'Content Subtype', key: 'content_subtype_id', sortable: false, maxWidth: '50px' },
+  { title: 'Action', key: 'action', sortable: false, maxWidth: '50px' },
   ...requiredFields.value.map(field => ({
     title: field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' '),
     key: field,
     sortable: false,
+    maxWidth: '50px'
   })),
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: 'Instructions', key: 'guidelines', sortable: false, maxWidth: '50px' },
+  { title: 'Actions', key: 'actions', sortable: false, maxWidth: '50px' },
 ]);
 
 const getContentSubtypes = (contentTypeId: number) => {
@@ -188,11 +198,6 @@ const handleDeleteConfirm = () => {
   editedItem.value = { ...defaultItem.value };
 };
 
-// const deleteItemConfirm = () => {
-//   contentPieces.value.splice(editedIndex.value, 1);
-//   closeDelete();
-// };
-
 const cloneItem = (item: UserInput) => {
   const clonedItem = { ...item, id: Date.now() };
   contentPieces.value.push(clonedItem);
@@ -202,12 +207,6 @@ const close = () => {
   dialog.value = false;
   editedIndex.value = -1;
 };
-
-// const closeDelete = () => {
-//   dialogDelete.value = false;
-//   editedIndex.value = -1;
-//   editedItem.value = { ...defaultItem.value };
-// };
 
 const isFormValid = computed(() => {
   return !!editedItem.value.content_type_id && !!editedItem.value.content_subtype_id;

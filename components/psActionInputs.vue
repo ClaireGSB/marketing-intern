@@ -1,7 +1,7 @@
 // psActionInputs.vue
 
 <template>
-    <h3 class="mb-4">4. Action Inputs</h3>
+    
     <!-- Content-specific fields -->
     <template v-for="fieldKey in contentFields" :key="fieldKey">
       <template v-if="inputFields[fieldKey].allowSelection">

@@ -10,35 +10,47 @@
           <h1 class="text-h4 flex-grow-1">{{ pageTitle }}</h1>
         </div>
 
-          <v-text-field v-model="campaign.name" label="Name"
-            :rules="[v => !!v || 'Name is required', v => v.length <= 100 || 'Name must be 100 characters or less']"
-            counter="100" maxlength="100"></v-text-field>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="campaign.name" label="Campaign Name"
+              :rules="[v => !!v || 'Name is required', v => v.length <= 100 || 'Name must be 100 characters or less']"
+              counter="100" maxlength="100"></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
+              @update="handleActionSelection" />
+          </v-col>
+        </v-row>
 
-          <v-textarea v-model="campaign.guidelines" label="Guidelines"
-            :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']" counter="500"
-            maxlength="500"></v-textarea>
+        <v-row>
+          <v-col cols="12" >
+            <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
+              :form-fields="formFields" :selected-contents="selectedContents"
+              @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+          </v-col>
+        </v-row>
 
-          <v-textarea v-model="campaign.context" label="Context"
-            :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']" counter="500"
-            maxlength="500"></v-textarea>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-textarea v-model="campaign.guidelines" label="Campaign guidelines (optional)"
+              :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']" counter="500"
+              maxlength="500" auto-grow rows="2" max-rows="5"></v-textarea>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-textarea v-model="campaign.context" label="Campaign context (optional)"
+              :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']" counter="500" maxlength="500"
+              auto-grow rows="2" max-rows="5"></v-textarea>
+          </v-col>
+        </v-row>
 
 
 
-        <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
-          @update="handleActionSelection" />
-
-        <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
-          :form-fields="formFields" :selected-contents="selectedContents"
-          @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
-
-          <CampaignContentTable 
-    :campaign-action="campaign.action" 
-    :campaign-fields="campaign.action_inputs"
-  />
-          <div class="my-10">
-          </div>
-          <div class="my-10">
-          </div>
+        <CampaignContentTable v-if="step >= 2" :campaign-action="campaign.action"
+          :campaign-fields="campaign.action_inputs" />
+        <div class="my-10">
+        </div>
+        <div class="my-10">
+        </div>
 
       </v-col>
     </v-row>
@@ -145,15 +157,6 @@ const isContentSelectable = computed(() => {
 
 // ---------- Fields for Table ----------
 
-// const campaignFields = computed(() => {
-//   const fields: Record<string, string> = {};
-//   const requiredFields = actions.value[campaign.value.action]?.requiredFieldsForCampaigns || [];
-//   for (const field of requiredFields) {
-//     fields[field] = formFields[field] || '';
-//   }
-//   return fields;
-// });
-
 // watch for changed in Form Fields and update campaign.value.action_inputs
 watch(formFields, (newFields) => {
   const updatedFields = { ...newFields };
@@ -177,7 +180,6 @@ const saveCampaign = () => {
 
 
 <style scoped>
-
 .relative-container {
   position: relative;
 }
