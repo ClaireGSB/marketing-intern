@@ -29,16 +29,9 @@
         <v-col cols="12">
           <template v-if="step >= 5">
             <h3 class="mb-4">4. Action Inputs</h3>
-            <psActionInputs 
-    :content-fields="contentFields"
-    :action-fields="actionFields"
-    :input-fields="inputFields"
-    :form-fields="formFields"
-    :selected-contents="selectedContents"
-    :selected-options="selectedOptions"
-    @select-content="selectExistingContent"
-    @clear-selected-content="clearSelectedContent"
-  />
+            <psActionInputs :content-fields="contentFields" :action-fields="actionFields" :input-fields="inputFields"
+              :form-fields="formFields" :selected-contents="selectedContents" @update:form-fields="updateFormFields"
+              @update:selected-contents="updateSelectedContents" />
           </template>
         </v-col>
 
@@ -66,8 +59,6 @@
 
   <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
     :content-subtype-id="selectedSubType.id" />
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
-    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script setup lang="ts">
@@ -216,30 +207,14 @@ const isFieldRequired = (fieldKey: string): boolean => {
 // ---------- Content Selection ----------
 
 const selectedContents = ref<Record<string, any>>({});
-const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
-const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
 
-const selectExistingContent = (fieldKey: string) => {
-  showContentSelectionModal.value = true;
-  currentSelectingField.value = fieldKey;
+const updateFormFields = (newFormFields: Record<string, string>) => {
+  Object.assign(formFields, newFormFields);
 };
 
-const onContentSelected = async (content: any) => {
-  if (currentSelectingField.value === 'outline') {
-    selectedContents.value['outline'] = content;
-    projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
-    updateStep(5);
-  } else {
-    selectedContents.value[currentSelectingField.value] = content;
-    formFields[currentSelectingField.value] = content.content;
-  }
-  selectedOptions.value[currentSelectingField.value] = 'select';
-};
-
-const clearSelectedContent = (fieldKey: string) => {
-  selectedContents.value[fieldKey] = null;
-  formFields[fieldKey] = '';
+const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
+  selectedContents.value = newSelectedContents;
 };
 
 const isContentSelectable = computed(() => {
@@ -323,7 +298,7 @@ const generateContent = async () => {
     console.log('actionFields.value:', actionFields.value)
     console.log('selectedContentType.value.required_fields:', selectedContentType.value.required_fields)
     console.log('selectedAction.value:', selectedAction.value)
-    emit('generate', userInput);
+    // emit('generate', userInput);
   }
 };
 </script>
