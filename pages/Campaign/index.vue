@@ -1,61 +1,87 @@
-// pages/Campaign/index.vue
-
+// Pages/Campaign/index.vue
 
 <template>
   <v-container class="fill-height pa-0">
     <v-row no-gutters class="fill-height justify-center">
       <v-col cols="12" class="d-flex flex-column relative-container pa-0">
-
         <div class="d-flex align-center px-4 py-10">
           <h1 class="text-h4 flex-grow-1">{{ pageTitle }}</h1>
         </div>
 
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field v-model="campaign.name" label="Campaign Name"
-              :rules="[v => !!v || 'Name is required', v => v.length <= 100 || 'Name must be 100 characters or less']"
-              counter="100" maxlength="100"></v-text-field>
+            <v-text-field
+              v-model="campaign.name"
+              label="Campaign Name"
+              :rules="[
+                v => !!v || 'Name is required',
+                v => v.length <= 100 || 'Name must be 100 characters or less'
+              ]"
+              counter="100"
+              maxlength="100"
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
-            <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
-              @update="handleActionSelection" />
+            <psActionSelection
+              :actions="availableActions"
+              :is-action-available="isActionAvailable"
+              @update="handleActionSelection"
+            />
           </v-col>
         </v-row>
 
-        <v-row>
-          <v-col cols="12" >
-            <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
-              :form-fields="formFields" :selected-contents="selectedContents" 
-              @select-content="selectExistingContent" @clear-selected-content="clearSelectedContent" />
+        <v-row v-if="step >= 2">
+          <v-col cols="12">
+            <psActionInputs
+              :action-fields="actionFields"
+              :input-fields="inputFields"
+              :form-fields="formFields"
+              :selected-contents="selectedContents"
+              @update:form-fields="updateFormFields"
+              @update:selected-contents="updateSelectedContents"
+            />
           </v-col>
         </v-row>
 
-        <v-row  v-if="step >= 2">
+        <v-row v-if="step >= 2">
           <v-col cols="12" md="6">
-            <v-textarea v-model="campaign.guidelines" label="Campaign guidelines (optional)"
-              :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']" counter="500"
-              maxlength="500" auto-grow rows="2" max-rows="5"></v-textarea>
+            <v-textarea
+              v-model="campaign.guidelines"
+              label="Campaign guidelines (optional)"
+              :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']"
+              counter="500"
+              maxlength="500"
+              auto-grow
+              rows="2"
+              max-rows="5"
+            ></v-textarea>
           </v-col>
           <v-col cols="12" md="6">
-            <v-textarea v-model="campaign.context" label="Campaign context (optional)"
-              :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']" counter="500" maxlength="500"
-              auto-grow rows="2" max-rows="5"></v-textarea>
+            <v-textarea
+              v-model="campaign.context"
+              label="Campaign context (optional)"
+              :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']"
+              counter="500"
+              maxlength="500"
+              auto-grow
+              rows="2"
+              max-rows="5"
+            ></v-textarea>
           </v-col>
         </v-row>
 
+        <CampaignContentTable
+          v-if="step >= 2"
+          :campaign-action="campaign.action"
+          :campaign-fields="campaign.action_inputs"
+        />
 
-
-        <CampaignContentTable v-if="step >= 2" :campaign-action="campaign.action"
-          :campaign-fields="campaign.action_inputs" />
-        <div class="my-10">
-        </div>
-        <div class="my-10">
-        </div>
-
+        <div class="my-10"></div>
+        <div class="my-10"></div>
       </v-col>
     </v-row>
-
   </v-container>
+
   <v-container class="button-container px-0">
     <v-row no-gutters justify="center">
       <v-col cols="auto">
@@ -65,15 +91,14 @@
       </v-col>
     </v-row>
   </v-container>
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected" @cancel="clearSelectedOptions"
-    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Campaign } from '../../types/frontendTypes';
 import { inputFields } from '../../types/inputFieldTypes';
+import { useUserDataStore } from '../../stores/userData';
 
 const userStore = useUserDataStore();
 
@@ -87,7 +112,8 @@ const campaign = ref<Campaign>({
 });
 
 const step = ref(1);
-const formFields = reactive<Record<string, string>>({}); // { fieldKey: fieldValue }
+const formFields = ref<Record<string, string>>({});
+const selectedContents = ref<Record<string, any>>({});
 
 const updateStep = (newStep: number) => {
   step.value = newStep;
@@ -103,6 +129,7 @@ const handleActionSelection = (action: string) => {
   campaign.value.action = action;
   campaign.value.action_inputs = {}; // Reset action_inputs
   formFields.value = {}; // Reset formFields
+  selectedContents.value = {}; // Reset selectedContents
   console.log('Selected action:', action);
   console.log('Selected action fields:', actionFields.value);
   console.log('Campaign:', campaign.value);
@@ -112,7 +139,7 @@ const handleActionSelection = (action: string) => {
 
 const availableActions = computed(() => {
   return Object.fromEntries(
-    Object.entries(actions).filter(([_, config]) => config.availableForCampaigns)
+    Object.entries(actions.value).filter(([_, config]) => config.availableForCampaigns)
   );
 });
 
@@ -128,68 +155,29 @@ const actionFields = computed((): string[] => {
   return [];
 });
 
-// ---------- Content Selection ----------
+// ---------- Update functions ----------
+const updateFormFields = (newFormFields: Record<string, string>) => {
+  console.log('Updating form fields:', newFormFields);
+  formFields.value = newFormFields;
+  campaign.value.action_inputs = { ...campaign.value.action_inputs, ...newFormFields };
+  console.log('Campaign aciton inputs:', campaign.value.action_inputs);
+};
 
-const selectedContents = ref<Record<string, any>>({});
-const showContentSelectionModal = ref(false);
-const currentSelectingField = ref('');
-const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
-
-const clearSelectedOptions = () => {
-  console.log('Clearing selected options');
+const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
+  selectedContents.value = newSelectedContents;
   console.log('Selected contents:', selectedContents.value);
-  if (!selectedContents.value['content']) {
-    console.log('Clearing selected content');
-    console.log('Selected contents:', selectedOptions.value);
-    selectedOptions.value = {};
+  if (selectedContents.value.content.id) {
+    campaign.value.action_inputs['selected_content_output_id'] = selectedContents.value.content.id;
   }
+  console.log('Campaign aciton inputs:', campaign.value.action_inputs);
 };
-
-const selectExistingContent = (fieldKey: string) => {
-  showContentSelectionModal.value = true;
-  currentSelectingField.value = fieldKey;
-};
-
-
-const onContentSelected = async (content: any) => {
-  selectedContents.value[currentSelectingField.value] = content;
-  formFields[currentSelectingField.value] = content.content;
-};
-
-const clearSelectedContent = (fieldKey: string) => {
-  selectedContents.value[fieldKey] = null;
-  formFields[fieldKey] = '';
-};
-
-const isContentSelectable = computed(() => {
-  return actionFields.value.includes('content') &&
-    selectedAction.value &&
-    actions.value[selectedAction.value].allowContentSelection;
-});
-
-// ---------- Fields for Table ----------
-
-// watch for changed in Form Fields and update campaign.value.action_inputs
-watch(formFields, (newFields) => {
-  const updatedFields = { ...newFields };
-
-  if (selectedContents.value['content']) {
-    updatedFields[`selected_content_output_id`] = selectedContents.value['content'].id;
-    // Ensure 'content' key is not present
-    // delete updatedFields['content'];
-  }
-
-  campaign.value.action_inputs = updatedFields;
-  console.log('INDEX: Updated campaign action inputs:', campaign.value.action_inputs);
-  // console.log('Campaign fields:', campaignFields.value);
-});
 
 // ---------- Save Campaign ----------
 const saveCampaign = () => {
+  // Implement save logic here
+  console.log('Saving campaign:', campaign.value);
 };
-
 </script>
-
 
 <style scoped>
 .relative-container {

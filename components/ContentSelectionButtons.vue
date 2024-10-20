@@ -22,42 +22,65 @@
           readonly auto-grow rows="5" max-rows="10"></v-textarea>
       </v-col>
     </template>
+
+    <ContentSelectionModal 
+      v-model="showContentSelectionModal"
+      :filters="filters"
+      @select="onContentSelected"
+      @cancel="handleModalCancel"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 interface Props {
   modelValue: 'select' | 'provide' | null;
   label: string;
   selectedContent: any | null;
+  filters?: any; // Add type definition for filters if available
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: 'select' | 'provide' | null): void;
-  (e: 'select'): void;
-  (e: 'clear'): void;
+  (e: 'update:selectedContent', content: any | null): void;
+  (e: 'provide'): void;
 }>();
+
+const showContentSelectionModal = ref(false);
 
 const contentDisplay = computed(() => {
   return props.selectedContent?.content || '';
 });
 
 const handleSelect = () => {
-  emit('update:modelValue', 'select');
-  emit('select');
+  showContentSelectionModal.value = true;
 };
 
 const handleProvide = () => {
   emit('update:modelValue', 'provide');
-  emit('clear');
+  emit('update:selectedContent', null);
+  emit('provide');
 };
 
 const handleClear = () => {
   emit('update:modelValue', null);
-  emit('clear');
+  emit('update:selectedContent', null);
+};
+
+const onContentSelected = (content: any) => {
+  emit('update:modelValue', 'select');
+  emit('update:selectedContent', content);
+  showContentSelectionModal.value = false;
+};
+
+const handleModalCancel = () => {
+  if (!props.selectedContent) {
+    emit('update:modelValue', null);
+  }
+  showContentSelectionModal.value = false;
 };
 </script>

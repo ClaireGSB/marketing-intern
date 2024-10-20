@@ -6,28 +6,31 @@
     <v-col cols="12">
       <ContentSelectionButtons
         v-if="inputFields[fieldKey].allowSelection"
-        v-model="selectedOption[fieldKey]"
-        :label="inputFields[fieldKey].label"
+        v-model="localSelectedOption[fieldKey]"
         :selected-content="selectedContents[fieldKey]"
-        @select="handleSelectContent(fieldKey)"
-        @clear="handleClearContent(fieldKey)"
+        :label="inputFields[fieldKey].label"
+        :filters="inputFields[fieldKey].selectionFilters"
+        @update:selected-content="updateSelectedContent(fieldKey, $event)"
+        @provide="handleProvideContent(fieldKey)"
       />
 
-      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && selectedOption[fieldKey]==='provide')">
+      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
         <v-text-field 
           v-if="inputFields[fieldKey].type === 'text'" 
-          v-model="formFields[fieldKey]"
+          v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
           :rules="getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
+          @input="emitFormFieldUpdate(fieldKey)"
         ></v-text-field>
         <v-textarea 
           v-else-if="inputFields[fieldKey].type === 'textarea'" 
-          v-model="formFields[fieldKey]"
+          v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
           :rules="getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           auto-grow
+          @input="emitFormFieldUpdate(fieldKey)"
         ></v-textarea>
       </template>
     </v-col>
@@ -38,28 +41,31 @@
     <v-col cols="12">
       <ContentSelectionButtons
         v-if="inputFields[fieldKey].allowSelection"
-        v-model="selectedOption[fieldKey]"
-        :label="inputFields[fieldKey].label"
+        v-model="localSelectedOption[fieldKey]"
         :selected-content="selectedContents[fieldKey]"
-        @select="handleSelectContent(fieldKey)"
-        @clear="handleClearContent(fieldKey)"
+        :label="inputFields[fieldKey].label"
+        :filters="inputFields[fieldKey].selectionFilters"
+        @update:selected-content="updateSelectedContent(fieldKey, $event)"
+        @provide="handleProvideContent(fieldKey)"
       />
 
-      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && selectedOption[fieldKey]==='provide')">
+      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
         <v-text-field 
           v-if="inputFields[fieldKey].type === 'text'" 
-          v-model="formFields[fieldKey]"
+          v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
           :rules="getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
+          @input="emitFormFieldUpdate(fieldKey)"
         ></v-text-field>
         <v-textarea 
           v-else-if="inputFields[fieldKey].type === 'textarea'" 
-          v-model="formFields[fieldKey]"
+          v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
           :rules="getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           auto-grow
+          @input="emitFormFieldUpdate(fieldKey)"
         ></v-textarea>
       </template>
     </v-col>
@@ -67,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { InputField } from '~/types/inputFieldTypes';
 
 interface Props {
@@ -84,62 +90,51 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'selectContent', fieldKey: string): void;
-  (e: 'clearSelectedContent', fieldKey: string): void;
+  (e: 'update:formFields', value: Record<string, any>): void;
+  (e: 'update:selectedContents', value: Record<string, any>): void;
 }>();
 
-const selectedOption = ref<Record<string, 'select' | 'provide' | null>>({});
+const localSelectedOption = ref<Record<string, 'select' | 'provide' | null>>({});
+const localFormFields = ref<Record<string, any>>({...props.formFields});
 
-const initializeSelectedOptions = () => {
-  [...props.contentFields, ...props.actionFields].forEach(fieldKey => {
-    if (props.inputFields[fieldKey]?.allowSelection) {
-      selectedOption.value[fieldKey] = props.selectedContents[fieldKey] ? 'select' : null;
-    }
-  });
-};
-
-watch(() => props.contentFields, initializeSelectedOptions, { immediate: true });
-watch(() => props.actionFields, initializeSelectedOptions, { immediate: true });
-watch(() => props.selectedContents, initializeSelectedOptions, { deep: true });
-
-// Initialize selectedOption with null values for all fields
-onMounted(() => {
-  console.log('Action Inputs mounted');
-  console.log(props);
-  initializeSelectedOptions();
-});
-
-const selectedContentDisplay = computed(() => {
-  const display: Record<string, string> = {};
-  for (const fieldKey in props.selectedContents) {
-    if (props.selectedContents[fieldKey] && props.selectedContents[fieldKey].content) {
-      display[fieldKey] = props.selectedContents[fieldKey].content;
-    } else {
-      display[fieldKey] = '';
-    }
+// Initialize localSelectedOption immediately
+[...(props.contentFields || []), ...props.actionFields].forEach(fieldKey => {
+  if (props.inputFields[fieldKey]?.allowSelection) {
+    localSelectedOption.value[fieldKey] = props.selectedContents[fieldKey] ? 'select' : null;
+  } else {
+    localSelectedOption.value[fieldKey] = null;
   }
-  return display;
 });
 
-const handleSelectContent = (fieldKey: string) => {
-  selectedOption.value[fieldKey] = 'select';
-  emit('selectContent', fieldKey);
+const updateSelectedContent = (fieldKey: string, content: any) => {
+  emit('update:selectedContents', { ...props.selectedContents, [fieldKey]: content });
+  if (content) {
+    localFormFields.value[fieldKey] = content.content;
+    emit('update:formFields', { ...localFormFields.value, [fieldKey]: content.content });
+    localSelectedOption.value[fieldKey] = 'select';
+  } else {
+    localFormFields.value[fieldKey] = '';
+    emit('update:formFields', { ...localFormFields.value, [fieldKey]: '' });
+    localSelectedOption.value[fieldKey] = null;
+  }
 };
 
 const handleProvideContent = (fieldKey: string) => {
-  selectedOption.value[fieldKey] = 'provide';
-  emit('clearSelectedContent', fieldKey);
+  emit('update:selectedContents', { ...props.selectedContents, [fieldKey]: null });
+  localFormFields.value[fieldKey] = '';
+  emit('update:formFields', { ...localFormFields.value, [fieldKey]: '' });
+  localSelectedOption.value[fieldKey] = 'provide';
 };
-
-const handleClearContent = (fieldKey: string) => {
-  selectedOption.value[fieldKey] = null;
-  emit('clearSelectedContent', fieldKey);
+const emitFormFieldUpdate = (fieldKey: string) => {
+  emit('update:formFields', { ...localFormFields.value, [fieldKey]: localFormFields.value[fieldKey] });
 };
-
 
 const getValidationRules = (field: InputField) => {
   // Implement validation rules logic
-
 };
 
+onMounted(() => {
+  console.log('Action Inputs mounted');
+  console.log(props);
+});
 </script>
