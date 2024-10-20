@@ -38,14 +38,22 @@
       {{ item.action }}
     </template>
     <template v-for="field in requiredFields" :key="field" v-slot:[`item.${field}`]="{ item }">
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <span v-bind="attrs" v-on="on">
-            {{ truncate(item[field]) }}
-          </span>
-        </template>
-        <span>{{ item[field] }}</span>
-      </v-tooltip>
+      <template v-if="field === 'content' && item.selected_content_output_id">
+        <SelectedContentTag
+          :contentOutputId="item.selected_content_output_id"
+          :short="true"
+        />
+      </template>
+      <template v-else>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <span v-bind="attrs" v-on="on">
+              {{ truncate(item[field]) }}
+            </span>
+          </template>
+          <span>{{ item[field] }}</span>
+        </v-tooltip>
+      </template>
     </template>
   </v-data-table>
 </template>
@@ -93,6 +101,7 @@ const addNewRow = () => {
     content_type_id: 0,
     content_subtype_id: '',
     action: props.campaignAction,
+    selected_content_output_id: null,
   } as UserInput;
 
   console.log('requiredFields', requiredFields.value);
@@ -100,6 +109,9 @@ const addNewRow = () => {
   // Add required fields from campaignFields
   for (const field of requiredFields.value) {
     newRow[field] = props.campaignFields[field];
+    if (field === 'content' && props.campaignFields.selected_content_output_id) {
+      newRow.selected_content_output_id = props.campaignFields.selected_content_output_id;
+    }
   }
   
   contentPieces.value.push(newRow);
@@ -126,7 +138,13 @@ watch(() => props.campaignFields, (newFields) => {
   console.log('Campaign fields changed:', newFields);
   contentPieces.value.forEach(piece => {
     requiredFields.value.forEach(field => {
-      piece[field] = newFields[field];
+      if (field === 'content' && newFields.selected_content_output_id) {
+        piece.selected_content_output_id = newFields.selected_content_output_id;
+        piece.content = '';  // Clear the content field when a content is selected
+        console.log('Selected content:', newFields.selected_content_output_id);
+      } else {
+        piece[field] = newFields[field];
+      }
     });
   });
 }, { deep: true });

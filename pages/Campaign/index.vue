@@ -33,7 +33,7 @@
 
           <CampaignContentTable 
     :campaign-action="campaign.action" 
-    :campaign-fields="campaignFields"
+    :campaign-fields="campaign.action_inputs"
   />
           <div class="my-10">
           </div>
@@ -161,7 +161,7 @@ watch(formFields, (newFields) => {
   if (selectedContents.value['content']) {
     updatedFields[`selected_content_output_id`] = selectedContents.value['content'].id;
     // Ensure 'content' key is not present
-    delete updatedFields['content'];
+    // delete updatedFields['content'];
   }
 
   campaign.value.action_inputs = updatedFields;
