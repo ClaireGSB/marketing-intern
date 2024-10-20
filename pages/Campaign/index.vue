@@ -25,12 +25,12 @@
         <v-row>
           <v-col cols="12" >
             <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
-              :form-fields="formFields" :selected-contents="selectedContents" :selected-options="selectedOptions"
+              :form-fields="formFields" :selected-contents="selectedContents" 
               @select-content="selectExistingContent" @clear-selected-content="clearSelectedContent" />
           </v-col>
         </v-row>
 
-        <v-row>
+        <v-row  v-if="step >= 2">
           <v-col cols="12" md="6">
             <v-textarea v-model="campaign.guidelines" label="Campaign guidelines (optional)"
               :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']" counter="500"
@@ -65,7 +65,7 @@
       </v-col>
     </v-row>
   </v-container>
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected" @cancel="clearSelectedOptions"
     :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
@@ -135,11 +135,15 @@ const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
 const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
 
-
-// const openContentSelectionModal = (fieldKey: string) => {
-//   currentSelectingField.value = fieldKey;
-//   showContentSelectionModal.value = true;
-// };
+const clearSelectedOptions = () => {
+  console.log('Clearing selected options');
+  console.log('Selected contents:', selectedContents.value);
+  if (!selectedContents.value['content']) {
+    console.log('Clearing selected content');
+    console.log('Selected contents:', selectedOptions.value);
+    selectedOptions.value = {};
+  }
+};
 
 const selectExistingContent = (fieldKey: string) => {
   showContentSelectionModal.value = true;

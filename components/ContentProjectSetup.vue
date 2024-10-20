@@ -323,7 +323,7 @@ const generateContent = async () => {
     console.log('actionFields.value:', actionFields.value)
     console.log('selectedContentType.value.required_fields:', selectedContentType.value.required_fields)
     console.log('selectedAction.value:', selectedAction.value)
-    // emit('generate', userInput);
+    emit('generate', userInput);
   }
 };
 </script>

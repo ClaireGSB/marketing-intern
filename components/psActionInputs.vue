@@ -67,8 +67,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
 import { InputField } from '~/types/inputFieldTypes';
-// import { onMounted, defineProps, defineEmits, withDefaults } from 'vue';
 
 interface Props {
   contentFields?: string[];
@@ -79,6 +79,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  contentFields: () => [],
   inputFields: () => ({})
 });
 
@@ -88,6 +89,25 @@ const emit = defineEmits<{
 }>();
 
 const selectedOption = ref<Record<string, 'select' | 'provide' | null>>({});
+
+const initializeSelectedOptions = () => {
+  [...props.contentFields, ...props.actionFields].forEach(fieldKey => {
+    if (props.inputFields[fieldKey]?.allowSelection) {
+      selectedOption.value[fieldKey] = props.selectedContents[fieldKey] ? 'select' : null;
+    }
+  });
+};
+
+watch(() => props.contentFields, initializeSelectedOptions, { immediate: true });
+watch(() => props.actionFields, initializeSelectedOptions, { immediate: true });
+watch(() => props.selectedContents, initializeSelectedOptions, { deep: true });
+
+// Initialize selectedOption with null values for all fields
+onMounted(() => {
+  console.log('Action Inputs mounted');
+  console.log(props);
+  initializeSelectedOptions();
+});
 
 const selectedContentDisplay = computed(() => {
   const display: Record<string, string> = {};
@@ -102,6 +122,7 @@ const selectedContentDisplay = computed(() => {
 });
 
 const handleSelectContent = (fieldKey: string) => {
+  selectedOption.value[fieldKey] = 'select';
   emit('selectContent', fieldKey);
 };
 
@@ -111,6 +132,7 @@ const handleProvideContent = (fieldKey: string) => {
 };
 
 const handleClearContent = (fieldKey: string) => {
+  selectedOption.value[fieldKey] = null;
   emit('clearSelectedContent', fieldKey);
 };
 
@@ -119,11 +141,5 @@ const getValidationRules = (field: InputField) => {
   // Implement validation rules logic
 
 };
-
-onMounted(() => {
-  console.log('Action Inputs mounted');
-  // log props
-  console.log(props);
-});
 
 </script>

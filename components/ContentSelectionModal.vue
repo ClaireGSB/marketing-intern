@@ -13,7 +13,7 @@
       </v-card-text>
       <v-card-actions class="pt-4">
         <v-spacer></v-spacer>
-        <v-btn color="primary" variant="text" @click="closeModal">
+        <v-btn color="primary" variant="text" @click="cancelAndClose">
           Cancel
         </v-btn>
         <v-btn color="primary" variant="text" @click="confirmSelection" :disabled="!selectedContent">
@@ -38,6 +38,8 @@
   const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
     (e: 'select', content: any): void;
+    (e: 'close'): void;
+    (e: 'cancel'): void;
   }>();
 
   const dialog = ref(false);
@@ -66,7 +68,13 @@
   };
 
   const closeModal = () => {
+    emit('close')
     dialog.value = false;
+  };
+
+  const cancelAndClose = () => {
+    emit('cancel');
+    closeModal();
   };
 
   const truncateContent = (content: string) => {
