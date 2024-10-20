@@ -11,8 +11,8 @@
 
       <!-- If Blog Post Copy: Select Outline - Step 3 -->
       <psOutlineSelection v-if="step >= 3 && selectedContentType.id === 9" v-model:outline-option="outlineOption"
-        :project-setup="projectSetup" :selected-outline="selectedContents['outline']"
-        @select-outline="selectExistingOutline" @clear-selected-outline="clearSelectedOutline" />
+        :project-setup="projectSetup" 
+        @select-outline="selectExistingOutline($event)" @clear-selected-outline="clearSelectedOutline" />
 
       <!-- If NOT Blog Post Copy AND outline selected -->
       <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
@@ -128,13 +128,17 @@ const handleSubTypeSelection = (newSubType: { id: string; name: string }) => {
   updateStep(3);
 };
 
-const selectExistingOutline = async () => {
-  showContentSelectionModal.value = true;
+const selectExistingOutline = async (outline) => {
   currentSelectingField.value = 'outline';
+  selectedContents.value['outline'] = outline;
+  console.log('selectedContents:', selectedContents.value);
+  projectSetup.value = await userStore.fetchProjectSetupByContentOutput(outline.id);
+  updateStep(5);
 };
 
 const clearSelectedOutline = () => {
   selectedContents.value['outline'] = null;
+  formFields['outline'] = '';
   outlineOption.value = null;
   projectSetup.value = null;
   updateStep(3);
@@ -298,7 +302,7 @@ const generateContent = async () => {
     console.log('actionFields.value:', actionFields.value)
     console.log('selectedContentType.value.required_fields:', selectedContentType.value.required_fields)
     console.log('selectedAction.value:', selectedAction.value)
-    // emit('generate', userInput);
+    emit('generate', userInput);
   }
 };
 </script>

@@ -1,3 +1,5 @@
+// ContentSelectionButtons.vue
+
 <template>
   <div class="mb-4">
     <h3 class="mb-4">{{ label }}</h3>
