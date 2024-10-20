@@ -19,13 +19,14 @@
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
                     <v-select v-model="editedItem.content_type_id" :items="contentTypes" item-title="display_name"
-  item-value="id" label="Content Type" @update:model-value="updateContentSubtypes"
-  :rules="[v => !!v || 'Content Type is required']"></v-select>
+                      item-value="id" label="Content Type" @update:model-value="updateContentSubtypes"
+                      :rules="[v => !!v || 'Content Type is required']"></v-select>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-select v-model="editedItem.content_subtype_id"
-  :items="getContentSubtypes(editedItem.content_type_id)" item-title="name" item-value="id"
-  label="Content Subtype" :disabled="!editedItem.content_type_id" :rules="[v => !!v || 'Content Subtype is required']"></v-select>
+                      :items="getContentSubtypes(editedItem.content_type_id)" item-title="name" item-value="id"
+                      label="Content Subtype" :disabled="!editedItem.content_type_id"
+                      :rules="[v => !!v || 'Content Subtype is required']"></v-select>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="editedItem.action" label="Action" disabled></v-text-field>
@@ -43,8 +44,16 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+              <v-btn color="primary" variant="text" @click="close">Cancel</v-btn>
+              <v-tooltip :disabled="isFormValid" location="bottom" text="Please fill in all required fields">
+                <template v-slot:activator="{ props }">
+                  <span v-bind="props">
+                    <v-btn color="primary" variant="text" @click="save" :disabled="!isFormValid">
+                      Save
+                    </v-btn>
+                  </span>
+                </template>
+              </v-tooltip>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -62,11 +71,11 @@
       </v-toolbar>
     </template>
     <template v-slot:item.content_type_id="{ item }">
-    {{ getContentTypeName(item.content_type_id) }}
-  </template>
-  <template v-slot:item.content_subtype_id="{ item }">
-    {{ getContentSubtypeName(item.content_subtype_id) }}
-  </template>
+      {{ getContentTypeName(item.content_type_id) }}
+    </template>
+    <template v-slot:item.content_subtype_id="{ item }">
+      {{ getContentSubtypeName(item.content_subtype_id) }}
+    </template>
     <template v-slot:item.content="{ item }">
       <SelectedContentTag v-if="item.selected_content_output_id" :contentOutputId="item.selected_content_output_id"
         :short="true" />
@@ -75,6 +84,9 @@
     <template v-slot:item.actions="{ item }">
       <v-icon small class="mr-2" @click="editItem(item)">
         mdi-pencil
+      </v-icon>
+      <v-icon small class="mr-2" @click="cloneItem(item)">
+        mdi-content-copy
       </v-icon>
       <v-icon small @click="deleteItem(item)">
         mdi-delete
@@ -116,7 +128,7 @@ const defaultItem = computed(() => {
     action: props.campaignAction,
     selected_content_output_id: null,
   };
-  
+
   requiredFields.value.forEach(field => {
     if (field === 'content' && props.campaignFields.selected_content_output_id) {
       item.selected_content_output_id = props.campaignFields.selected_content_output_id;
@@ -177,6 +189,11 @@ const deleteItemConfirm = () => {
   closeDelete();
 };
 
+const cloneItem = (item: UserInput) => {
+  const clonedItem = { ...item, id: Date.now() };
+  contentPieces.value.push(clonedItem);
+};
+
 const close = () => {
   dialog.value = false;
   editedIndex.value = -1;
@@ -188,9 +205,12 @@ const closeDelete = () => {
   editedItem.value = { ...defaultItem.value };
 };
 
+const isFormValid = computed(() => {
+  return !!editedItem.value.content_type_id && !!editedItem.value.content_subtype_id;
+});
+
 const save = () => {
-  if (!editedItem.value.content_type_id || !editedItem.value.content_subtype_id) {
-    // You might want to show an error message here
+  if (!isFormValid.value) {
     return;
   }
   if (editedIndex.value > -1) {
