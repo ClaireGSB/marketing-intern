@@ -31,6 +31,12 @@
           :form-fields="formFields" :selected-contents="selectedContents"
           @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
 
+          <CampaignContentTable :campaign-action="campaign.action" />
+          <div class="my-10">
+          </div>
+          <div class="my-10">
+          </div>
+
       </v-col>
     </v-row>
 
