@@ -46,9 +46,10 @@
 
 <script setup lang="ts">
 import { InputField } from '~/types/inputFieldTypes';
+// import { onMounted, defineProps, defineEmits, withDefaults } from 'vue';
 
 interface Props {
-  contentFields: string[];
+  contentFields?: string[];
   actionFields: string[];
   inputFields: Record<string, InputField>;
   formFields: Record<string, any>;
@@ -68,4 +69,11 @@ const getValidationRules = (field: InputField) => {
   // Implement validation rules logic
 
 };
+
+onMounted(() => {
+  console.log('Action Inputs mounted');
+  // log props
+  console.log(props);
+});
+
 </script>

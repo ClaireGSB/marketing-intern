@@ -1,0 +1,150 @@
+// pages/Campaign/index.vue
+
+
+<template>
+  <v-container class="fill-height pa-0">
+    <v-row no-gutters class="fill-height justify-center">
+      <v-col cols="12" class="d-flex flex-column relative-container pa-0">
+
+        <div class="d-flex align-center px-4 py-10">
+          <h1 class="text-h4 flex-grow-1">{{ pageTitle }}</h1>
+        </div>
+        <v-col cols="12">
+        <v-text-field
+            v-model="campaign.name"
+            label="Name"
+            :rules="[v => !!v || 'Name is required', v => v.length <= 100 || 'Name must be 100 characters or less']"
+            counter="100"
+            maxlength="100"
+          ></v-text-field>
+          
+          <v-textarea
+            v-model="campaign.guidelines"
+            label="Guidelines"
+            :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']"
+            counter="500"
+            maxlength="500"
+          ></v-textarea>
+          
+          <v-textarea
+            v-model="campaign.context"
+            label="Context"
+            :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']"
+            counter="500"
+            maxlength="500"
+          ></v-textarea>
+        </v-col>
+
+      
+          <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
+            @update="handleActionSelection" />
+
+            <psActionInputs v-if="step >= 2" :action-fields="actionFields"
+          :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
+          @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+
+        </v-col>
+    </v-row>
+
+  </v-container>
+  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
+  :filters="inputFields[currentSelectingField]?.selectionFilters" />
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { Campaign } from '../../types/frontendTypes';
+import { inputFields } from '../../types/inputFieldTypes';
+
+const userStore = useUserDataStore();
+
+const pageTitle = 'Create Campaign';
+const campaign = ref<Campaign>({
+  name: '',
+  guidelines: '',
+  context: ''
+});
+
+const step = ref(1);
+const formFields = reactive<Record<string, string>>({}); // { fieldKey: fieldValue }
+
+const updateStep = (newStep: number) => {
+  step.value = newStep;
+};
+
+// ---------- Action Selection ----------
+const selectedAction = ref<string>('');
+
+const { actions } = storeToRefs(userStore);
+const handleActionSelection = (action: string) => {
+  selectedAction.value = action;
+  console.log('Selected action:', action);
+  console.log('Selected action fields:', actionFields.value);
+  updateStep(2);
+  console.log('Step:', step.value);
+};
+
+const availableActions = computed(() => {
+  return Object.fromEntries(
+    Object.entries(actions).filter(([_, config]) => config.availableForCampaigns)
+  );
+});
+
+const isActionAvailable = (action: string): boolean => {
+  return true; // All actions passed to the component are already available
+};
+
+const actionFields = computed((): string[] => {
+  if (selectedAction.value && selectedAction.value in actions.value) {
+    const action = actions.value[selectedAction.value as keyof typeof actions.value];
+    return [...action.requiredFieldsForCampaigns];
+  }
+  return [];
+});
+
+// ---------- Content Selection ----------
+
+const selectedContents = ref<Record<string, any>>({});
+const showContentSelectionModal = ref(false);
+const currentSelectingField = ref('');
+
+const openContentSelectionModal = (fieldKey: string) => {
+  currentSelectingField.value = fieldKey;
+  showContentSelectionModal.value = true;
+};
+
+const onContentSelected = async (content: any) => {
+  if (currentSelectingField.value === 'outline') {
+    selectedContents.value['outline'] = content;
+    projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
+    updateStep(5);
+  } else {
+    selectedContents.value[currentSelectingField.value] = content;
+    formFields[currentSelectingField.value] = content.content;
+  }
+};
+
+const clearSelectedContent = (fieldKey: string) => {
+  selectedContents.value[fieldKey] = null;
+  formFields[fieldKey] = '';
+};
+
+const isContentSelectable = computed(() => {
+  return actionFields.value.includes('content') &&
+    selectedAction.value &&
+    actions.value[selectedAction.value].allowContentSelection;
+});
+
+
+</script>
+
+
+<style scoped>
+/* Add max-width to v-col for extra large screens */
+@media (min-width: 1000px) {
+  .v-container {
+    max-width: 1000px !important;
+  }
+}
+</style>

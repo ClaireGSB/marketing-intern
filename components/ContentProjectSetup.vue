@@ -187,6 +187,8 @@ const isFieldRequired = (fieldKey: string): boolean => {
   return false;
 };
 
+// ---------- Content Selection ----------
+
 const selectedContents = ref<Record<string, any>>({});
 const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
