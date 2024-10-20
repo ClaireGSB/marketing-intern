@@ -145,14 +145,14 @@ const isContentSelectable = computed(() => {
 
 // ---------- Fields for Table ----------
 
-const campaignFields = computed(() => {
-  const fields: Record<string, string> = {};
-  const requiredFields = actions.value[campaign.value.action]?.requiredFieldsForCampaigns || [];
-  for (const field of requiredFields) {
-    fields[field] = formFields[field] || '';
-  }
-  return fields;
-});
+// const campaignFields = computed(() => {
+//   const fields: Record<string, string> = {};
+//   const requiredFields = actions.value[campaign.value.action]?.requiredFieldsForCampaigns || [];
+//   for (const field of requiredFields) {
+//     fields[field] = formFields[field] || '';
+//   }
+//   return fields;
+// });
 
 // watch for changed in Form Fields and update campaign.value.action_inputs
 watch(formFields, (newFields) => {
@@ -165,8 +165,8 @@ watch(formFields, (newFields) => {
   }
 
   campaign.value.action_inputs = updatedFields;
-  console.log('Updated campaign action inputs:', campaign.value.action_inputs);
-  console.log('Campaign fields:', campaignFields.value);
+  console.log('INDEX: Updated campaign action inputs:', campaign.value.action_inputs);
+  // console.log('Campaign fields:', campaignFields.value);
 });
 
 // ---------- Save Campaign ----------
