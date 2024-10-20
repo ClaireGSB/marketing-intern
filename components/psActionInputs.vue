@@ -14,12 +14,12 @@
         @provide="handleProvideContent(fieldKey)"
       />
 
-      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
+      <div v-show="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
         <v-text-field 
           v-if="inputFields[fieldKey].type === 'text'" 
           v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
-          :rules="getValidationRules(inputFields[fieldKey])"
+          :rules="props.getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           @input="emitFormFieldUpdate(fieldKey)"
         ></v-text-field>
@@ -27,12 +27,12 @@
           v-else-if="inputFields[fieldKey].type === 'textarea'" 
           v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
-          :rules="getValidationRules(inputFields[fieldKey])"
+          :rules="props.getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           auto-grow
           @input="emitFormFieldUpdate(fieldKey)"
         ></v-textarea>
-      </template>
+      </div>
     </v-col>
   </template>
 
@@ -49,12 +49,12 @@
         @provide="handleProvideContent(fieldKey)"
       />
 
-      <template v-if="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
+      <div v-show="!inputFields[fieldKey].allowSelection || (inputFields[fieldKey].allowSelection && localSelectedOption[fieldKey]==='provide')">
         <v-text-field 
           v-if="inputFields[fieldKey].type === 'text'" 
           v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
-          :rules="getValidationRules(inputFields[fieldKey])"
+          :rules="props.getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           @input="emitFormFieldUpdate(fieldKey)"
         ></v-text-field>
@@ -62,31 +62,33 @@
           v-else-if="inputFields[fieldKey].type === 'textarea'" 
           v-model="localFormFields[fieldKey]"
           :label="inputFields[fieldKey].label" 
-          :rules="getValidationRules(inputFields[fieldKey])"
+          :rules="props.getValidationRules(inputFields[fieldKey])"
           :counter="inputFields[fieldKey].validation?.maxChar"
           auto-grow
           @input="emitFormFieldUpdate(fieldKey)"
         ></v-textarea>
-      </template>
+      </div>
     </v-col>
   </template>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { InputField } from '~/types/inputFieldTypes';
+import { FieldConfig } from '~/types/inputFieldTypes';
 
 interface Props {
   contentFields?: string[];
   actionFields: string[];
-  inputFields: Record<string, InputField>;
+  inputFields: Record<string, FieldConfig>;
   formFields: Record<string, any>;
   selectedContents: Record<string, any>;
+  getValidationRules: (field: InputField) => any[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   contentFields: () => [],
-  inputFields: () => ({})
+  inputFields: () => ({}),
+  getValidationRules: () => () => []
 });
 
 const emit = defineEmits<{
@@ -137,9 +139,6 @@ const emitFormFieldUpdate = (fieldKey: string) => {
   emit('update:formFields', { ...localFormFields.value, [fieldKey]: localFormFields.value[fieldKey] });
 };
 
-const getValidationRules = (field: InputField) => {
-  // Implement validation rules logic
-};
 
 onMounted(() => {
   console.log('Action Inputs mounted');

@@ -30,7 +30,7 @@
           <template v-if="step >= 5">
             <h3 class="mb-4">4. Action Inputs</h3>
             <psActionInputs :content-fields="contentFields" :action-fields="actionFields" :input-fields="inputFields"
-              :form-fields="formFields" :selected-contents="selectedContents" @update:form-fields="updateFormFields"
+              :form-fields="formFields" :selected-contents="selectedContents" @update:form-fields="updateFormFields" :get-validation-rules="getValidationRules"
               @update:selected-contents="updateSelectedContents" />
           </template>
         </v-col>
