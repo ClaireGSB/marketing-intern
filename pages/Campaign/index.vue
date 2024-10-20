@@ -9,46 +9,43 @@
         <div class="d-flex align-center px-4 py-10">
           <h1 class="text-h4 flex-grow-1">{{ pageTitle }}</h1>
         </div>
-        <v-col cols="12">
-        <v-text-field
-            v-model="campaign.name"
-            label="Name"
+
+          <v-text-field v-model="campaign.name" label="Name"
             :rules="[v => !!v || 'Name is required', v => v.length <= 100 || 'Name must be 100 characters or less']"
-            counter="100"
-            maxlength="100"
-          ></v-text-field>
-          
-          <v-textarea
-            v-model="campaign.guidelines"
-            label="Guidelines"
-            :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']"
-            counter="500"
-            maxlength="500"
-          ></v-textarea>
-          
-          <v-textarea
-            v-model="campaign.context"
-            label="Context"
-            :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']"
-            counter="500"
-            maxlength="500"
-          ></v-textarea>
-        </v-col>
+            counter="100" maxlength="100"></v-text-field>
 
-      
-          <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
-            @update="handleActionSelection" />
+          <v-textarea v-model="campaign.guidelines" label="Guidelines"
+            :rules="[v => v.length <= 500 || 'Guidelines must be 500 characters or less']" counter="500"
+            maxlength="500"></v-textarea>
 
-            <psActionInputs v-if="step >= 2" :action-fields="actionFields"
-          :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
+          <v-textarea v-model="campaign.context" label="Context"
+            :rules="[v => v.length <= 500 || 'Context must be 500 characters or less']" counter="500"
+            maxlength="500"></v-textarea>
+
+
+
+        <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
+          @update="handleActionSelection" />
+
+        <psActionInputs v-if="step >= 2" :action-fields="actionFields" :input-fields="inputFields"
+          :form-fields="formFields" :selected-contents="selectedContents"
           @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
 
-        </v-col>
+      </v-col>
     </v-row>
 
   </v-container>
+  <v-container class="button-container px-0">
+    <v-row no-gutters justify="center">
+      <v-col cols="auto">
+        <v-btn color="primary" @click="saveCampaign" class="generate-btn">
+          Save
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
   <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
-  :filters="inputFields[currentSelectingField]?.selectionFilters" />
+    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script setup lang="ts">
@@ -63,7 +60,8 @@ const pageTitle = 'Create Campaign';
 const campaign = ref<Campaign>({
   name: '',
   guidelines: '',
-  context: ''
+  context: '',
+  action: '',
 });
 
 const step = ref(1);
@@ -77,10 +75,13 @@ const updateStep = (newStep: number) => {
 const selectedAction = ref<string>('');
 
 const { actions } = storeToRefs(userStore);
+
 const handleActionSelection = (action: string) => {
   selectedAction.value = action;
+  campaign.value.action = action;
   console.log('Selected action:', action);
   console.log('Selected action fields:', actionFields.value);
+  console.log('Campaign:', campaign.value);
   updateStep(2);
   console.log('Step:', step.value);
 };
@@ -115,14 +116,8 @@ const openContentSelectionModal = (fieldKey: string) => {
 };
 
 const onContentSelected = async (content: any) => {
-  if (currentSelectingField.value === 'outline') {
-    selectedContents.value['outline'] = content;
-    projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
-    updateStep(5);
-  } else {
-    selectedContents.value[currentSelectingField.value] = content;
-    formFields[currentSelectingField.value] = content.content;
-  }
+  selectedContents.value[currentSelectingField.value] = content;
+  formFields[currentSelectingField.value] = content.content;
 };
 
 const clearSelectedContent = (fieldKey: string) => {
@@ -136,11 +131,43 @@ const isContentSelectable = computed(() => {
     actions.value[selectedAction.value].allowContentSelection;
 });
 
+// ---------- Save Campaign ----------
+const saveCampaign = () => {
+  campaign.value.action_inputs = formFields;
+  // Add selected content IDs for fields that allow selection
+  for (const fieldKey in selectedContents.value) {
+      if (selectedContents.value['content']) {
+        campaign.value.action_inputs[`selected_content_output_id`] = selectedContents.value['content'].id;
+        // remove the content key from campaign.value.action_inputs
+        delete campaign.value.action_inputs['content'];
+      }
+    }
+  console.log('Saving campaign:', campaign.value);
+};
 
 </script>
 
 
 <style scoped>
+
+.relative-container {
+  position: relative;
+}
+
+.button-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.generate-btn {
+  width: 200px;
+}
+
 /* Add max-width to v-col for extra large screens */
 @media (min-width: 1000px) {
   .v-container {

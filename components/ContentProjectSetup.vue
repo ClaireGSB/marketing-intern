@@ -17,13 +17,17 @@
       <!-- If NOT Blog Post Copy AND outline selected -->
       <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
         <!-- Select Action - Step 4 -->
+        <v-col cols="12">
         <psActionSelection v-if="step >= 3" :actions="actions" :is-action-available="isActionAvailable"
           @update="handleActionSelection" />
+        </v-col>
 
         <!-- Action fields - Step 5 -->
+        <v-col cols="12">
         <psActionInputs v-if="step >= 5" :content-fields="contentFields" :action-fields="actionFields"
           :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
           @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+        </v-col>
       </template>
 
       <!-- Review settings - Step 5 -->

@@ -1,7 +1,6 @@
 // psActionInputs.vue
 
 <template>
-  <v-col cols="12">
     <h3 class="mb-4">4. Action Inputs</h3>
     <!-- Content-specific fields -->
     <template v-for="fieldKey in contentFields" :key="fieldKey">
@@ -41,7 +40,6 @@
         :counter="inputFields[fieldKey].validation?.maxChar"
         :disabled="inputFields[fieldKey].allowSelection && !!selectedContents[fieldKey]" auto-grow></v-textarea>
     </template>
-  </v-col>
 </template>
 
 <script setup lang="ts">
