@@ -1,3 +1,5 @@
+// ConfirmDialog.vue
+
 <template>
   <v-dialog v-model="dialog" max-width="400">
     <v-card>

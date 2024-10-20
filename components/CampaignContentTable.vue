@@ -57,17 +57,6 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-toolbar>
     </template>
     <template v-slot:item.content_type_id="{ item }">
@@ -93,6 +82,13 @@
       </v-icon>
     </template>
   </v-data-table>
+  <ConfirmDialog
+    ref="confirmDialog"
+    title="Confirm Deletion"
+    message="Are you sure you want to delete this item?"
+    confirm-text="Delete"
+    @confirm="handleDeleteConfirm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -178,16 +174,24 @@ const editItem = (item: UserInput) => {
   dialog.value = true;
 };
 
-const deleteItem = (item: UserInput) => {
+const confirmDialog = ref(null);
+
+  const deleteItem = (item: UserInput) => {
   editedIndex.value = contentPieces.value.indexOf(item);
   editedItem.value = { ...item };
-  dialogDelete.value = true;
+  confirmDialog.value.open();
 };
 
-const deleteItemConfirm = () => {
+const handleDeleteConfirm = () => {
   contentPieces.value.splice(editedIndex.value, 1);
-  closeDelete();
+  editedIndex.value = -1;
+  editedItem.value = { ...defaultItem.value };
 };
+
+// const deleteItemConfirm = () => {
+//   contentPieces.value.splice(editedIndex.value, 1);
+//   closeDelete();
+// };
 
 const cloneItem = (item: UserInput) => {
   const clonedItem = { ...item, id: Date.now() };
@@ -199,11 +203,11 @@ const close = () => {
   editedIndex.value = -1;
 };
 
-const closeDelete = () => {
-  dialogDelete.value = false;
-  editedIndex.value = -1;
-  editedItem.value = { ...defaultItem.value };
-};
+// const closeDelete = () => {
+//   dialogDelete.value = false;
+//   editedIndex.value = -1;
+//   editedItem.value = { ...defaultItem.value };
+// };
 
 const isFormValid = computed(() => {
   return !!editedItem.value.content_type_id && !!editedItem.value.content_subtype_id;
