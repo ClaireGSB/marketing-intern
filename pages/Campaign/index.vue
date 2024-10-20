@@ -31,7 +31,10 @@
           :form-fields="formFields" :selected-contents="selectedContents"
           @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
 
-          <CampaignContentTable :campaign-action="campaign.action" />
+          <CampaignContentTable 
+    :campaign-action="campaign.action" 
+    :campaign-fields="campaignFields"
+  />
           <div class="my-10">
           </div>
           <div class="my-10">
@@ -68,6 +71,7 @@ const campaign = ref<Campaign>({
   guidelines: '',
   context: '',
   action: '',
+  action_inputs: {},
 });
 
 const step = ref(1);
@@ -85,6 +89,8 @@ const { actions } = storeToRefs(userStore);
 const handleActionSelection = (action: string) => {
   selectedAction.value = action;
   campaign.value.action = action;
+  campaign.value.action_inputs = {}; // Reset action_inputs
+  formFields.value = {}; // Reset formFields
   console.log('Selected action:', action);
   console.log('Selected action fields:', actionFields.value);
   console.log('Campaign:', campaign.value);
@@ -137,18 +143,34 @@ const isContentSelectable = computed(() => {
     actions.value[selectedAction.value].allowContentSelection;
 });
 
+// ---------- Fields for Table ----------
+
+const campaignFields = computed(() => {
+  const fields: Record<string, string> = {};
+  const requiredFields = actions.value[campaign.value.action]?.requiredFieldsForCampaigns || [];
+  for (const field of requiredFields) {
+    fields[field] = formFields[field] || '';
+  }
+  return fields;
+});
+
+// watch for changed in Form Fields and update campaign.value.action_inputs
+watch(formFields, (newFields) => {
+  const updatedFields = { ...newFields };
+
+  if (selectedContents.value['content']) {
+    updatedFields[`selected_content_output_id`] = selectedContents.value['content'].id;
+    // Ensure 'content' key is not present
+    delete updatedFields['content'];
+  }
+
+  campaign.value.action_inputs = updatedFields;
+  console.log('Updated campaign action inputs:', campaign.value.action_inputs);
+  console.log('Campaign fields:', campaignFields.value);
+});
+
 // ---------- Save Campaign ----------
 const saveCampaign = () => {
-  campaign.value.action_inputs = formFields;
-  // Add selected content IDs for fields that allow selection
-  for (const fieldKey in selectedContents.value) {
-      if (selectedContents.value['content']) {
-        campaign.value.action_inputs[`selected_content_output_id`] = selectedContents.value['content'].id;
-        // remove the content key from campaign.value.action_inputs
-        delete campaign.value.action_inputs['content'];
-      }
-    }
-  console.log('Saving campaign:', campaign.value);
 };
 
 </script>
