@@ -97,14 +97,22 @@ const emit = defineEmits<{
 const localSelectedOption = ref<Record<string, 'select' | 'provide' | null>>({});
 const localFormFields = ref<Record<string, any>>({...props.formFields});
 
+const initializeLocalSelectedOption = () => {
+  [...(props.contentFields || []), ...props.actionFields].forEach(fieldKey => {
+    if (props.inputFields[fieldKey]?.allowSelection) {
+      localSelectedOption.value[fieldKey] = props.selectedContents[fieldKey] ? 'select' : null;
+    } else {
+      localSelectedOption.value[fieldKey] = null;
+    }
+  });
+};
+
 // Initialize localSelectedOption immediately
-[...(props.contentFields || []), ...props.actionFields].forEach(fieldKey => {
-  if (props.inputFields[fieldKey]?.allowSelection) {
-    localSelectedOption.value[fieldKey] = props.selectedContents[fieldKey] ? 'select' : null;
-  } else {
-    localSelectedOption.value[fieldKey] = null;
-  }
-});
+initializeLocalSelectedOption();
+
+// watch for changes in content fields and action fields and reinitialize localSelectedOption
+watch(() => props.contentFields, () => initializeLocalSelectedOption());
+watch(() => props.actionFields, () => initializeLocalSelectedOption());
 
 const updateSelectedContent = (fieldKey: string, content: any) => {
   emit('update:selectedContents', { ...props.selectedContents, [fieldKey]: content });

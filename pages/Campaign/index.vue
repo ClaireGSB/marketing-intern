@@ -157,19 +157,18 @@ const actionFields = computed((): string[] => {
 
 // ---------- Update functions ----------
 const updateFormFields = (newFormFields: Record<string, string>) => {
-  console.log('Updating form fields:', newFormFields);
   formFields.value = newFormFields;
   campaign.value.action_inputs = { ...campaign.value.action_inputs, ...newFormFields };
-  console.log('Campaign aciton inputs:', campaign.value.action_inputs);
 };
 
 const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
+  console.log('Updating selected contents:', newSelectedContents);
   selectedContents.value = newSelectedContents;
-  console.log('Selected contents:', selectedContents.value);
-  if (selectedContents.value.content.id) {
+  if (!selectedContents.value.content) {
+    delete campaign.value.action_inputs['selected_content_output_id'];
+  } else if (selectedContents.value.content.id) {
     campaign.value.action_inputs['selected_content_output_id'] = selectedContents.value.content.id;
   }
-  console.log('Campaign aciton inputs:', campaign.value.action_inputs);
 };
 
 // ---------- Save Campaign ----------
