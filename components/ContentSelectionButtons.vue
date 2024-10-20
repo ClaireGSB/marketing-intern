@@ -2,7 +2,6 @@
 
 <template>
   <div class="mb-4">
-    <h3 class="mb-4">{{ label }}</h3>
     <v-btn @click="handleSelect" class="mr-2"
       :prepend-icon="modelValue === 'select' ? 'mdi-check-circle' : ''">
       Select Existing {{ label }}
