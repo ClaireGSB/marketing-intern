@@ -37,6 +37,7 @@
               :input-fields="inputFields"
               :form-fields="formFields"
               :selected-contents="selectedContents"
+              :get-validation-rules="getValidationRules"
               @update:form-fields="updateFormFields"
               @update:selected-contents="updateSelectedContents"
             />
@@ -170,6 +171,61 @@ const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
     campaign.value.action_inputs['selected_content_output_id'] = selectedContents.value.content.id;
   }
 };
+
+// ---------- Validation ----------
+
+const isFieldRequired = (fieldKey: string): boolean => {
+  console.log('checking if isFieldRequired:', fieldKey);
+  if (actionFields.value.includes(fieldKey)) {
+    console.log('field is in actionFields');
+    if (selectedAction.value && selectedAction.value in actions.value) {
+      console.log('selectedAction.value:', selectedAction.value);
+      const action = actions.value[selectedAction.value as keyof typeof actions.value];
+      console.log('action:', action);
+      console.log('action.requiredFields:', action.requiredFields);
+      console.log('action.requiredFields.includes(fieldKey):', action.requiredFields.includes(fieldKey));
+      return action.requiredFields.includes(fieldKey);
+    }
+  }
+  if (contentFields.value.includes(fieldKey)) {
+    console.log('field is in contentFields');
+    console.log('selectedContentType.value:', selectedContentType.value);
+    return selectedContentType.value.required_fields.includes(fieldKey);
+  }
+  return false;
+};
+
+const getValidationRules = (field: FieldConfig) => {
+  const rules: ((v: string) => true | string)[] = [];
+
+  const isRequired = isFieldRequired(field.key);
+
+  if (isRequired) {
+    rules.push((v: string) => !!v || `${field.label} is required`);
+  }
+
+  if (field.validation) {
+    const { minChar, maxChar } = field.validation;
+
+    rules.push((v: string) => {
+      if (!v || v.trim().length === 0) {
+        return isRequired ? `${field.label} is required` : true;
+      }
+      if (minChar && v.length < minChar) {
+        return isRequired
+          ? `Minimum ${minChar} characters required`
+          : `This field is optional, but if using, minimum ${minChar} characters required`;
+      }
+      if (maxChar && v.length > maxChar) {
+        return `Maximum ${maxChar} characters allowed`;
+      }
+      return true;
+    });
+  }
+
+  return rules;
+};
+
 
 // ---------- Save Campaign ----------
 const saveCampaign = () => {
