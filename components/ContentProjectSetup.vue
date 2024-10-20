@@ -29,9 +29,16 @@
         <v-col cols="12">
           <template v-if="step >= 5">
             <h3 class="mb-4">4. Action Inputs</h3>
-            <psActionInputs  :content-fields="contentFields" :action-fields="actionFields"
-              :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
-              @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+            <psActionInputs 
+    :content-fields="contentFields"
+    :action-fields="actionFields"
+    :input-fields="inputFields"
+    :form-fields="formFields"
+    :selected-contents="selectedContents"
+    :selected-options="selectedOptions"
+    @select-content="selectExistingContent"
+    @clear-selected-content="clearSelectedContent"
+  />
           </template>
         </v-col>
 
@@ -186,13 +193,21 @@ const handleActionSelection = (action: string) => {
 };
 
 const isFieldRequired = (fieldKey: string): boolean => {
+  console.log('checking if isFieldRequired:', fieldKey);
   if (actionFields.value.includes(fieldKey)) {
+    console.log('field is in actionFields');
     if (selectedAction.value && selectedAction.value in actions.value) {
+      console.log('selectedAction.value:', selectedAction.value);
       const action = actions.value[selectedAction.value as keyof typeof actions.value];
+      console.log('action:', action);
+      console.log('action.requiredFields:', action.requiredFields);
+      console.log('action.requiredFields.includes(fieldKey):', action.requiredFields.includes(fieldKey));
       return action.requiredFields.includes(fieldKey);
     }
   }
   if (contentFields.value.includes(fieldKey)) {
+    console.log('field is in contentFields');
+    console.log('selectedContentType.value:', selectedContentType.value);
     return selectedContentType.value.required_fields.includes(fieldKey);
   }
   return false;
@@ -203,10 +218,11 @@ const isFieldRequired = (fieldKey: string): boolean => {
 const selectedContents = ref<Record<string, any>>({});
 const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
+const selectedOptions = ref<Record<string, 'select' | 'provide' | null>>({});
 
-const openContentSelectionModal = (fieldKey: string) => {
-  currentSelectingField.value = fieldKey;
+const selectExistingContent = async () => {
   showContentSelectionModal.value = true;
+  currentSelectingField.value = 'content';
 };
 
 const onContentSelected = async (content: any) => {
@@ -218,6 +234,7 @@ const onContentSelected = async (content: any) => {
     selectedContents.value[currentSelectingField.value] = content;
     formFields[currentSelectingField.value] = content.content;
   }
+  selectedOptions.value[currentSelectingField.value] = 'select';
 };
 
 const clearSelectedContent = (fieldKey: string) => {
@@ -303,7 +320,10 @@ const generateContent = async () => {
     }
     // To do: also handle outline
     console.log('requesting content generation with:', userInput)
-    emit('generate', userInput);
+    console.log('actionFields.value:', actionFields.value)
+    console.log('selectedContentType.value.required_fields:', selectedContentType.value.required_fields)
+    console.log('selectedAction.value:', selectedAction.value)
+    // emit('generate', userInput);
   }
 };
 </script>
