@@ -25,6 +25,7 @@ import { ContentOutput } from '~/types/frontendTypes';
 const props = defineProps<{
   contentOutputId: string;
   removable?: boolean;
+  short?: boolean;
 }>();
 
 const emit = defineEmits(['remove']);
@@ -40,8 +41,9 @@ onMounted(async () => {
 
 const truncatedContent = computed(() => {
   if (!contentOutput.value) return '';
-  return contentOutput.value.content.length > 50 
-    ? contentOutput.value.content.slice(0, 50) + '...' 
+  const maxLength = props.short ? 10 : 50;
+  return contentOutput.value.content.length > maxLength 
+    ? contentOutput.value.content.slice(0, maxLength) + '...' 
     : contentOutput.value.content;
 });
 

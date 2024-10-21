@@ -117,4 +117,16 @@ export interface Validations {
 //   3: "This is a fantastic title"
 // }
 
+export interface Campaign {
+  id: string;
+  org_id: string;
+  name: string;
+  action: string;
+  guidelines: string;
+  context: string;
+  action_inputs: object;
+  status: 'draft' | 'active' | 'paused' | 'completed';
+  created_at: string;
+  created_by: string;
+  }
 

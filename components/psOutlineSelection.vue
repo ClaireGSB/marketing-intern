@@ -3,26 +3,17 @@
 <template>
   <v-col cols="12">
     <h3 class="mb-4">3. Choose Outline Option</h3>
-    <!-- <template v-if="!selectedOutline"> -->
-    <v-btn @click="handleSelectOutline" class="mr-2"
-      :prepend-icon="outlineOption === 'select' ? 'mdi-check-circle' : ''">
-      Select Existing Outline
-    </v-btn>
-    <v-btn @click="handleProvideOutline" :prepend-icon="outlineOption === 'provide' ? 'mdi-check-circle' : ''">
-      Provide New Outline
-    </v-btn>
-    <!-- </template> -->
+    <ContentSelectionButtons
+      v-model="localOutlineOption"
+      :label="'Outline'"
+      :selected-content="selectedOutline"
+      :show-selected-content="true"
+      :filters="{ content_type_id: 8, status: 'completed' }"
+      @update:selected-content="handleSelectOutline($event)"
+      @provide="handleProvideOutline"
+    />
 
     <template v-if="selectedOutline">
-      <v-col cols="12" class="d-flex align-center mt-4">
-        <SelectedContentTag :content-output-id="selectedOutline.id" :removable="true" @remove="handleClearOutline">
-          {{ selectedOutline.title || 'Selected Outline' }}
-        </SelectedContentTag>
-      </v-col>
-      <v-col cols="12" class="mt-4">
-        <v-textarea v-model="selectedOutlineContent" label="Selected Outline" readonly auto-grow rows="5"
-          max-rows="10"></v-textarea>
-      </v-col>
       <v-col v-if="projectSetup" cols="12">
         <ProjectSetupHistory :projectSetup="projectSetup" />
       </v-col>
@@ -44,13 +35,11 @@
   interface Props {
     outlineOption: 'select' | 'provide' | null;
     projectSetup: object | null;
-    selectedOutline: Outline | null;
   }
 
   const props = withDefaults(defineProps<Props>(), {
     outlineOption: null,
     projectSetup: null,
-    selectedOutline: null,
   });
 
   const emit = defineEmits<{
@@ -59,24 +48,29 @@
     (e: 'clearSelectedOutline'): void;
   }>();
 
-  const selectedOutlineContent = computed(() => {
-    if (props.selectedOutline && props.selectedOutline.content) {
-      return props.selectedOutline.content;
-    }
-    return '';
-  });
+  const localOutlineOption = ref(props.outlineOption);
+  const selectedOutline = ref<Outline | null>(null);
 
-  const handleSelectOutline = () => {
-    emit('update:outlineOption', 'select');
-    emit('selectOutline');
+  const handleSelectOutline = (content: any) => {
+    if (content) {
+      localOutlineOption.value = 'select';
+      selectedOutline.value = content;
+      emit('update:outlineOption', 'select');
+      emit('selectOutline', content);
+    } else {
+      handleClearOutline();
+    }
   };
 
   const handleProvideOutline = () => {
+    localOutlineOption.value = 'provide';
     emit('clearSelectedOutline');
     emit('update:outlineOption', 'provide');
   };
 
   const handleClearOutline = () => {
+    localOutlineOption.value = null;
+    selectedOutline.value = null;
     emit('clearSelectedOutline');
     emit('update:outlineOption', null);
   };

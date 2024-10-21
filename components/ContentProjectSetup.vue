@@ -11,19 +11,30 @@
 
       <!-- If Blog Post Copy: Select Outline - Step 3 -->
       <psOutlineSelection v-if="step >= 3 && selectedContentType.id === 9" v-model:outline-option="outlineOption"
-        :project-setup="projectSetup" :selected-outline="selectedContents['outline']"
-        @select-outline="selectExistingOutline" @clear-selected-outline="clearSelectedOutline" />
+        :project-setup="projectSetup" 
+        @select-outline="selectExistingOutline($event)" @clear-selected-outline="clearSelectedOutline" />
 
       <!-- If NOT Blog Post Copy AND outline selected -->
       <template v-if="!(selectedContentType.id === 9 && (!outlineOption || outlineOption === 'select'))">
         <!-- Select Action - Step 4 -->
-        <psActionSelection v-if="step >= 3" :actions="actions" :is-action-available="isActionAvailable"
-          @update="handleActionSelection" />
+        <v-col cols="12">
+          <template v-if="step >= 3">
+            <h3 class="mb-4">3. Select Action</h3>
+            <psActionSelection :actions="actions" :is-action-available="isActionAvailable"
+              @update="handleActionSelection" />
+          </template>
+        </v-col>
 
         <!-- Action fields - Step 5 -->
-        <psActionInputs v-if="step >= 5" :content-fields="contentFields" :action-fields="actionFields"
-          :input-fields="inputFields" :form-fields="formFields" :selected-contents="selectedContents"
-          @open-content-selection="openContentSelectionModal" @clear-selected-content="clearSelectedContent" />
+        <v-col cols="12">
+          <template v-if="step >= 5">
+            <h3 class="mb-4">4. Action Inputs</h3>
+            <psActionInputs :content-fields="contentFields" :action-fields="actionFields" :input-fields="inputFields"
+              :form-fields="formFields" :selected-contents="selectedContents" @update:form-fields="updateFormFields" :get-validation-rules="getValidationRules"
+              @update:selected-contents="updateSelectedContents" />
+          </template>
+        </v-col>
+
       </template>
 
       <!-- Review settings - Step 5 -->
@@ -48,8 +59,6 @@
 
   <ContentSettingsDialog v-model="showSettingsPanel" :content-type-id="selectedContentType.id"
     :content-subtype-id="selectedSubType.id" />
-  <ContentSelectionModal v-model="showContentSelectionModal" @select="onContentSelected"
-    :filters="inputFields[currentSelectingField]?.selectionFilters" />
 </template>
 
 <script setup lang="ts">
@@ -119,13 +128,17 @@ const handleSubTypeSelection = (newSubType: { id: string; name: string }) => {
   updateStep(3);
 };
 
-const selectExistingOutline = async () => {
-  showContentSelectionModal.value = true;
+const selectExistingOutline = async (outline) => {
   currentSelectingField.value = 'outline';
+  selectedContents.value['outline'] = outline;
+  console.log('selectedContents:', selectedContents.value);
+  projectSetup.value = await userStore.fetchProjectSetupByContentOutput(outline.id);
+  updateStep(5);
 };
 
 const clearSelectedOutline = () => {
   selectedContents.value['outline'] = null;
+  formFields['outline'] = '';
   outlineOption.value = null;
   projectSetup.value = null;
   updateStep(3);
@@ -175,41 +188,37 @@ const handleActionSelection = (action: string) => {
 };
 
 const isFieldRequired = (fieldKey: string): boolean => {
+  console.log('checking if isFieldRequired:', fieldKey);
   if (actionFields.value.includes(fieldKey)) {
+    console.log('field is in actionFields');
     if (selectedAction.value && selectedAction.value in actions.value) {
+      console.log('selectedAction.value:', selectedAction.value);
       const action = actions.value[selectedAction.value as keyof typeof actions.value];
+      console.log('action:', action);
+      console.log('action.requiredFields:', action.requiredFields);
+      console.log('action.requiredFields.includes(fieldKey):', action.requiredFields.includes(fieldKey));
       return action.requiredFields.includes(fieldKey);
     }
   }
   if (contentFields.value.includes(fieldKey)) {
+    console.log('field is in contentFields');
+    console.log('selectedContentType.value:', selectedContentType.value);
     return selectedContentType.value.required_fields.includes(fieldKey);
   }
   return false;
 };
 
+// ---------- Content Selection ----------
+
 const selectedContents = ref<Record<string, any>>({});
-const showContentSelectionModal = ref(false);
 const currentSelectingField = ref('');
 
-const openContentSelectionModal = (fieldKey: string) => {
-  currentSelectingField.value = fieldKey;
-  showContentSelectionModal.value = true;
+const updateFormFields = (newFormFields: Record<string, string>) => {
+  Object.assign(formFields, newFormFields);
 };
 
-const onContentSelected = async (content: any) => {
-  if (currentSelectingField.value === 'outline') {
-    selectedContents.value['outline'] = content;
-    projectSetup.value = await userStore.fetchProjectSetupByContentOutput(content.id);
-    updateStep(5);
-  } else {
-    selectedContents.value[currentSelectingField.value] = content;
-    formFields[currentSelectingField.value] = content.content;
-  }
-};
-
-const clearSelectedContent = (fieldKey: string) => {
-  selectedContents.value[fieldKey] = null;
-  formFields[fieldKey] = '';
+const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
+  selectedContents.value = newSelectedContents;
 };
 
 const isContentSelectable = computed(() => {
@@ -290,6 +299,9 @@ const generateContent = async () => {
     }
     // To do: also handle outline
     console.log('requesting content generation with:', userInput)
+    console.log('actionFields.value:', actionFields.value)
+    console.log('selectedContentType.value.required_fields:', selectedContentType.value.required_fields)
+    console.log('selectedAction.value:', selectedAction.value)
     emit('generate', userInput);
   }
 };
