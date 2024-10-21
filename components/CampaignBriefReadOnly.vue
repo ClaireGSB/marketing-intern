@@ -28,6 +28,10 @@
 
 <script setup lang="ts">
 import { Campaign } from '../../types/frontendTypes';
+import { useUserDataStore } from '~/stores/userdata';
+
+
+const userStore = useUserDataStore();
 
 const props = defineProps<{
   campaign: Campaign;
@@ -48,12 +52,16 @@ const toggleShowMore = (key: string) => {
   showFullText.value[key] = !showFullText.value[key];
 };
 
+const getActionDisplayName = (action: string): string => {
+  return userStore.getActionDisplayName(action);
+};
+
 const campaignProperties = computed(() => {
   if (!props.campaign) return [];
 
   return [
     { key: 'name', label: 'Name', value: props.campaign.name },
-    { key: 'action', label: 'Goal', value: props.campaign.action },
+    { key: 'action', label: 'Goal', value: getActionDisplayName(props.campaign.action) },
     { key: 'guidelines', label: 'Guidelines', value: props.campaign.guidelines },
     { key: 'context', label: 'Context', value: props.campaign.context },
     { key: 'product_description', label: 'Product Description', value: props.campaign.action_inputs.product_description },

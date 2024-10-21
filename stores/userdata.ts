@@ -265,6 +265,9 @@ export const useUserDataStore = defineStore('userData', {
       if (!contentOutput) return null;
 
       return state.subtypeSettingsHistory.find(settings => settings.id === contentOutput.subtype_settings_history_id) || null;
+    },
+    getActionDisplayName: (state) => (actionID: string) => {
+      return state.actions[actionID].display_name;
     }
   },
 });
