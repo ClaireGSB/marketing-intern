@@ -11,14 +11,14 @@
         <v-col cols="12">
           <strong>Action:</strong> {{ campaign.action }}
         </v-col>
-        <v-col cols="12" v-for="(value, key) in campaign.action_inputs" :key="key">
+        <v-col cols="12" v-if="campaign.action_inputs" v-for="(value, key) in campaign.action_inputs" :key="key">
           <strong>{{ formatFieldName(key) }}:</strong> {{ value }}
         </v-col>
-        <v-col cols="12">
+        <v-col cols="12" v-if="campaign.guidelines">
           <strong>Guidelines:</strong>
           <div v-html="formattedText(campaign.guidelines)"></div>
         </v-col>
-        <v-col cols="12">
+        <v-col cols="12" v-if="campaign.context">
           <strong>Context:</strong>
           <div v-html="formattedText(campaign.context)"></div>
         </v-col>
