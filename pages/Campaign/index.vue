@@ -86,7 +86,9 @@ const saveCampaign = async (updatedCampaign: Campaign) => {
   if (campaign.value.id) {
     // Update existing campaign
     console.log('Updating campaign', updatedCampaign);
-    // await userStore.updateCampaign(updatedCampaign);
+    const fullUpdatedCampaign= await userStore.updateCampaign(campaign.value.id, updatedCampaign);
+    campaign.value = fullUpdatedCampaign;
+    console.log('INDEX has Updated campaign:', fullUpdatedCampaign);
   } else {
     // Create new campaign
     console.log('Creating campaign', updatedCampaign);

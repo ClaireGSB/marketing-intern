@@ -241,8 +241,23 @@ export const useUserDataStore = defineStore('userData', {
       }
       console.log('USERSTORE creating campaign:', newCampaign);
       // const newCampaign = await api.createCampaign(campaign);
+      // TODO: API call to create campaign
       this.campaigns.push(newCampaign);
       return newCampaign;
+    },
+    async updateCampaign(campaignID: string, updates: Partial<FrontendTypes.Campaign>) {
+      const updatedCampaign = {
+        ...updates,
+        id: campaignID,
+        updated_at: new Date().toISOString(),
+        updated_by: this.userID,
+      }
+      // const updatedCampaign = await api.updateCampaign(campaignID, updates);
+      // TODO: API call to create campaign
+      const index = this.campaigns.findIndex((campaign) => campaign.id === updatedCampaign.id);
+      this.campaigns[index] = updatedCampaign;
+      console.log('USERSTORE updating campaign:', updatedCampaign);
+      return updatedCampaign;
     }
   },
   getters: {
