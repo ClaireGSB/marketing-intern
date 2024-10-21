@@ -53,7 +53,7 @@ const toggleShowMore = (key: string) => {
 };
 
 const getActionDisplayName = (action: string): string => {
-  return userStore.getActionDisplayName(action);
+  return userStore.getActionCampaignDisplayName(action);
 };
 
 const campaignProperties = computed(() => {

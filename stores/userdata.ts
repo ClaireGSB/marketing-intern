@@ -268,6 +268,9 @@ export const useUserDataStore = defineStore('userData', {
     },
     getActionDisplayName: (state) => (actionID: string) => {
       return state.actions[actionID].display_name;
+    },
+    getActionCampaignDisplayName: (state) => (actionID: string) => {
+      return state.actions[actionID].display_name_campaign;
     }
   },
 });
