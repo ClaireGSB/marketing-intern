@@ -6,7 +6,7 @@
         <v-spacer></v-spacer>
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ props }">
-            <v-btn color="primary" dark class="mb-2" v-bind="props" @click="addItem">
+            <v-btn color="primary" dark class="mb-2" v-bind="props" :disabled="disabled" @click="addItem">
               Add Content Piece
             </v-btn>
           </template>
@@ -109,10 +109,13 @@ const { actions, contentTypes } = storeToRefs(userStore);
 const props = defineProps<{
   campaignAction: string;
   campaignFields: Record<string, string>;
+  campaignId?: string;
 }>();
 
 const getContentTypeName = (id: number) => userStore.getContentTypeDisplayNameById(id);
 const getContentSubtypeName = (id: string) => userStore.getContentSubTypeNameById(id);
+
+const disabled = computed(() => !props.campaignId);
 
 const contentPieces = ref<UserInput[]>([]);
 const dialog = ref(false);
@@ -126,6 +129,7 @@ const requiredFields = computed(() => {
 
 const defaultItem = computed(() => {
   const item: UserInput = {
+    campaign_id: props.campaignId || '',
     content_type_id: 0,
     content_subtype_id: '',
     action: props.campaignAction,
@@ -221,6 +225,7 @@ const save = () => {
   } else {
     contentPieces.value.push(editedItem.value);
   }
+  console.log('TABLE: Saved item:', editedItem.value);
   close();
 };
 

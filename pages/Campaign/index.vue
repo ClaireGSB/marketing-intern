@@ -32,6 +32,7 @@
         <CampaignContentTable
           :campaign-action="campaign.action"
           :campaign-fields="campaign.action_inputs"
+          :campaign-id="campaign.id"
         />
 
         <div class="my-10"></div>
