@@ -26,6 +26,7 @@ import { useUserDataStore } from '~/stores/userData';
 interface Props {
   actions: Record<string, any>;
   isActionAvailable: (action: string) => boolean;
+  campaignDisplayName?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -41,17 +42,13 @@ const localSelectedAction = ref<{ value: string; text: string } | null>(null);
 
 const availableActions = computed(() => 
   Object.keys(props.actions).map(action => ({
-    text: userDataStore.getActionDisplayName(action),
+    text: props.campaignDisplayName 
+      ? userDataStore.getActionCampaignDisplayName(action) 
+      : userDataStore.getActionDisplayName(action),
     value: action,
   }))
 );
 
-// const onActionChange = (newAction: { value: string, text: string } | null) => {
-//   if (newAction && props.isActionAvailable(newAction.value)) {
-//     localSelectedAction.value = newAction;
-//     emit('update', newAction.value);
-//   }
-// };
 
 const onActionChange = (newAction: { value: string, text: string } | null) => {
   if (newAction === null || props.isActionAvailable(newAction.value)) {
@@ -60,9 +57,4 @@ const onActionChange = (newAction: { value: string, text: string } | null) => {
   }
 };
 
-// onMounted(() => {
-//   if (localSelectedAction.value === null) {
-//     localSelectedAction.value = availableActions.value.find(action => props.isActionAvailable(action.value)) || null;
-//   }
-// });
 </script>

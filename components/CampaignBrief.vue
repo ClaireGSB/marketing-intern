@@ -25,6 +25,7 @@
               <psActionSelection
                 :actions="availableActions"
                 :is-action-available="isActionAvailable"
+                :campaign-display-name="true"
                 @update="handleActionSelection"
               />
             </v-col>

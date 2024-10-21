@@ -62,9 +62,11 @@ const campaignProperties = computed(() => {
   return [
     { key: 'name', label: 'Name', value: props.campaign.name },
     { key: 'action', label: 'Goal', value: getActionDisplayName(props.campaign.action) },
+    { key: 'topic', label: 'Topic', value: props.campaign.action_inputs.topic },
+    { key: 'product_description', label: 'Product Description', value: props.campaign.action_inputs.product_description },
     { key: 'guidelines', label: 'Guidelines', value: props.campaign.guidelines },
     { key: 'context', label: 'Context', value: props.campaign.context },
-    { key: 'product_description', label: 'Product Description', value: props.campaign.action_inputs.product_description },
+  
 
     // Only add 'content' if there's no selected content
     ...(props.campaign.action_inputs.selected_content_output_id ? [] : [{ key: 'content', label: 'Content', value: props.campaign.action_inputs.content }]),
