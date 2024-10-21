@@ -10,7 +10,7 @@ export const campaigns = {
   async create(campaign: Campaign): Promise<Campaign> {
     const query = `
       INSERT INTO campaigns (id, org_id, name, action, guidelines, context, action_inputs, created_at, created_by, updated_at, updated_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `;
     const values = [

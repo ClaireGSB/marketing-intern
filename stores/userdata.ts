@@ -230,35 +230,23 @@ export const useUserDataStore = defineStore('userData', {
 
       return generatedResponse;
     },
-    async createCampaign(campaign: Partial<FrontendTypes.Campaign>) {
-      const newCampaign = {
-        ...campaign,
-        user_id: this.userID,
-        created_at: new Date().toISOString(),
-        created_by: this.userID,
-        org_id: '1',
-        id: '1',
-      }
-      console.log('USERSTORE creating campaign:', newCampaign);
-      // const newCampaign = await api.createCampaign(campaign);
-      // TODO: API call to create campaign
+    async createCampaign(campaign: Omit<FrontendTypes.Campaign, 'id' | 'org_id' |'created_by' | 'created_at' | 'updated_by' | 'updated_at'>) {
+      console.log('USERSTORE creating campaign:', campaign);
+      const newCampaign = await api.createCampaign(campaign);
       this.campaigns.push(newCampaign);
       return newCampaign;
     },
     async updateCampaign(campaignID: string, updates: Partial<FrontendTypes.Campaign>) {
-      const updatedCampaign = {
-        ...updates,
-        id: campaignID,
-        updated_at: new Date().toISOString(),
-        updated_by: this.userID,
-      }
-      // const updatedCampaign = await api.updateCampaign(campaignID, updates);
-      // TODO: API call to create campaign
+      const updatedCampaign = await api.updateCampaign(campaignID, updates);
       const index = this.campaigns.findIndex((campaign) => campaign.id === updatedCampaign.id);
       this.campaigns[index] = updatedCampaign;
       console.log('USERSTORE updating campaign:', updatedCampaign);
       return updatedCampaign;
-    }
+    },
+    async deleteCampaign(campaignID: string) {
+      await api.deleteCampaign(campaignID);
+      this.campaigns = this.campaigns.filter((campaign) => campaign.id !== campaignID);
+    },
   },
   getters: {
     userFirstNames(): Record<string, string> {

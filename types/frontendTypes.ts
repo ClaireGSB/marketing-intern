@@ -125,8 +125,9 @@ export interface Campaign {
   guidelines?: string;
   context?: string;
   action_inputs: object;
-  // status: 'draft' | 'active' | 'paused' | 'completed';
   created_at: string;
   created_by: string;
+  updated_at: string;
+  updated_by: string;
   }
 

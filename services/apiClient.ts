@@ -714,6 +714,94 @@ class apiClient {
     }
   }
 
+  // ##############################
+  // # Campaigns
+  // ##############################
+
+  async createCampaign(campaign: Omit<FrontendTypes.Campaign, 'id'>): Promise<FrontendTypes.Campaign> {
+    try {
+      console.log('Creating campaign');
+      const response = await $fetch('/api/campaign/create', {
+        method: 'POST',
+        body: campaign
+      });
+
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
+      }
+
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Campaign };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
+        throw new Error('No data received from the server');
+      }
+
+      return typedResponse.body;
+    } catch (error) {
+      this.handleErrors(error, 'createCampaign');
+    }
+  }
+
+  async updateCampaign(id: string, updates: Partial<FrontendTypes.Campaign>): Promise<FrontendTypes.Campaign> {
+    try {
+      console.log('Updating campaign');
+      const response = await $fetch(`/api/campaign/${id}/update`, {
+        method: 'POST',
+        body: { id, ...updates }
+      });
+
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response) || !('body' in response)) {
+        throw new Error('Unexpected response structure from API');
+      }
+
+      const typedResponse = response as { statusCode: number; body: FrontendTypes.Campaign };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      if (!typedResponse.body) {
+        throw new Error('No data received from the server');
+      }
+
+      return typedResponse.body;
+    } catch (error) {
+      this.handleErrors(error, 'updateCampaign');
+    }
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    try {
+      console.log('Deleting campaign');
+      const response = await $fetch(`/api/campaign/${id}/delete`, {
+        method: 'POST'
+      });
+
+      console.log('Response:', response);
+
+      if (!response || typeof response !== 'object' || !('statusCode' in response)) {
+        throw new Error('Unexpected response structure from API');
+      }
+
+      const typedResponse = response as { statusCode: number };
+
+      if (![200, 201, 202, 204, 304].includes(typedResponse.statusCode)) {
+        throw new Error(`API returned non-200 status code: ${typedResponse.statusCode}`);
+      }
+
+      console.log('Campaign deleted successfully');
+    } catch (error) {
+      this.handleErrors(error, 'deleteCampaign');
+    }
+  }
 
 }
 
