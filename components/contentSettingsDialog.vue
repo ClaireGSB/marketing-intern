@@ -1,3 +1,5 @@
+// contentSettingsDialog.vue
+
 <template>
   <v-dialog v-model="showDialog" height="100%" :width="dialogWidth" :fullscreen="isSmallScreen"
     transition="dialog-bottom-transition" :content-class="['custom-dialog', isSmallScreen ? 'fullscreen-dialog' : '']"

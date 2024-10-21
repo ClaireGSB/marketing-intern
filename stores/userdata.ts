@@ -17,6 +17,7 @@ type State = {
   blogMetadata: FrontendTypes.BlogMetadata[];
   projectSetups: FrontendTypes.UserInput[];
   subtypeSettingsHistory: FrontendTypes.SettingsInput[];
+  campaigns: FrontendTypes.Campaign[];
 };
 
 export const useUserDataStore = defineStore('userData', {
@@ -32,6 +33,7 @@ export const useUserDataStore = defineStore('userData', {
     userID: '',
     projectSetups: [],
     subtypeSettingsHistory: [],
+    campaigns: [],
   }),
   actions: {
     async fetchUserData() {
@@ -228,6 +230,20 @@ export const useUserDataStore = defineStore('userData', {
 
       return generatedResponse;
     },
+    async createCampaign(campaign: Partial<FrontendTypes.Campaign>) {
+      const newCampaign = {
+        ...campaign,
+        user_id: this.userID,
+        created_at: new Date().toISOString(),
+        created_by: this.userID,
+        org_id: '1',
+        id: '1',
+      }
+      console.log('USERSTORE creating campaign:', newCampaign);
+      // const newCampaign = await api.createCampaign(campaign);
+      this.campaigns.push(newCampaign);
+      return newCampaign;
+    }
   },
   getters: {
     userFirstNames(): Record<string, string> {

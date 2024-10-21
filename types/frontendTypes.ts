@@ -122,10 +122,10 @@ export interface Campaign {
   org_id: string;
   name: string;
   action: string;
-  guidelines: string;
-  context: string;
+  guidelines?: string;
+  context?: string;
   action_inputs: object;
-  status: 'draft' | 'active' | 'paused' | 'completed';
+  // status: 'draft' | 'active' | 'paused' | 'completed';
   created_at: string;
   created_by: string;
   }

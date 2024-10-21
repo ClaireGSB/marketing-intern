@@ -1,4 +1,6 @@
 <!-- ProjectSetupHistory.vue -->
+// readonly component
+
 <template>
   <v-card v-if="projectSetup">
     <v-card-title>Project Setup</v-card-title>
