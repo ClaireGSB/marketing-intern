@@ -7,6 +7,7 @@
       v-model="localOutlineOption"
       :label="'Outline'"
       :selected-content="selectedOutline"
+      :show-selected-content="true"
       :filters="{ content_type_id: 8, status: 'completed' }"
       @update:selected-content="handleSelectOutline($event)"
       @provide="handleProvideOutline"

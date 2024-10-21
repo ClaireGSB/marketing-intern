@@ -18,7 +18,7 @@
           {{ selectedContent.title || `Selected ${label}` }}
         </SelectedContentTag>
       </v-col>
-      <v-col cols="12" class="mt-4">
+      <v-col cols="12" class="mt-4" v-if="showSelectedContent">
         <v-textarea v-model="contentDisplay" :label="`Selected ${label}`"
           readonly auto-grow rows="5" max-rows="10"></v-textarea>
       </v-col>
@@ -40,6 +40,7 @@ interface Props {
   modelValue: 'select' | 'provide' | null;
   label: string;
   selectedContent: any | null;
+  showSelectedContent: boolean;
   filters?: any; // Add type definition for filters if available
 }
 

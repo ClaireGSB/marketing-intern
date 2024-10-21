@@ -46,7 +46,7 @@ export const inputFields: Record<string, FieldConfig> = {
     use: 'action_specific',
     validation: { maxChar: 500 }
   },
-  productDescription: {
+  product_description: {
     key: 'product_description',
     label: 'Product Description',
     type: 'textarea',

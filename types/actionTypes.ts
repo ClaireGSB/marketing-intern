@@ -35,9 +35,9 @@ export const actions: Record<string, ActionConfig> = {
   },
   promote_product: {
     display_name: "Promote Product",
-    requiredFields: ['productDescription'],
+    requiredFields: ['product_description'],
     optionalFields: [],
     availableForCampaigns: true,
-    requiredFieldsForCampaigns: ['productDescription'],
+    requiredFieldsForCampaigns: ['product_description'],
   }
 };

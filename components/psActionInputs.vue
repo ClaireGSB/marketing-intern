@@ -10,6 +10,7 @@
         :selected-content="selectedContents[fieldKey]"
         :label="inputFields[fieldKey].label"
         :filters="inputFields[fieldKey].selectionFilters"
+        :show-selected-content="showSelectedContent"
         @update:selected-content="updateSelectedContent(fieldKey, $event)"
         @provide="handleProvideContent(fieldKey)"
       />
@@ -45,6 +46,7 @@
         :selected-content="selectedContents[fieldKey]"
         :label="inputFields[fieldKey].label"
         :filters="inputFields[fieldKey].selectionFilters"
+        :show-selected-content="showSelectedContent"
         @update:selected-content="updateSelectedContent(fieldKey, $event)"
         @provide="handleProvideContent(fieldKey)"
       />
@@ -82,12 +84,14 @@ interface Props {
   inputFields: Record<string, FieldConfig>;
   formFields: Record<string, any>;
   selectedContents: Record<string, any>;
+  showSelectedContent?: boolean;
   getValidationRules: (field: InputField) => any[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   contentFields: () => [],
   inputFields: () => ({}),
+  showSelectedContent: true,
   getValidationRules: () => () => []
 });
 
@@ -112,9 +116,14 @@ const initializeLocalSelectedOption = () => {
 // Initialize localSelectedOption immediately
 initializeLocalSelectedOption();
 
-// watch for changes in content fields and action fields and reinitialize localSelectedOption
-watch(() => props.contentFields, () => initializeLocalSelectedOption());
-watch(() => props.actionFields, () => initializeLocalSelectedOption());
+// watch for changes in content fields and action fields and reinitialize localSelectedOption and also reset action fields and content fields to their default values
+
+watch(() => props.contentFields || [], () => {
+  initializeLocalSelectedOption();
+});
+watch(() => props.actionFields, () => {
+  initializeLocalSelectedOption();
+});
 
 const updateSelectedContent = (fieldKey: string, content: any) => {
   emit('update:selectedContents', { ...props.selectedContents, [fieldKey]: content });

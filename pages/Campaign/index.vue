@@ -38,6 +38,7 @@
               :form-fields="formFields"
               :selected-contents="selectedContents"
               :get-validation-rules="getValidationRules"
+              :show-selected-content="false"
               @update:form-fields="updateFormFields"
               @update:selected-contents="updateSelectedContents"
             />
@@ -176,6 +177,9 @@ const updateSelectedContents = (newSelectedContents: Record<string, any>) => {
 
 const isFieldRequired = (fieldKey: string): boolean => {
   console.log('checking if isFieldRequired:', fieldKey);
+  console.log('actionFields.value:', actionFields.value);
+  console.log('selectedAction.value:', selectedAction.value);
+  console.log('actions.value:', actions.value);
   if (actionFields.value.includes(fieldKey)) {
     console.log('field is in actionFields');
     if (selectedAction.value && selectedAction.value in actions.value) {
@@ -186,11 +190,6 @@ const isFieldRequired = (fieldKey: string): boolean => {
       console.log('action.requiredFields.includes(fieldKey):', action.requiredFields.includes(fieldKey));
       return action.requiredFields.includes(fieldKey);
     }
-  }
-  if (contentFields.value.includes(fieldKey)) {
-    console.log('field is in contentFields');
-    console.log('selectedContentType.value:', selectedContentType.value);
-    return selectedContentType.value.required_fields.includes(fieldKey);
   }
   return false;
 };
