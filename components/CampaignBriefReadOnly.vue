@@ -4,25 +4,20 @@
   <v-card>
     <v-card-title>Campaign Brief</v-card-title>
     <v-card-text>
-      <v-row>
-        <v-col cols="12">
-          <strong>Campaign Name:</strong> {{ campaign.name }}
-        </v-col>
-        <v-col cols="12">
-          <strong>Action:</strong> {{ campaign.action }}
-        </v-col>
-        <v-col cols="12" v-if="campaign.action_inputs" v-for="(value, key) in campaign.action_inputs" :key="key">
-          <strong>{{ formatFieldName(key) }}:</strong> {{ value }}
-        </v-col>
-        <v-col cols="12" v-if="campaign.guidelines">
-          <strong>Guidelines:</strong>
-          <div v-html="formattedText(campaign.guidelines)"></div>
-        </v-col>
-        <v-col cols="12" v-if="campaign.context">
-          <strong>Context:</strong>
-          <div v-html="formattedText(campaign.context)"></div>
-        </v-col>
-      </v-row>
+      <p v-for="prop in campaignProperties" :key="prop.key" class="mb-2">
+        <strong>{{ prop.label }}: </strong>
+        <span v-if="prop.value.length <= maxCharDisplay">{{ prop.value }}</span>
+        <span v-else>
+          {{ showFullText[prop.key] ? prop.value : prop.value.slice(0, maxCharDisplay) + '...' }}
+          <a class="text-grey-darken-2" href="#" @click.prevent="toggleShowMore(prop.key)">
+            {{ showFullText[prop.key] ? 'See less' : 'See more' }}
+          </a>
+        </span>
+      </p>
+      <template v-if="campaign.action_inputs.selected_content_output_id">
+        <p><strong>Content: </strong></p>
+        <SelectedContentTag :content-output-id="campaign.action_inputs.selected_content_output_id" />
+      </template>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -46,7 +41,28 @@ const formatFieldName = (key: string): string => {
   return key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-const formattedText = (text: string): string => {
-  return text.replace(/\n/g, '<br>');
+const showFullText = ref<{ [key: string]: boolean }>({});
+const maxCharDisplay = 200;
+
+const toggleShowMore = (key: string) => {
+  showFullText.value[key] = !showFullText.value[key];
 };
+
+const campaignProperties = computed(() => {
+  if (!props.campaign) return [];
+
+  return [
+    { key: 'name', label: 'Name', value: props.campaign.name },
+    { key: 'action', label: 'Goal', value: props.campaign.action },
+    { key: 'guidelines', label: 'Guidelines', value: props.campaign.guidelines },
+    { key: 'context', label: 'Context', value: props.campaign.context },
+    { key: 'product_description', label: 'Product Description', value: props.campaign.action_inputs.product_description },
+
+    // Only add 'content' if there's no selected content
+    ...(props.campaign.action_inputs.selected_content_output_id ? [] : [{ key: 'content', label: 'Content', value: props.campaign.action_inputs.content }]),
+    ].filter(prop => prop.value != null && prop.value !== '' && (typeof prop.value !== 'string' || prop.value.trim() !== ''));
+
+});
+
+
 </script>

@@ -21,6 +21,12 @@ export const campaigns = {
   },
 
   async create(campaign: Campaign): Promise<Campaign> {
+
+    // if action input has action_inputs.selected_content_output_id, remove action_inputs.content
+    if (campaign.action_inputs && (campaign.action_inputs as any).selected_content_output_id) {
+      (campaign.action_inputs as any).content = '';
+    }
+
     // if action inputs are an object, convert to JSON string
     const actionInputs = this.stringify(campaign.action_inputs);
     // insert the campaign into the database
