@@ -187,3 +187,18 @@ export interface SettingsInput {
   context?: string;
   examples: Example[];
 }
+
+export interface Campaign {
+  id: string;
+  org_id: string;
+  name: string;
+  action: string;
+  guidelines?: string;
+  context?: string;
+  action_inputs: object;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  deleted_at: string | null;
+  }
